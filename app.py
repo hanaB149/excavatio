@@ -414,13 +414,13 @@ def query_ai(passage, api_key):
         "If you cannot identify it at all, return: {\"matched\": false}\n\n"
         "Passage: '''" + passage + "'''"
     )
-    url = "https://api.openai.com/v1/chat/completions"
+    url = "https://api.aiand.com/v1/chat/completions"
     headers = {
         "Authorization": f"Bearer {api_key}",
         "Content-Type": "application/json",
     }
     body = {
-        "model": "gpt-4o-mini",
+        "model": "deepseek-ai/deepseek-v4-flash",
         "messages": [{"role": "user", "content": prompt}],
         "temperature": 0.1,
         "max_tokens": 800,
@@ -472,14 +472,14 @@ def api_identify():
     if not text:
         return jsonify({"error": "No text provided"}), 400
 
-    ai_key = os.environ.get("OPENAI_API_KEY", "")
+    ai_key = os.environ.get("AIAND_API_KEY", "")
     if ai_key:
         try:
             result = query_ai(text, ai_key)
             if result:
                 return jsonify({"matched": True, "source": "ai", **result})
         except Exception as e:
-            logger.error(f"OpenAI API error: {e}")
+            logger.error(f"AI API error: {e}")
 
     match = find_text_match(text)
     if match:
