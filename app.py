@@ -395,7 +395,7 @@ def find_text_match(input_text):
 def index():
     return render_template("index.html")
 
-def query_gemini(passage, api_key):
+def query_ai(passage, api_key):
     prompt = (
         "You are a classical philologist. Identify the following ancient Greek or Latin passage. "
         "Return ONLY valid JSON with these fields (or the subset you can determine):\n"
@@ -410,15 +410,21 @@ def query_gemini(passage, api_key):
         "If you cannot identify it at all, return: {\"matched\": false}\n\n"
         "Passage: '''" + passage + "'''"
     )
-    url = f"https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent?key={api_key}"
-    body = {
-        "contents": [{"parts": [{"text": prompt}]}],
-        "generationConfig": {"temperature": 0.1, "maxOutputTokens": 800},
+    url = "https://api.openai.com/v1/chat/completions"
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json",
     }
-    r = requests.post(url, json=body, timeout=20)
+    body = {
+        "model": "gpt-4o-mini",
+        "messages": [{"role": "user", "content": prompt}],
+        "temperature": 0.1,
+        "max_tokens": 800,
+    }
+    r = requests.post(url, json=body, headers=headers, timeout=20)
     r.raise_for_status()
     resp = r.json()
-    raw = resp["candidates"][0]["content"]["parts"][0]["text"]
+    raw = resp["choices"][0]["message"]["content"]
     raw = raw.strip()
     if raw.startswith("```"):
         raw = raw.split("\n", 1)[-1]
@@ -462,10 +468,10 @@ def api_identify():
     if not text:
         return jsonify({"error": "No text provided"}), 400
 
-    gemini_key = os.environ.get("GEMINI_API_KEY", "")
-    if gemini_key:
+    ai_key = os.environ.get("OPENAI_API_KEY", "")
+    if ai_key:
         try:
-            result = query_gemini(text, gemini_key)
+            result = query_ai(text, ai_key)
             if result:
                 return jsonify({"matched": True, "source": "ai", **result})
         except Exception:
