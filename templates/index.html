@@ -803,7 +803,9 @@
   let mapMarkers = {};
   let currentFilter = 'all';
 
-  const map = L.map('map').setView([38.5, 15.5], 4);
+  const map = L.map('map', { scrollWheelZoom: false }).setView([38.5, 15.5], 4);
+  map.on('focus', function() { map.scrollWheelZoom.enable(); });
+  map.on('blur', function() { map.scrollWheelZoom.disable(); });
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 18,
     attribution: '&copy; <a href="https://openstreetmap.org/copyright">OSM</a>'
