@@ -1074,10 +1074,17 @@
     journey.stops.forEach((stop, i) => {
       const el = document.createElement('span');
       el.className = 'jp-stop';
+      el.title = stop.desc;
       el.innerHTML = '<span class="stop-num" style="background:' + journey.color + '">' + (i+1) + '</span>' + stop.name;
       el.addEventListener('click', () => {
         document.querySelectorAll('.jp-stop').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.jp-stop-desc').forEach(d => d.remove());
         el.classList.add('active');
+        const descEl = document.createElement('div');
+        descEl.className = 'jp-stop-desc';
+        descEl.style.cssText = 'font-size:0.75rem;color:#7a4a6a;line-height:1.4;padding:0.4rem 0.7rem;margin:0.2rem 0;background:rgba(255,255,255,0.5);border-radius:8px;border:1px solid rgba(244,143,177,0.1);';
+        descEl.textContent = stop.desc;
+        el.parentNode.insertBefore(descEl, el.nextSibling);
         map.setView([stop.lat, stop.lng], 6, { animate: true });
       });
       stopsDiv.appendChild(el);
@@ -1101,16 +1108,15 @@
     Object.values(mapMarkers).forEach(m => {
       if (map.hasLayer(m.layer)) map.removeLayer(m.layer);
     });
-    document.querySelectorAll('.site-chip').forEach(c => c.style.display = 'none');
     document.getElementById('site-panel').classList.remove('visible');
-    document.getElementById('marker-count').textContent = '';
+    document.getElementById('marker-count').textContent = 'excavations hidden (journey active)';
   }
 
   function showExcavationMarkers() {
     Object.values(mapMarkers).forEach(m => {
       if (!map.hasLayer(m.layer)) m.layer.addTo(map);
     });
-    loadSites();
+    document.getElementById('marker-count').textContent = Object.keys(mapMarkers).length + ' sites';
   }
 
   loadJourneys();
