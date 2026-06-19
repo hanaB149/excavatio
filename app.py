@@ -462,10 +462,6 @@ def api_identify():
     if not text:
         return jsonify({"error": "No text provided"}), 400
 
-    match = find_text_match(text)
-    if match:
-        return jsonify({"matched": True, "source": "library", **match})
-
     gemini_key = os.environ.get("GEMINI_API_KEY", "")
     if gemini_key:
         try:
@@ -474,6 +470,10 @@ def api_identify():
                 return jsonify({"matched": True, "source": "ai", **result})
         except Exception:
             pass
+
+    match = find_text_match(text)
+    if match:
+        return jsonify({"matched": True, "source": "library", **match})
 
     return jsonify({"matched": False, "message": "No classical text match found."})
 
