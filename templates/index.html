@@ -422,6 +422,138 @@
       padding: 0.2rem 0;
     }
 
+    .journey-bar {
+      background: rgba(255,255,255,0.82);
+      backdrop-filter: blur(10px);
+      border-radius: 18px;
+      padding: 1rem 1.5rem;
+      border: 2px solid rgba(244, 143, 177, 0.18);
+      box-shadow: 0 4px 20px rgba(244, 143, 177, 0.08);
+      transition: box-shadow 0.3s;
+    }
+    .journey-bar:hover { box-shadow: 0 6px 28px rgba(244, 143, 177, 0.14); }
+    .journey-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.6rem;
+    }
+    .journey-header .label {
+      font-weight: 700;
+      font-size: 0.85rem;
+      color: #7a4a6a;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .journey-header .label svg {
+      width: 16px; height: 16px;
+      stroke: #d48aa8; fill: none; stroke-width: 2;
+    }
+    .journey-chips {
+      display: flex;
+      gap: 0.45rem;
+      flex-wrap: wrap;
+    }
+    .journey-chip {
+      padding: 0.35rem 1rem;
+      border-radius: 50px;
+      border: 1.5px solid rgba(244, 143, 177, 0.22);
+      background: transparent;
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      font-family: 'Nunito', sans-serif;
+      color: #7a4a6a;
+      position: relative;
+    }
+    .journey-chip .color-dot {
+      display: inline-block;
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      margin-right: 0.35rem;
+      vertical-align: middle;
+    }
+    .journey-chip:hover { border-color: #f48fb1; background: rgba(244, 143, 177, 0.06); transform: translateY(-1px); }
+    .journey-chip.active {
+      color: white;
+      border-color: transparent;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+    }
+    .journey-panel {
+      display: none;
+      margin-top: 0.7rem;
+      padding: 1rem 1.2rem;
+      background: rgba(255,255,255,0.6);
+      border-radius: 14px;
+      border: 1px solid rgba(244, 143, 177, 0.12);
+    }
+    .journey-panel.visible { display: block; }
+    .journey-panel .jp-title {
+      font-weight: 800;
+      font-size: 0.95rem;
+      margin-bottom: 0.2rem;
+    }
+    .journey-panel .jp-desc {
+      font-size: 0.82rem;
+      color: #7a4a6a;
+      line-height: 1.5;
+      margin-bottom: 0.5rem;
+    }
+    .journey-panel .jp-stops {
+      display: flex;
+      gap: 0.35rem;
+      overflow-x: auto;
+      padding-bottom: 0.3rem;
+      scrollbar-width: thin;
+    }
+    .journey-panel .jp-stops::-webkit-scrollbar { height: 3px; }
+    .journey-panel .jp-stops::-webkit-scrollbar-thumb { background: #f48fb1; border-radius: 4px; }
+    .jp-stop {
+      flex-shrink: 0;
+      padding: 0.25rem 0.6rem;
+      border-radius: 50px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      background: rgba(255,255,255,0.7);
+      border: 1px solid rgba(244, 143, 177, 0.15);
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .jp-stop:hover { border-color: #f48fb1; transform: translateY(-1px); }
+    .jp-stop.active { color: white; border-color: transparent; }
+    .jp-stop .stop-num {
+      display: inline-block;
+      width: 14px; height: 14px;
+      line-height: 14px;
+      text-align: center;
+      border-radius: 50%;
+      font-size: 0.6rem;
+      font-weight: 800;
+      margin-right: 0.3rem;
+      color: white;
+    }
+    .journey-legend {
+      display: flex;
+      gap: 0.4rem;
+      margin-top: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .journey-legend .jl-item {
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-size: 0.7rem;
+      color: #9a7a8a;
+      font-weight: 600;
+    }
+    .journey-legend .jl-line {
+      width: 20px; height: 3px;
+      border-radius: 3px;
+    }
+
     .identify-box { max-width: 800px; margin: 0 auto; }
     .identify-box textarea {
       width: 100%; min-height: 200px; padding: 1.2rem;
@@ -616,6 +748,23 @@
       </div>
 
       <div class="marker-count" id="marker-count"></div>
+
+      <div class="journey-bar">
+        <div class="journey-header">
+          <span class="label">
+            <svg viewBox="0 0 24 24"><path d="M3 11l3-9h12l3 9"/><path d="M3 11v10h18V11"/><circle cx="9" cy="16" r="1"/><circle cx="15" cy="16" r="1"/></svg>
+            trace a journey
+          </span>
+        </div>
+        <div class="journey-chips" id="journey-chips"></div>
+        <div class="journey-panel" id="journey-panel">
+          <div class="jp-title" id="jp-title"></div>
+          <div class="jp-desc" id="jp-desc"></div>
+          <div class="jp-stops" id="jp-stops"></div>
+        </div>
+        <div class="journey-legend" id="journey-legend"></div>
+      </div>
+
     </div>
   </div>
 </div>
@@ -827,6 +976,102 @@
   });
 
   loadSites();
+
+  let journeyLayers = {};
+  let journeyStopMarkers = {};
+  let activeJourneyId = null;
+
+  function loadJourneys() {
+    fetch('/api/journeys')
+      .then(r => r.json())
+      .then(journeys => {
+        const chips = document.getElementById('journey-chips');
+        chips.innerHTML = '';
+        journeys.forEach(j => {
+          const chip = document.createElement('div');
+          chip.className = 'journey-chip';
+          chip.innerHTML = '<span class="color-dot" style="background:' + j.color + '"></span>' + j.name;
+          chip.addEventListener('click', () => toggleJourney(j));
+          chips.appendChild(chip);
+        });
+      });
+  }
+
+  function toggleJourney(journey) {
+    if (activeJourneyId === journey.id) {
+      clearJourney(journey.id);
+      activeJourneyId = null;
+      document.getElementById('journey-panel').classList.remove('visible');
+      document.querySelectorAll('.journey-chip').forEach(c => c.classList.remove('active'));
+      document.getElementById('journey-legend').innerHTML = '';
+      return;
+    }
+    Object.keys(journeyLayers).forEach(id => clearJourney(id));
+    activeJourneyId = journey.id;
+    document.querySelectorAll('.journey-chip').forEach(c => {
+      c.classList.toggle('active', c.textContent.trim() === journey.name);
+    });
+
+    const coords = journey.stops.map(s => [s.lat, s.lng]);
+
+    const polyline = L.polyline(coords, {
+      color: journey.color,
+      weight: 3,
+      opacity: 0.7,
+      dashArray: '8, 6',
+    }).addTo(map);
+    journeyLayers[journey.id] = { polyline: polyline, markers: [] };
+
+    const stopMarkers = [];
+    journey.stops.forEach((stop, i) => {
+      const marker = L.circleMarker([stop.lat, stop.lng], {
+        radius: 6,
+        fillColor: journey.color,
+        color: '#fff',
+        weight: 2,
+        fillOpacity: 0.9,
+      }).addTo(map);
+      marker.bindPopup('<strong>' + stop.name + '</strong><br><span style="font-size:0.8rem;color:#9a7a8a;">' + stop.desc + '</span>');
+      journeyLayers[journey.id].markers.push(marker);
+      stopMarkers.push({ marker: marker, data: stop, index: i });
+    });
+    journeyStopMarkers[journey.id] = stopMarkers;
+
+    map.fitBounds(polyline.getBounds().pad(0.15));
+
+    const panel = document.getElementById('journey-panel');
+    document.getElementById('jp-title').textContent = journey.title;
+    document.getElementById('jp-title').style.color = journey.color;
+    document.getElementById('jp-desc').textContent = journey.description;
+    const stopsDiv = document.getElementById('jp-stops');
+    stopsDiv.innerHTML = '';
+    journey.stops.forEach((stop, i) => {
+      const el = document.createElement('span');
+      el.className = 'jp-stop';
+      el.innerHTML = '<span class="stop-num" style="background:' + journey.color + '">' + (i+1) + '</span>' + stop.name;
+      el.addEventListener('click', () => {
+        document.querySelectorAll('.jp-stop').forEach(s => s.classList.remove('active'));
+        el.classList.add('active');
+        map.setView([stop.lat, stop.lng], 6, { animate: true });
+      });
+      stopsDiv.appendChild(el);
+    });
+    panel.classList.add('visible');
+
+    const legend = document.getElementById('journey-legend');
+    legend.innerHTML = '<span class="jl-item"><span class="jl-line" style="background:' + journey.color + '"></span>' + journey.stops.length + ' stops</span>';
+  }
+
+  function clearJourney(id) {
+    if (journeyLayers[id]) {
+      map.removeLayer(journeyLayers[id].polyline);
+      journeyLayers[id].markers.forEach(m => map.removeLayer(m));
+      delete journeyLayers[id];
+    }
+    delete journeyStopMarkers[id];
+  }
+
+  loadJourneys();
 
   const identifyBtn = document.getElementById('identify-btn');
   const textInput = document.getElementById('text-input');
