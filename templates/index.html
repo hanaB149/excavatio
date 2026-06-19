@@ -1004,6 +1004,7 @@
       document.getElementById('journey-panel').classList.remove('visible');
       document.querySelectorAll('.journey-chip').forEach(c => c.classList.remove('active'));
       document.getElementById('journey-legend').innerHTML = '';
+      showExcavationMarkers();
       return;
     }
     Object.keys(journeyLayers).forEach(id => clearJourney(id));
@@ -1011,6 +1012,7 @@
     document.querySelectorAll('.journey-chip').forEach(c => {
       c.classList.toggle('active', c.textContent.trim() === journey.name);
     });
+    hideExcavationMarkers();
 
     const coords = journey.stops.map(s => [s.lat, s.lng]);
 
@@ -1043,6 +1045,30 @@
     document.getElementById('jp-title').textContent = journey.title;
     document.getElementById('jp-title').style.color = journey.color;
     document.getElementById('jp-desc').textContent = journey.description;
+
+    const ff = journey.factFile;
+    const ffDiv = document.createElement('div');
+    ffDiv.id = 'jp-factfile';
+    ffDiv.style.cssText = 'background:rgba(255,255,255,0.5);border-radius:12px;padding:0.7rem 0.9rem;margin-top:0.6rem;border:1px solid rgba(244,143,177,0.1);';
+    let ffHtml = '';
+    if (ff) {
+      const items = [
+        ['source', ff.source],
+        ['period', ff.period],
+        ['distance', ff.distance],
+        ['duration', ff.duration],
+        ['key themes', ff.keyThemes],
+      ];
+      items.forEach(([label, val]) => {
+        ffHtml += '<div style="display:flex;gap:0.5rem;font-size:0.75rem;margin-bottom:0.2rem;"><span style="font-weight:700;color:#9a7a8a;min-width:72px;">' + label + ':</span><span style="color:#5a3c4a;">' + val + '</span></div>';
+      });
+      ffHtml += '<div style="margin-top:0.4rem;padding-top:0.4rem;border-top:1px solid rgba(244,143,177,0.15);font-size:0.75rem;color:#5a3c4a;line-height:1.5;"><strong style="color:#9a7a8a;">legacy:</strong> ' + ff.legacy + '</div>';
+    }
+    ffDiv.innerHTML = ffHtml;
+    const oldFf = document.getElementById('jp-factfile');
+    if (oldFf) oldFf.remove();
+    panel.appendChild(ffDiv);
+
     const stopsDiv = document.getElementById('jp-stops');
     stopsDiv.innerHTML = '';
     journey.stops.forEach((stop, i) => {
@@ -1069,6 +1095,22 @@
       delete journeyLayers[id];
     }
     delete journeyStopMarkers[id];
+  }
+
+  function hideExcavationMarkers() {
+    Object.values(mapMarkers).forEach(m => {
+      if (map.hasLayer(m.layer)) map.removeLayer(m.layer);
+    });
+    document.querySelectorAll('.site-chip').forEach(c => c.style.display = 'none');
+    document.getElementById('site-panel').classList.remove('visible');
+    document.getElementById('marker-count').textContent = '';
+  }
+
+  function showExcavationMarkers() {
+    Object.values(mapMarkers).forEach(m => {
+      if (!map.hasLayer(m.layer)) m.layer.addTo(map);
+    });
+    loadSites();
   }
 
   loadJourneys();
