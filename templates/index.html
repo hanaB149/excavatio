@@ -3,54 +3,402 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Excavatio — Greco-Roman Excavations & Classical Text Identifier</title>
+  <title>Excavatio — Ancient World Explorer</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital@0;1&display=swap" rel="stylesheet">
   <style>
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
+    }
+    @keyframes sparkle {
+      0%, 100% { opacity: 0; transform: scale(0) rotate(0deg); }
+      50% { opacity: 1; transform: scale(1) rotate(180deg); }
+    }
+    @keyframes fadeSlideUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeSlideDown {
+      from { opacity: 0; transform: translateY(-12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes pulseGlow {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(244, 143, 177, 0.4); }
+      50% { box-shadow: 0 0 0 12px rgba(244, 143, 177, 0); }
+    }
+    @keyframes shimmer {
+      0% { background-position: -200% center; }
+      100% { background-position: 200% center; }
+    }
+    @keyframes popIn {
+      0% { opacity: 0; transform: scale(0.8); }
+      70% { transform: scale(1.05); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(-16px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes stamp {
+      0% { opacity: 0; transform: scale(0.3) rotate(-10deg); }
+      60% { transform: scale(1.1) rotate(2deg); }
+      100% { opacity: 1; transform: scale(1) rotate(0deg); }
+    }
+    @keyframes dots {
+      0%, 20% { content: ''; }
+      40% { content: '.'; }
+      60% { content: '..'; }
+      80%, 100% { content: '...'; }
+    }
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Inter', sans-serif; background: #f5f2eb; color: #2c2416; }
-    header { background: #4a3728; color: #f5f2eb; padding: 1.2rem 2rem; display: flex; align-items: center; gap: 0.75rem; }
-    header h1 { font-weight: 500; font-size: 1.5rem; letter-spacing: 0.02em; }
-    header span { opacity: 0.7; font-size: 0.85rem; }
-    nav { background: #e8e0d4; display: flex; border-bottom: 1px solid #d4c9b8; }
-    nav button { flex: 1; padding: 0.8rem; border: none; background: transparent; font-size: 0.9rem; font-weight: 500; cursor: pointer; color: #4a3728; transition: 0.2s; font-family: inherit; }
-    nav button:hover { background: #ddd3c5; }
-    nav button.active { background: #f5f2eb; border-bottom: 2px solid #8b6914; }
-    .tab-content { display: none; }
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: linear-gradient(135deg, #fff5f7 0%, #fce4ec 30%, #f8e8ff 70%, #fce4ec 100%);
+      color: #4a2c3a;
+      min-height: 100vh;
+    }
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-image: radial-gradient(circle at 20% 50%, rgba(255,182,193,0.15) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 20%, rgba(200,160,255,0.12) 0%, transparent 50%),
+                        radial-gradient(circle at 50% 80%, rgba(255,218,185,0.1) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+    .sparkle-deco {
+      position: fixed;
+      pointer-events: none;
+      z-index: 0;
+      font-size: 20px;
+      animation: sparkle 3s ease-in-out infinite;
+    }
+    .sparkle-deco:nth-child(1) { top: 10%; left: 5%; animation-delay: 0s; }
+    .sparkle-deco:nth-child(2) { top: 25%; right: 8%; animation-delay: 0.8s; font-size: 14px; }
+    .sparkle-deco:nth-child(3) { bottom: 20%; left: 10%; animation-delay: 1.6s; font-size: 16px; }
+    .sparkle-deco:nth-child(4) { bottom: 35%; right: 5%; animation-delay: 2.4s; font-size: 12px; }
+    .sparkle-deco:nth-child(5) { top: 50%; left: 3%; animation-delay: 0.4s; font-size: 10px; }
+
+    header {
+      background: linear-gradient(135deg, #f8bbd0, #e1bee7, #f8bbd0);
+      background-size: 200% 200%;
+      animation: shimmer 6s ease infinite;
+      color: #fff;
+      padding: 1.4rem 2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      position: relative;
+      z-index: 1;
+      box-shadow: 0 4px 20px rgba(244, 143, 177, 0.25);
+    }
+    header h1 {
+      font-weight: 800;
+      font-size: 1.6rem;
+      letter-spacing: 0.03em;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      animation: float 4s ease-in-out infinite;
+    }
+    header span {
+      opacity: 0.9;
+      font-size: 0.85rem;
+      font-weight: 400;
+    }
+    header .heart {
+      font-size: 1.3rem;
+      animation: float 3s ease-in-out infinite 0.5s;
+    }
+    nav {
+      background: rgba(255,255,255,0.7);
+      backdrop-filter: blur(12px);
+      display: flex;
+      border-bottom: 1px solid rgba(244, 143, 177, 0.2);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    nav button {
+      flex: 1;
+      padding: 0.9rem;
+      border: none;
+      background: transparent;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      color: #7a4a6a;
+      transition: all 0.3s ease;
+      font-family: inherit;
+      position: relative;
+    }
+    nav button:hover {
+      background: rgba(244, 143, 177, 0.1);
+      color: #d45a8a;
+    }
+    nav button.active {
+      background: rgba(255,255,255,0.8);
+      color: #c94f7c;
+    }
+    nav button.active::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 25%;
+      width: 50%;
+      height: 3px;
+      background: linear-gradient(90deg, #f48fb1, #ce93d8);
+      border-radius: 3px 3px 0 0;
+      animation: fadeSlideDown 0.3s ease;
+    }
+    .tab-content { display: none; animation: fadeSlideUp 0.4s ease; }
     .tab-content.active { display: block; }
-    .container { max-width: 1400px; margin: 0 auto; padding: 1.5rem; }
-    #map { height: 70vh; border-radius: 8px; border: 1px solid #d4c9b8; }
-    .search-bar { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
-    .search-bar input { flex: 1; padding: 0.6rem 1rem; border: 1px solid #d4c9b8; border-radius: 6px; font-size: 0.9rem; background: white; }
-    .search-bar button { padding: 0.6rem 1.2rem; background: #4a3728; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 500; }
-    .search-bar button:hover { background: #5e4836; }
-    .identify-box { max-width: 800px; margin: 0 auto; }
-    .identify-box textarea { width: 100%; min-height: 200px; padding: 1rem; border: 1px solid #d4c9b8; border-radius: 8px; font-size: 0.95rem; background: white; resize: vertical; font-family: inherit; }
-    .identify-box .actions { display: flex; gap: 0.75rem; margin-top: 0.75rem; flex-wrap: wrap; }
-    .identify-box .actions button { padding: 0.6rem 1.5rem; background: #4a3728; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 500; font-family: inherit; }
-    .identify-box .actions button:hover { background: #5e4836; }
-    .identify-box .actions label { padding: 0.6rem 1.5rem; background: #e8e0d4; border: 1px solid #d4c9b8; border-radius: 6px; cursor: pointer; font-weight: 500; display: inline-flex; align-items: center; gap: 0.4rem; }
-    .identify-box .actions label:hover { background: #ddd3c5; }
-    .result-card { display: none; margin-top: 1.5rem; background: white; border-radius: 8px; padding: 1.5rem; border: 1px solid #d4c9b8; }
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 1.5rem;
+      position: relative;
+      z-index: 1;
+    }
+    #map {
+      height: 70vh;
+      border-radius: 16px;
+      border: 2px solid rgba(244, 143, 177, 0.3);
+      box-shadow: 0 8px 32px rgba(244, 143, 177, 0.15);
+      animation: fadeSlideUp 0.6s ease;
+    }
+    .leaflet-control-zoom a {
+      color: #7a4a6a !important;
+    }
+    .leaflet-popup-content-wrapper {
+      border-radius: 12px !important;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.1) !important;
+    }
+    .leaflet-popup-tip {
+      box-shadow: none !important;
+    }
+    .search-bar {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+      animation: fadeSlideDown 0.5s ease;
+    }
+    .search-bar input {
+      flex: 1;
+      padding: 0.7rem 1.2rem;
+      border: 2px solid rgba(244, 143, 177, 0.25);
+      border-radius: 50px;
+      font-size: 0.9rem;
+      background: rgba(255,255,255,0.85);
+      font-family: 'Nunito', sans-serif;
+      font-weight: 600;
+      color: #4a2c3a;
+      transition: all 0.3s ease;
+    }
+    .search-bar input:focus {
+      outline: none;
+      border-color: #f48fb1;
+      box-shadow: 0 0 0 4px rgba(244, 143, 177, 0.15);
+      background: white;
+    }
+    .search-bar button {
+      padding: 0.7rem 1.5rem;
+      background: linear-gradient(135deg, #f48fb1, #ce93d8);
+      color: white;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      font-weight: 700;
+      font-family: 'Nunito', sans-serif;
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 12px rgba(244, 143, 177, 0.3);
+    }
+    .search-bar button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(244, 143, 177, 0.4);
+    }
+    .search-bar button:active {
+      transform: translateY(0);
+    }
+    .identify-box {
+      max-width: 800px;
+      margin: 0 auto;
+      animation: fadeSlideUp 0.5s ease;
+    }
+    .identify-box textarea {
+      width: 100%;
+      min-height: 200px;
+      padding: 1.2rem;
+      border: 2px solid rgba(244, 143, 177, 0.25);
+      border-radius: 16px;
+      font-size: 0.95rem;
+      background: rgba(255,255,255,0.85);
+      resize: vertical;
+      font-family: 'Nunito', sans-serif;
+      font-weight: 600;
+      color: #4a2c3a;
+      transition: all 0.3s ease;
+    }
+    .identify-box textarea:focus {
+      outline: none;
+      border-color: #f48fb1;
+      box-shadow: 0 0 0 4px rgba(244, 143, 177, 0.15);
+      background: white;
+    }
+    .identify-box .actions {
+      display: flex;
+      gap: 0.75rem;
+      margin-top: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .identify-box .actions button {
+      padding: 0.7rem 1.8rem;
+      background: linear-gradient(135deg, #f48fb1, #ce93d8);
+      color: white;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      font-weight: 700;
+      font-family: 'Nunito', sans-serif;
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 12px rgba(244, 143, 177, 0.3);
+    }
+    .identify-box .actions button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(244, 143, 177, 0.4);
+    }
+    .identify-box .actions button:active {
+      transform: translateY(0);
+    }
+    .identify-box .actions label {
+      padding: 0.7rem 1.8rem;
+      background: rgba(255,255,255,0.8);
+      border: 2px solid rgba(244, 143, 177, 0.25);
+      border-radius: 50px;
+      cursor: pointer;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: all 0.3s ease;
+      font-family: 'Nunito', sans-serif;
+      color: #7a4a6a;
+      font-size: 0.9rem;
+    }
+    .identify-box .actions label:hover {
+      background: white;
+      border-color: #f48fb1;
+      transform: translateY(-2px);
+    }
+
+    .result-card {
+      display: none;
+      margin-top: 1.5rem;
+      background: rgba(255,255,255,0.92);
+      backdrop-filter: blur(8px);
+      border-radius: 20px;
+      padding: 1.8rem;
+      border: 2px solid rgba(244, 143, 177, 0.2);
+      box-shadow: 0 8px 32px rgba(244, 143, 177, 0.1);
+      animation: popIn 0.5s ease;
+    }
     .result-card.visible { display: block; }
-    .result-card h2 { font-size: 1.2rem; margin-bottom: 0.5rem; }
-    .result-card .meta { color: #666; font-size: 0.85rem; margin-bottom: 0.75rem; }
-    .result-card .meta strong { color: #2c2416; }
-    .result-card .desc { line-height: 1.6; margin-bottom: 1rem; }
-    .result-card .trans { border-top: 1px solid #e8e0d4; padding-top: 1rem; }
-    .result-card .trans h3 { font-size: 0.9rem; margin-bottom: 0.5rem; color: #8b6914; }
-    .result-card .trans .version { margin-bottom: 0.5rem; }
-    .result-card .trans .version .label { font-weight: 600; font-size: 0.8rem; }
-    .result-card .trans .version .quote { font-style: italic; color: #555; }
-    .no-match { display: none; margin-top: 1.5rem; padding: 1rem; background: #fdf0f0; border: 1px solid #e8b4b4; border-radius: 6px; color: #8b2020; }
+    .result-card h2 {
+      font-size: 1.1rem;
+      margin-bottom: 0.5rem;
+      color: #c94f7c;
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+    }
+    .result-card .meta {
+      color: #9a7a8a;
+      font-size: 0.85rem;
+      margin-bottom: 0.75rem;
+    }
+    .result-card .meta strong { color: #4a2c3a; }
+    .result-card .desc {
+      line-height: 1.7;
+      margin-bottom: 1rem;
+      color: #5a3c4a;
+    }
+    .result-card .trans {
+      border-top: 2px dashed rgba(244, 143, 177, 0.3);
+      padding-top: 1rem;
+    }
+    .result-card .trans h3 {
+      font-size: 0.9rem;
+      margin-bottom: 0.8rem;
+      color: #ce93d8;
+      font-weight: 800;
+    }
+    .result-card .trans .version {
+      margin-bottom: 0.7rem;
+      padding: 0.6rem 0.8rem;
+      background: rgba(248, 187, 208, 0.1);
+      border-radius: 10px;
+      animation: slideIn 0.4s ease;
+    }
+    .result-card .trans .version:last-child { margin-bottom: 0; }
+    .result-card .trans .version .label {
+      font-weight: 700;
+      font-size: 0.8rem;
+      color: #7a4a6a;
+    }
+    .result-card .trans .version .quote {
+      font-style: italic;
+      color: #6a4a5a;
+      font-family: 'Playfair Display', serif;
+      font-size: 0.95rem;
+    }
+    .no-match {
+      display: none;
+      margin-top: 1.5rem;
+      padding: 1.2rem;
+      background: rgba(255, 205, 210, 0.6);
+      border: 2px solid #ef9a9a;
+      border-radius: 16px;
+      color: #b35a5a;
+      text-align: center;
+      font-weight: 600;
+      animation: popIn 0.4s ease;
+    }
     .no-match.visible { display: block; }
-    .loading { text-align: center; padding: 2rem; color: #888; display: none; }
+    .loading {
+      text-align: center;
+      padding: 2rem;
+      color: #ce93d8;
+      font-weight: 700;
+      display: none;
+      animation: fadeSlideUp 0.3s ease;
+    }
     .loading.visible { display: block; }
-    .site-popup a { color: #8b6914; text-decoration: none; font-weight: 500; }
+    .loading::after {
+      content: '';
+      animation: dots 1.5s steps(3) infinite;
+    }
+    .site-popup a {
+      color: #c94f7c;
+      text-decoration: none;
+      font-weight: 700;
+    }
     .site-popup a:hover { text-decoration: underline; }
-    .marker-count { font-size: 0.8rem; color: #888; margin-top: 0.3rem; }
+    .marker-count {
+      font-size: 0.8rem;
+      color: #9a7a8a;
+      margin-top: 0.5rem;
+      font-weight: 600;
+      animation: fadeSlideUp 0.5s ease;
+    }
     #file-input { display: none; }
+
+    .leaflet-marker-icon {
+      filter: drop-shadow(0 2px 4px rgba(244, 143, 177, 0.3));
+    }
+
     @media (max-width: 600px) {
       header { flex-direction: column; text-align: center; padding: 1rem; }
       .search-bar { flex-direction: column; }
@@ -59,49 +407,57 @@
 </head>
 <body>
 
+<div class="sparkle-deco">&#x2728;</div>
+<div class="sparkle-deco">&#x2728;</div>
+<div class="sparkle-deco">&#x1F338;</div>
+<div class="sparkle-deco">&#x2728;</div>
+<div class="sparkle-deco">&#x1F33C;</div>
+
 <header>
-  <h1>&#x1F3F4;&#x200D;&#x26A7; Excavatio</h1>
-  <span>Ancient World Explorer</span>
+  <span class="heart">&#x1F497;</span>
+  <h1>Excavatio</h1>
+  <span>ancient world explorer &#x1F308;</span>
 </header>
 
 <nav>
-  <button class="active" data-tab="map-tab">&#x1F5FA; Excavation Map</button>
-  <button data-tab="text-tab">&#x1F4DC; Text Identifier</button>
+  <button class="active" data-tab="map-tab">&#x1F5FA; excavation map</button>
+  <button data-tab="text-tab">&#x1F4DC; text identifier</button>
 </nav>
 
-<!-- ========= TAB 1: MAP ========= -->
 <div id="map-tab" class="tab-content active">
   <div class="container">
     <div class="search-bar">
-      <input type="text" id="search-q" value="excavation" placeholder="Search for ancient sites (e.g. excavation, temple, forum, acropolis)">
-      <button id="search-btn">Search</button>
+      <input type="text" id="search-q" value="excavation" placeholder="search sites, temples, forums...">
+      <button id="search-btn">&#x1F50D; search</button>
     </div>
     <div id="map"></div>
     <div class="marker-count" id="marker-count"></div>
   </div>
 </div>
 
-<!-- ========= TAB 2: TEXT IDENTIFIER ========= -->
 <div id="text-tab" class="tab-content">
   <div class="container">
     <div class="identify-box">
-      <textarea id="text-input" placeholder="Paste a passage from a classical text (Greek or Latin) — for example:&#10;&#10;arma virumque cano&#10;&#10;or:&#10;&#10;ἄνδρα μοι ἔννεπε μοῦσα πολύτροπον"></textarea>
+      <textarea id="text-input" placeholder="paste a passage from a classical text...&#10;&#10;arma virumque cano&#10;&#10;or:&#10;&#10;&#x1F3F3;&#xFE0F;&#x200D;&#x1F308; &#x1F9D6;&#x200D;&#x2640;&#xFE0F; &#x1F469;&#x200D;&#x1F469;&#x200D;&#x1F467;&#x200D;&#x1F466; &#x1F3F4;&#x200D;&#x26A7; &#x1F9D6;&#x200D;&#x2640;&#xFE0F; &#x1F9D6;&#x200D;&#x2642;&#xFE0F; &#x1F3C3;&#x200D;&#x2642;&#xFE0F; &#x1F9F3; &#x1F9F3; &#x2744;&#xFE0F;&#x200D;&#x2744;&#xFE0F; &#x2B50;&#xFE0F; &#x1F31F; &#x1F31F; &#x1F308; &#x2728;"></textarea>
       <div class="actions">
-        <button id="identify-btn">Identify Text</button>
-        <label for="file-input">&#x1F4F7; Upload Image</label>
+        <button id="identify-btn">&#x2728; identify</button>
+        <label for="file-input">&#x1F4F7; upload image</label>
         <input type="file" id="file-input" accept="image/*">
       </div>
-      <div class="loading" id="loading">Identifying...</div>
-      <div class="no-match" id="no-match">No classical text match found. Try a different passage.</div>
+      <div class="loading" id="loading">identifying</div>
+      <div class="no-match" id="no-match">&#x1F4AD; no match found — try a different passage!</div>
       <div class="result-card" id="result-card">
         <h2 id="result-title"></h2>
         <div class="meta">
-          <span><strong>Author:</strong> <span id="result-author"></span></span> &middot;
-          <span><strong>Work:</strong> <span id="result-work"></span></span> &middot;
+          <span><strong>author:</strong> <span id="result-author"></span></span> &middot;
+          <span><strong>work:</strong> <span id="result-work"></span></span> &middot;
           <span id="result-location"></span>
         </div>
         <p class="desc" id="result-desc"></p>
-        <div class="trans" id="result-trans"></div>
+        <div class="trans">
+          <h3>&#x1F30D; translations & editions</h3>
+          <div id="result-trans"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -109,7 +465,6 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  // ---- Tab switching ----
   document.querySelectorAll('nav button').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
@@ -120,7 +475,6 @@
     });
   });
 
-  // ---- Map ----
   const map = L.map('map').setView([38.5, 15.5], 4);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 18,
@@ -130,33 +484,40 @@
   let markers = [];
 
   function loadExcavations(query) {
-    document.getElementById('marker-count').textContent = 'Loading...';
+    document.getElementById('marker-count').textContent = 'loading...';
     markers.forEach(m => map.removeLayer(m));
     markers = [];
     fetch(`/api/excavations?q=${encodeURIComponent(query)}`)
       .then(r => r.json())
       .then(data => {
         document.getElementById('marker-count').textContent = `${data.length} sites found`;
-        data.forEach(site => {
-          const color = site.featureTypes.includes('amphitheater') ? '#8b2020' : '#4a3728';
-          const m = L.circleMarker([site.lat, site.lng], {
-            radius: 7, fillColor: color, color: '#f5f2eb', weight: 2, fillOpacity: 0.8
-          }).addTo(map);
-          m.bindPopup(`
-            <div class="site-popup">
-              <strong>${site.title}</strong><br>
-              ${site.description ? site.description.substring(0, 150) + '...' : ''}<br>
-              <a href="${site.uri}" target="_blank">View on Pleiades &rarr;</a>
-            </div>
-          `);
-          markers.push(m);
+        data.forEach((site, i) => {
+          setTimeout(() => {
+            const m = L.circleMarker([site.lat, site.lng], {
+              radius: 7,
+              fillColor: '#f48fb1',
+              color: '#fff',
+              weight: 2,
+              fillOpacity: 0.85
+            }).addTo(map);
+            m.bindPopup(`
+              <div class="site-popup">
+                <strong>${site.title}</strong><br>
+                ${site.description ? site.description.substring(0, 150) + '...' : ''}<br>
+                <a href="${site.uri}" target="_blank">view on pleiades &rarr;</a>
+              </div>
+            `);
+            markers.push(m);
+          }, i * 15);
         });
         if (data.length) {
-          const bounds = markers.map(m => m.getLatLng());
-          map.fitBounds(bounds, { padding: [30, 30] });
+          setTimeout(() => {
+            const bounds = markers.map(m => m.getLatLng());
+            map.fitBounds(bounds, { padding: [30, 30] });
+          }, data.length * 15 + 50);
         }
       })
-      .catch(() => document.getElementById('marker-count').textContent = 'Error loading data');
+      .catch(() => document.getElementById('marker-count').textContent = 'error loading data');
   }
 
   document.getElementById('search-btn').addEventListener('click', () => {
@@ -168,7 +529,6 @@
 
   loadExcavations('excavation');
 
-  // ---- Text Identifier ----
   const identifyBtn = document.getElementById('identify-btn');
   const textInput = document.getElementById('text-input');
   const loading = document.getElementById('loading');
@@ -196,17 +556,18 @@
         document.getElementById('result-author').textContent = data.author;
         document.getElementById('result-work').textContent = data.work;
         const loc = [];
-        if (data.book) loc.push(`Book ${data.book}`);
-        if (data.section) loc.push(`Section ${data.section}`);
-        if (data.line) loc.push(`Line ${data.line}`);
-        document.getElementById('result-location').innerHTML = `<strong>Location:</strong> ${loc.join(', ') || 'N/A'}`;
+        if (data.book) loc.push(`book ${data.book}`);
+        if (data.section) loc.push(`section ${data.section}`);
+        if (data.line) loc.push(`line ${data.line}`);
+        document.getElementById('result-location').innerHTML = `<strong>location:</strong> ${loc.join(', ') || 'n/a'}`;
         document.getElementById('result-desc').textContent = data.description;
         const transDiv = document.getElementById('result-trans');
-        transDiv.innerHTML = '<h3>&#x1F30D; Translations & Editions</h3>';
+        transDiv.innerHTML = '';
         if (data.translations) {
-          Object.entries(data.translations).forEach(([edition, quote]) => {
+          Object.entries(data.translations).forEach(([edition, quote], i) => {
             const v = document.createElement('div');
             v.className = 'version';
+            v.style.animationDelay = `${0.1 + i * 0.1}s`;
             v.innerHTML = `<span class="label">${edition}</span><br><span class="quote">"${quote}"</span>`;
             transDiv.appendChild(v);
           });
@@ -220,8 +581,10 @@
   }
 
   identifyBtn.addEventListener('click', () => identifyText(textInput.value));
+  textInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && e.ctrlKey) identifyText(textInput.value);
+  });
 
-  // OCR via Tesseract.js (loaded from CDN if user uploads image)
   document.getElementById('file-input').addEventListener('change', function(e) {
     const file = e.target.files[0];
     if (!file) return;
@@ -229,19 +592,18 @@
     reader.onload = function(ev) {
       const imgData = ev.target.result;
       loading.classList.add('visible');
-      // Dynamically load Tesseract
       const script = document.createElement('script');
       script.src = 'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';
       script.onload = function() {
         Tesseract.recognize(imgData, 'eng+lat+grc', {
-          logger: m => { if (m.status === 'recognizing text') loading.textContent = `OCR: ${Math.round(m.progress * 100)}%`; }
+          logger: m => { if (m.status === 'recognizing text') loading.textContent = `ocr: ${Math.round(m.progress * 100)}%`; }
         }).then(({ data: { text } }) => {
-          loading.textContent = 'Identifying...';
+          loading.textContent = 'identifying';
           loading.classList.remove('visible');
           textInput.value = text;
           identifyText(text);
         }).catch(() => {
-          loading.textContent = 'Identifying...';
+          loading.textContent = 'identifying';
           loading.classList.remove('visible');
           noMatch.classList.add('visible');
         });
