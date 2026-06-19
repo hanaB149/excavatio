@@ -395,6 +395,40 @@ def find_text_match(input_text):
 def index():
     return render_template("index.html")
 
+def query_gemini(passage, api_key):
+    prompt = (
+        "You are a classical philologist. Identify the following ancient Greek or Latin passage. "
+        "Return ONLY valid JSON with these fields (or the subset you can determine):\n"
+        "- text: the exact passage provided\n"
+        "- work: the title of the work\n"
+        "- author: the author's name\n"
+        "- book: book number (integer)\n"
+        "- section: section number (integer, if applicable)\n"
+        "- line: line number (integer, if known from the text)\n"
+        "- description: a brief explanation of the passage in context (1-2 sentences)\n"
+        "- translations: an object with 2-3 translator/edition names as keys and short quotes as values. If you don't know specific translations, use well-known ones.\n\n"
+        "If you cannot identify it at all, return: {\"matched\": false}\n\n"
+        "Passage: '''" + passage + "'''"
+    )
+    url = f"https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent?key={api_key}"
+    body = {
+        "contents": [{"parts": [{"text": prompt}]}],
+        "generationConfig": {"temperature": 0.1, "maxOutputTokens": 800},
+    }
+    r = requests.post(url, json=body, timeout=20)
+    r.raise_for_status()
+    resp = r.json()
+    raw = resp["candidates"][0]["content"]["parts"][0]["text"]
+    raw = raw.strip()
+    if raw.startswith("```"):
+        raw = raw.split("\n", 1)[-1]
+        raw = raw.rsplit("```", 1)[0]
+    raw = raw.strip()
+    data = json.loads(raw)
+    if data.get("matched") is False:
+        return None
+    return data
+
 @app.route("/api/excavations")
 def api_excavations():
     era = request.args.get("era", "")
@@ -427,10 +461,21 @@ def api_identify():
     text = data.get("text", "")
     if not text:
         return jsonify({"error": "No text provided"}), 400
+
     match = find_text_match(text)
-    if not match:
-        return jsonify({"matched": False, "message": "No classical text match found."})
-    return jsonify({"matched": True, **match})
+    if match:
+        return jsonify({"matched": True, "source": "library", **match})
+
+    gemini_key = os.environ.get("GEMINI_API_KEY", "")
+    if gemini_key:
+        try:
+            result = query_gemini(text, gemini_key)
+            if result:
+                return jsonify({"matched": True, "source": "ai", **result})
+        except Exception:
+            pass
+
+    return jsonify({"matched": False, "message": "No classical text match found."})
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
