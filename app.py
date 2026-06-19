@@ -401,7 +401,7 @@ def index():
 
 def query_ai(passage, api_key):
     prompt = (
-        "You are a classical philologist. Identify the following ancient Greek or Latin passage. "
+        "You are a classical philologist and archaeologist. Identify the following ancient Greek or Latin passage. "
         "Return ONLY valid JSON with these fields (or the subset you can determine):\n"
         "- text: the exact passage provided\n"
         "- work: the title of the work\n"
@@ -409,7 +409,10 @@ def query_ai(passage, api_key):
         "- book: book number (integer)\n"
         "- section: section number (integer, if applicable)\n"
         "- line: line number (integer, if known from the text)\n"
-        "- description: a brief explanation of the passage in context (1-2 sentences)\n"
+        "- description: a detailed explanation of the passage in context (2-3 sentences)\n"
+        "- historicalContext: historical background of when and why this was written (1-2 sentences)\n"
+        "- culturalSignificance: why this passage matters in classical literature/culture (1-2 sentences)\n"
+        "- archaeologicalContext: any known archaeological evidence related to this work or its setting (1-2 sentences)\n"
         "- translations: an object with 2-3 translator/edition names as keys and short quotes as values. If you don't know specific translations, use well-known ones.\n\n"
         "If you cannot identify it at all, return: {\"matched\": false}\n\n"
         "Passage: '''" + passage + "'''"
@@ -423,7 +426,7 @@ def query_ai(passage, api_key):
         "model": "deepseek-ai/deepseek-v4-flash",
         "messages": [{"role": "user", "content": prompt}],
         "temperature": 0.1,
-        "max_tokens": 800,
+        "max_tokens": 1200,
     }
     r = requests.post(url, json=body, headers=headers, timeout=20)
     r.raise_for_status()

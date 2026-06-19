@@ -640,6 +640,26 @@
     .result-card .trans .version .label { font-weight: 700; font-size: 0.8rem; color: #7a4a6a; }
     .result-card .trans .version .quote { font-style: italic; color: #6a4a5a; font-family: 'Playfair Display', serif; font-size: 0.95rem; }
 
+    .result-card .extra-section {
+      margin-bottom: 0.8rem;
+      padding: 0.6rem 0.8rem;
+      background: rgba(236, 204, 214, 0.15);
+      border-radius: 10px;
+      border-left: 3px solid #e1a3b8;
+      font-size: 0.88rem;
+      line-height: 1.6;
+      color: #5a3c4a;
+    }
+    .result-card .extra-section .label {
+      font-weight: 700;
+      color: #7a4a6a;
+      display: block;
+      margin-bottom: 0.2rem;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
     .no-match {
       display: none; margin-top: 1.5rem;
       padding: 1.2rem;
@@ -789,6 +809,9 @@
           <span id="result-location"></span>
         </div>
         <p class="desc" id="result-desc"></p>
+        <div id="result-historical" class="extra-section"></div>
+        <div id="result-cultural" class="extra-section"></div>
+        <div id="result-archaeological" class="extra-section"></div>
         <div class="trans">
           <h3>translations & editions</h3>
           <div id="result-trans"></div>
@@ -1169,6 +1192,18 @@
         if (data.line) loc.push('line ' + data.line);
         document.getElementById('result-location').innerHTML = '<strong>location:</strong> ' + (loc.join(', ') || 'n/a');
         document.getElementById('result-desc').textContent = data.description;
+        function setExtra(id, label, value) {
+          const el = document.getElementById(id);
+          if (value) {
+            el.innerHTML = '<span class="label">' + label + '</span>' + value;
+            el.style.display = 'block';
+          } else {
+            el.style.display = 'none';
+          }
+        }
+        setExtra('result-historical', 'historical context', data.historicalContext || '');
+        setExtra('result-cultural', 'cultural significance', data.culturalSignificance || '');
+        setExtra('result-archaeological', 'archaeological context', data.archaeologicalContext || '');
         const transDiv = document.getElementById('result-trans');
         transDiv.innerHTML = '';
         if (data.translations) {
