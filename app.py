@@ -2,6 +2,10 @@ import os
 import json
 import re
 import html
+import logging
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 import requests
 from flask import (
@@ -474,8 +478,8 @@ def api_identify():
             result = query_ai(text, ai_key)
             if result:
                 return jsonify({"matched": True, "source": "ai", **result})
-        except Exception:
-            pass
+        except Exception as e:
+            logger.error(f"OpenAI API error: {e}")
 
     match = find_text_match(text)
     if match:
