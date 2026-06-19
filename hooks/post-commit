@@ -1,0 +1,6 @@
+#!/bin/sh
+BRANCH=$(git rev-parse --abbrev-ref HEAD)
+if [ "$BRANCH" = "main" ]; then
+  git push origin main 2>&1
+  git push bld main 2>&1
+fi
