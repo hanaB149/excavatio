@@ -401,11 +401,13 @@ def index():
 
 def query_ai(passage, api_key):
     prompt = (
-        "You are a classical philologist and archaeologist. Identify the following ancient Greek or Latin passage. "
+        "You are a world-class classical philologist and archaeologist with deep knowledge of ancient Greek and Latin literature. "
+        "Identify the following passage. It may be ancient Greek or Latin, possibly fragmentary or obscure. "
+        "Think step by step: consider the language, style, metre, vocabulary, and any recognizable references.\n\n"
         "Return ONLY valid JSON with these fields (or the subset you can determine):\n"
         "- text: the exact passage provided\n"
-        "- work: the title of the work\n"
-        "- author: the author's name\n"
+        "- work: the title of the work (be specific)\n"
+        "- author: the author's full name\n"
         "- book: book number (integer)\n"
         "- section: section number (integer, if applicable)\n"
         "- line: line number (integer, if known from the text)\n"
@@ -414,7 +416,8 @@ def query_ai(passage, api_key):
         "- culturalSignificance: why this passage matters in classical literature/culture (1-2 sentences)\n"
         "- archaeologicalContext: any known archaeological evidence related to this work or its setting (1-2 sentences)\n"
         "- translations: an object with 2-3 translator/edition names as keys and short quotes as values. If you don't know specific translations, use well-known ones.\n\n"
-        "If you cannot identify it at all, return: {\"matched\": false}\n\n"
+        "Take your time and be thorough. Even obscure or fragmentary texts can be identified. "
+        "If you truly cannot identify it at all, return: {\"matched\": false}\n\n"
         "Passage: '''" + passage + "'''"
     )
     url = "https://api.aiand.com/v1/chat/completions"
@@ -423,12 +426,12 @@ def query_ai(passage, api_key):
         "Content-Type": "application/json",
     }
     body = {
-        "model": "deepseek-ai/deepseek-v4-flash",
+        "model": "deepseek-ai/deepseek-v4-pro",
         "messages": [{"role": "user", "content": prompt}],
         "temperature": 0.1,
-        "max_tokens": 1200,
+        "max_tokens": 1500,
     }
-    r = requests.post(url, json=body, headers=headers, timeout=20)
+    r = requests.post(url, json=body, headers=headers, timeout=30)
     r.raise_for_status()
     resp = r.json()
     raw = resp["choices"][0]["message"]["content"]
