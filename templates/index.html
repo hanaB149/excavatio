@@ -2457,12 +2457,18 @@
   function filterByYear(year) {
     const siteEls = document.querySelectorAll('.site-chip');
     const hidden = [];
+    const visibleSites = [];
     siteEls.forEach(el => {
       const sy = parseFloat(el.dataset.start);
       const ey = el.dataset.end ? parseFloat(el.dataset.end) : 9999;
       const visible = sy <= year;
       el.style.display = visible ? '' : 'none';
-      if (!visible) hidden.push(el.dataset.id);
+      if (!visible) {
+        hidden.push(el.dataset.id);
+      } else {
+        const site = allSites.find(s => s.id === el.dataset.id);
+        if (site) visibleSites.push(site);
+      }
     });
     Object.entries(mapMarkers).forEach(([id, m]) => {
       if (hidden.includes(id)) {
@@ -2471,6 +2477,7 @@
         m.layer.addTo(map);
       }
     });
+    renderAnalytics(visibleSites);
   }
 
   function renderSites() {
@@ -2552,13 +2559,13 @@
 
   const ANALYTICS_COLORS = ['#f48fb1','#ce93d8','#64b5f6','#4fc3f7','#4db6ac','#81c784','#aed581','#ffb74d','#ff8a65','#a1887f','#e57373','#ba68c8','#7986cb','#26a69a','#d4e157'];
 
-  function renderAnalytics() {
+  function renderAnalytics(sites) {
     const grid = document.getElementById('analytics-grid');
     const summary = document.getElementById('analytics-summary');
     if (!grid) return;
     grid.innerHTML = '';
 
-    const sites = allSites;
+    sites = sites || allSites;
     summary.textContent = sites.length + ' sites mapped';
 
     // 1. By century
