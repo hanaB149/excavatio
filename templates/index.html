@@ -1541,6 +1541,105 @@
       border-radius: 3px;
     }
 
+    /* excavation analytics */
+    .analytics-bar {
+      background: rgba(255,255,255,0.82);
+      backdrop-filter: blur(10px);
+      border-radius: 18px;
+      padding: 1.1rem 1.5rem;
+      border: 2px solid rgba(244, 143, 177, 0.18);
+      box-shadow: 0 4px 20px rgba(244, 143, 177, 0.08);
+      transition: box-shadow 0.3s;
+    }
+    .analytics-bar:hover { box-shadow: 0 6px 28px rgba(244, 143, 177, 0.14); }
+    .analytics-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.8rem;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .analytics-header .label {
+      font-weight: 700;
+      font-size: 0.85rem;
+      color: #7a4a6a;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+    .analytics-header .label svg { width: 16px; height: 16px; fill: none; stroke: #c94f7c; stroke-width: 2; }
+    .analytics-summary {
+      font-size: 0.78rem;
+      color: #9a7a8a;
+      font-weight: 600;
+    }
+    .analytics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1rem;
+    }
+    .analytics-card {
+      background: rgba(254, 246, 248, 0.6);
+      border: 1.5px solid rgba(244, 143, 177, 0.12);
+      border-radius: 14px;
+      padding: 0.9rem 1rem;
+    }
+    .analytics-card .ac-title {
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #9a6a8a;
+      margin-bottom: 0.6rem;
+    }
+    .analytics-bar-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.35rem;
+      font-size: 0.8rem;
+    }
+    .analytics-bar-row .abr-label {
+      min-width: 90px;
+      color: #5a3c4a;
+      font-weight: 600;
+      font-size: 0.76rem;
+      text-align: right;
+    }
+    .analytics-bar-row .abr-track {
+      flex: 1;
+      height: 14px;
+      background: rgba(244,143,177,0.06);
+      border-radius: 7px;
+      overflow: hidden;
+    }
+    .analytics-bar-row .abr-fill {
+      height: 100%;
+      border-radius: 7px;
+      transition: width 0.6s ease;
+    }
+    .analytics-bar-row .abr-val {
+      min-width: 28px;
+      text-align: right;
+      font-weight: 700;
+      color: #c94f7c;
+      font-size: 0.78rem;
+    }
+    .analytics-fact {
+      margin-top: 0.8rem;
+      padding: 0.6rem 0.8rem;
+      background: rgba(255,213,79,0.08);
+      border-left: 3px solid #ffd54f;
+      border-radius: 0 8px 8px 0;
+      font-size: 0.78rem;
+      line-height: 1.6;
+      color: #5a3c4a;
+      font-family: 'Source Serif 4', serif;
+      font-style: italic;
+    }
+    .analytics-fact strong { color: #c94f7c; font-style: normal; }
+
     .identify-box { max-width: 800px; margin: 0 auto; }
 
     /* source connections tab */
@@ -2111,6 +2210,17 @@
         <div class="journey-legend" id="journey-legend"></div>
       </div>
 
+      <div class="analytics-bar">
+        <div class="analytics-header">
+          <span class="label">
+            <svg viewBox="0 0 24 24"><path d="M3 3v18h18" fill="none" stroke="currentColor" stroke-width="2"/><path d="M7 14l3-3 3 3 5-5" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+            excavation analytics
+          </span>
+          <span class="analytics-summary" id="analytics-summary"></span>
+        </div>
+        <div class="analytics-grid" id="analytics-grid"></div>
+      </div>
+
     </div>
   </div>
 </div>
@@ -2298,6 +2408,7 @@
         allSites = data.sites;
         renderTimeline(data.yearMin, data.yearMax);
         renderSites();
+        renderAnalytics();
       });
   }
 
@@ -2411,6 +2522,120 @@
     });
 
     document.getElementById('marker-count').textContent = allSites.length + ' sites';
+  }
+
+  // --- excavation analytics ---
+  const REGION_BUCKETS = [
+    { name: 'Italy', latMin: 35, latMax: 47, lngMin: 6, lngMax: 19 },
+    { name: 'Greece', latMin: 34, latMax: 42, lngMin: 19, lngMax: 28 },
+    { name: 'Turkey', latMin: 35, latMax: 43, lngMin: 25, lngMax: 45 },
+    { name: 'Egypt', latMin: 22, latMax: 32, lngMin: 25, lngMax: 35 },
+    { name: 'Levant', latMin: 29, latMax: 37, lngMin: 34, lngMax: 45 },
+    { name: 'Iberia', latMin: 36, latMax: 44, lngMin: -10, lngMax: 3 },
+    { name: 'France', latMin: 42, latMax: 51, lngMin: -5, lngMax: 8 },
+    { name: 'Britain', latMin: 50, latMax: 59, lngMin: -8, lngMax: 2 },
+    { name: 'North Africa', latMin: 28, latMax: 37, lngMin: -10, lngMax: 25 },
+    { name: 'Mesopotamia', latMin: 29, latMax: 37, lngMin: 38, lngMax: 48 },
+    { name: 'Iran', latMin: 25, latMax: 40, lngMax: 48, lngMin: 44 },
+    { name: 'Central Asia', latMin: 35, latMax: 45, lngMin: 60, lngMax: 75 },
+    { name: 'South Asia', latMin: 25, latMax: 35, lngMin: 68, lngMax: 80 },
+    { name: 'Mesoamerica', latMin: 15, latMax: 25, lngMin: -105, lngMax: -90 },
+    { name: 'South America', latMin: -20, latMax: -10, lngMin: -80, lngMax: -70 },
+  ];
+
+  function getRegion(lat, lng) {
+    for (const r of REGION_BUCKETS) {
+      if (lat >= r.latMin && lat <= r.latMax && lng >= r.lngMin && lng <= r.lngMax) return r.name;
+    }
+    return 'Other';
+  }
+
+  const ANALYTICS_COLORS = ['#f48fb1','#ce93d8','#64b5f6','#4fc3f7','#4db6ac','#81c784','#aed581','#ffb74d','#ff8a65','#a1887f','#e57373','#ba68c8','#7986cb','#26a69a','#d4e157'];
+
+  function renderAnalytics() {
+    const grid = document.getElementById('analytics-grid');
+    const summary = document.getElementById('analytics-summary');
+    if (!grid) return;
+    grid.innerHTML = '';
+
+    const sites = allSites;
+    summary.textContent = sites.length + ' sites mapped';
+
+    // 1. By century
+    const centuries = {};
+    sites.forEach(s => {
+      const c = Math.floor(s.startYear / 100) * 100;
+      const label = c + 's';
+      centuries[label] = (centuries[label] || 0) + 1;
+    });
+    const centEntries = Object.entries(centuries).sort((a, b) => parseInt(a[0]) - parseInt(b[0]));
+    const centMax = Math.max(...centEntries.map(e => e[1]));
+
+    // 2. By region
+    const regions = {};
+    sites.forEach(s => {
+      const r = getRegion(s.lat, s.lng);
+      regions[r] = (regions[r] || 0) + 1;
+    });
+    const regEntries = Object.entries(regions).sort((a, b) => b[1] - a[1]);
+    const regMax = Math.max(...regEntries.map(e => e[1]));
+
+    // 3. By feature type
+    const features = {};
+    sites.forEach(s => {
+      (s.featureTypes || []).forEach(f => {
+        features[f] = (features[f] || 0) + 1;
+      });
+    });
+    const featEntries = Object.entries(features).sort((a, b) => b[1] - a[1]).slice(0, 8);
+    const featMax = Math.max(...featEntries.map(e => e[1]));
+
+    // 4. Ongoing vs completed
+    const ongoing = sites.filter(s => s.ongoing).length;
+    const completed = sites.length - ongoing;
+
+    // render: by century
+    let card1 = '<div class="analytics-card"><div class="ac-title">excavations by century</div>';
+    centEntries.forEach(([label, count], i) => {
+      const pct = Math.round((count / centMax) * 100);
+      const color = ANALYTICS_COLORS[i % ANALYTICS_COLORS.length];
+      card1 += '<div class="analytics-bar-row"><span class="abr-label">' + label + '</span><div class="abr-track"><div class="abr-fill" style="width:' + pct + '%;background:' + color + '"></div></div><span class="abr-val">' + count + '</span></div>';
+    });
+    card1 += '</div>';
+
+    // render: by region
+    let card2 = '<div class="analytics-card"><div class="ac-title">finds by region</div>';
+    regEntries.forEach(([label, count], i) => {
+      const pct = Math.round((count / regMax) * 100);
+      const color = ANALYTICS_COLORS[i % ANALYTICS_COLORS.length];
+      card2 += '<div class="analytics-bar-row"><span class="abr-label">' + label + '</span><div class="abr-track"><div class="abr-fill" style="width:' + pct + '%;background:' + color + '"></div></div><span class="abr-val">' + count + '</span></div>';
+    });
+    card2 += '</div>';
+
+    // render: by feature type
+    let card3 = '<div class="analytics-card"><div class="ac-title">most excavated types</div>';
+    featEntries.forEach(([label, count], i) => {
+      const pct = Math.round((count / featMax) * 100);
+      const color = ANALYTICS_COLORS[(i + 5) % ANALYTICS_COLORS.length];
+      card3 += '<div class="analytics-bar-row"><span class="abr-label">' + label + '</span><div class="abr-track"><div class="abr-fill" style="width:' + pct + '%;background:' + color + '"></div></div><span class="abr-val">' + count + '</span></div>';
+    });
+    card3 += '</div>';
+
+    // render: fact file
+    const oldest = sites.reduce((a, b) => a.startYear < b.startYear ? a : b);
+    const newestStart = sites.reduce((a, b) => a.startYear > b.startYear ? a : b);
+    const longestRunning = sites.filter(s => !s.endYear).sort((a, b) => a.startYear - b.startYear)[0];
+    const topRegion = regEntries[0];
+    let card4 = '<div class="analytics-card"><div class="ac-title">archaeology fact file</div>';
+    card4 += '<div class="analytics-fact"><strong>' + sites.length + ' sites</strong> across ' + regEntries.length + ' regions, spanning ' + centEntries[0][0] + ' to ' + centEntries[centEntries.length-1][0] + '.</div>';
+    card4 += '<div class="analytics-fact"><strong>Oldest excavation:</strong> ' + oldest.title + ' (begun ' + oldest.startYear + ').</div>';
+    card4 += '<div class="analytics-fact"><strong>Most recently begun:</strong> ' + newestStart.title + ' (' + newestStart.startYear + ').</div>';
+    if (longestRunning) card4 += '<div class="analytics-fact"><strong>Longest-running:</strong> ' + longestRunning.title + ' — ongoing since ' + longestRunning.startYear + ' (' + (new Date().getFullYear() - longestRunning.startYear) + ' years).</div>';
+    card4 += '<div class="analytics-fact"><strong>Most excavated region:</strong> ' + topRegion[0] + ' with ' + topRegion[1] + ' sites.</div>';
+    card4 += '<div class="analytics-fact"><strong>Active excavations:</strong> ' + ongoing + ' ongoing, ' + completed + ' completed.</div>';
+    card4 += '</div>';
+
+    grid.innerHTML = card1 + card2 + card3 + card4;
   }
 
   function selectSite(id) {
