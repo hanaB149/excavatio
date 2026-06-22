@@ -3493,7 +3493,13 @@
         sym: CD_SYMBOLS[Math.floor(Math.random() * CD_SYMBOLS.length)],
       };
     } else {
-      cdState.current = cdState.next;
+      var nextShape = cdState.next.shape;
+      cdState.current = {
+        shape: nextShape,
+        sym: cdState.next.sym,
+        x: Math.floor((CD_COLS - nextShape[0].length) / 2),
+        y: 0,
+      };
       cdState.next = piece;
     }
     if (cdCollides(cdState.current, 0, 0)) {
