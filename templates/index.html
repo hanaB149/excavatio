@@ -453,6 +453,239 @@
       animation: dotPulse 2s ease-in-out infinite;
     }
 
+    /* new game card colors */
+    .game-card[data-game="columndrop"] {
+      --card-border: #ffca28;
+      --card-shadow: rgba(255,202,40,0.22);
+      --card-glow: linear-gradient(135deg, rgba(255,202,40,0.08), transparent);
+    }
+    .game-card[data-game="memory"] {
+      --card-border: #26a69a;
+      --card-shadow: rgba(38,166,154,0.22);
+      --card-glow: linear-gradient(135deg, rgba(38,166,154,0.08), transparent);
+    }
+    .game-card[data-game="columndrop"] .gc-icon { background: linear-gradient(135deg, rgba(255,202,40,0.15), rgba(255,202,40,0.05)); }
+    .game-card[data-game="memory"] .gc-icon { background: linear-gradient(135deg, rgba(38,166,154,0.15), rgba(38,166,154,0.05)); }
+    .game-card[data-game="columndrop"] .gc-icon svg { stroke: #ffca28; }
+    .game-card[data-game="memory"] .gc-icon svg { stroke: #26a69a; }
+    .game-card[data-game="columndrop"] .gc-name { color: #f57f17; }
+    .game-card[data-game="memory"] .gc-name { color: #00695c; }
+    .game-card[data-game="columndrop"] .gc-play { color: #ffca28; }
+    .game-card[data-game="memory"] .gc-play { color: #26a69a; }
+
+    /* column drop (tetris-style) game */
+    .cd-wrap {
+      display: flex;
+      gap: 1.2rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .cd-canvas-wrap {
+      position: relative;
+    }
+    #cd-canvas {
+      background: linear-gradient(180deg, #1a1a2e, #16213e);
+      border-radius: 12px;
+      border: 2px solid rgba(255,202,40,0.3);
+      box-shadow: 0 4px 24px rgba(0,0,0,0.2), inset 0 0 40px rgba(255,202,40,0.03);
+      touch-action: none;
+    }
+    .cd-sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+      min-width: 160px;
+    }
+    .cd-stat {
+      background: rgba(255,255,255,0.6);
+      border: 1.5px solid rgba(244,143,177,0.15);
+      border-radius: 12px;
+      padding: 0.7rem 1rem;
+      text-align: center;
+    }
+    .cd-stat .cds-val {
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: #c94f7c;
+      line-height: 1;
+    }
+    .cd-stat .cds-label {
+      font-size: 0.68rem;
+      color: #9a7a8a;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-top: 0.2rem;
+    }
+    .cd-next {
+      background: rgba(255,255,255,0.6);
+      border: 1.5px solid rgba(255,202,40,0.2);
+      border-radius: 12px;
+      padding: 0.7rem;
+      text-align: center;
+    }
+    .cd-next .cdn-label {
+      font-size: 0.68rem;
+      color: #9a7a8a;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.4rem;
+    }
+    #cd-next-canvas {
+      background: rgba(26,26,46,0.8);
+      border-radius: 8px;
+    }
+    .cd-controls {
+      display: flex;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+    }
+    .cd-btn {
+      flex: 1;
+      min-width: 70px;
+      padding: 0.5rem;
+      border: 2px solid rgba(244,143,177,0.2);
+      border-radius: 10px;
+      background: rgba(255,255,255,0.6);
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: #5a3c4a;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.2s ease;
+      text-align: center;
+    }
+    .cd-btn:hover { border-color: #f48fb1; background: rgba(255,255,255,0.85); }
+    .cd-btn:active { transform: scale(0.95); }
+    .cd-legend {
+      font-size: 0.72rem;
+      color: #9a7a8a;
+      text-align: center;
+      line-height: 1.6;
+      padding: 0.5rem;
+      background: rgba(255,255,255,0.4);
+      border-radius: 8px;
+    }
+    .cd-over {
+      position: absolute;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      background: rgba(26,26,46,0.9);
+      border-radius: 12px;
+      animation: fadeSlideUp 0.4s ease;
+    }
+    .cd-over.visible { display: flex; }
+    .cd-over .cdo-score {
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: #ffca28;
+    }
+    .cd-over .cdo-label {
+      font-size: 0.85rem;
+      color: #fff;
+      margin: 0.3rem 0 0.8rem;
+    }
+    .cd-over .cdo-points {
+      font-size: 0.85rem;
+      font-weight: 700;
+      padding: 0.4rem 1rem;
+      border-radius: 10px;
+      margin-bottom: 0.8rem;
+    }
+
+    /* mosaic memory game */
+    .mm-board {
+      display: grid;
+      gap: 0.5rem;
+      justify-content: center;
+      margin: 0 auto;
+      max-width: 420px;
+    }
+    .mm-card {
+      aspect-ratio: 1;
+      border-radius: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8rem;
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      transform-style: preserve-3d;
+      position: relative;
+    }
+    .mm-card-inner {
+      width: 100%;
+      height: 100%;
+      transition: transform 0.5s;
+      transform-style: preserve-3d;
+      position: relative;
+    }
+    .mm-card.flipped .mm-card-inner { transform: rotateY(180deg); }
+    .mm-card-face {
+      position: absolute;
+      inset: 0;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      backface-visibility: hidden;
+    }
+    .mm-card-front {
+      background: linear-gradient(135deg, #f8bbd0, #ce93d8);
+      border: 2px solid rgba(255,255,255,0.4);
+    }
+    .mm-card-front svg {
+      width: 32px;
+      height: 32px;
+      fill: none;
+      stroke: rgba(255,255,255,0.6);
+      stroke-width: 2;
+    }
+    .mm-card-back {
+      background: rgba(255,255,255,0.85);
+      border: 2px solid rgba(244,143,177,0.2);
+      transform: rotateY(180deg);
+      font-size: 1.8rem;
+    }
+    .mm-card.matched .mm-card-back {
+      border-color: #81c784;
+      background: rgba(129,199,132,0.15);
+      box-shadow: 0 0 12px rgba(129,199,132,0.2);
+    }
+    .mm-card.wrong .mm-card-back {
+      border-color: #e57373;
+      background: rgba(229,115,115,0.1);
+    }
+    .mm-stats {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+    .mm-stat {
+      background: rgba(255,255,255,0.6);
+      border: 1.5px solid rgba(38,166,154,0.15);
+      border-radius: 12px;
+      padding: 0.5rem 1rem;
+      text-align: center;
+    }
+    .mm-stat .mms-val {
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: #00695c;
+      line-height: 1;
+    }
+    .mm-stat .mms-label {
+      font-size: 0.68rem;
+      color: #9a7a8a;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-top: 0.15rem;
+    }
+
     .game-arena {
       display: none;
       background: rgba(255,255,255,0.85);
@@ -1925,7 +2158,7 @@
         <p class="gh-subtitle">step into the colosseum of classics. test your knowledge of the ancient world &mdash; win drachmae for glory, lose them for defeat. four games await.</p>
         <div class="gh-stats">
           <div class="gh-stat">
-            <span class="ghs-val" id="gh-games-count">4</span>
+            <span class="ghs-val" id="gh-games-count">6</span>
             <span class="ghs-label">games</span>
           </div>
           <div class="gh-stat">
@@ -1970,6 +2203,20 @@
           <div class="gc-name">Matching Game</div>
           <div class="gc-desc">Match authors to works, gods to symbols, emperors to deeds.</div>
           <div class="gc-points">+4 correct &middot; -2 wrong &middot; +20 perfect</div>
+          <div class="gc-play">enter &rarr;</div>
+        </div>
+        <div class="game-card" data-game="columndrop">
+          <div class="gc-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="6" height="6" rx="1" fill="none" stroke="currentColor" stroke-width="2"/><rect x="11" y="3" width="6" height="6" rx="1" fill="none" stroke="currentColor" stroke-width="2"/><rect x="3" y="11" width="6" height="6" rx="1" fill="none" stroke="currentColor" stroke-width="2"/><rect x="11" y="11" width="6" height="6" rx="1" fill="currentColor" stroke="currentColor" stroke-width="2"/></svg></div>
+          <div class="gc-name">Column Drop</div>
+          <div class="gc-desc">Stack falling classical tiles &mdash; clear rows of marble to earn drachmae. A tetris-style puzzle.</div>
+          <div class="gc-points">+3 per row &middot; +15 per level &middot; bonus for combos</div>
+          <div class="gc-play">enter &rarr;</div>
+        </div>
+        <div class="game-card" data-game="memory">
+          <div class="gc-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="8" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><rect x="13" y="3" width="8" height="8" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><rect x="3" y="13" width="8" height="8" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><rect x="13" y="13" width="8" height="8" rx="2" fill="none" stroke="currentColor" stroke-width="2"/></svg></div>
+          <div class="gc-name">Mosaic Memory</div>
+          <div class="gc-desc">Flip tiles to find pairs of classical symbols &mdash; gods, artefacts, and more. Test your memory.</div>
+          <div class="gc-points">+3 per pair &middot; -1 per miss &middot; +10 flawless</div>
           <div class="gc-play">enter &rarr;</div>
         </div>
       </div>
@@ -2779,6 +3026,8 @@
     else if (type === 'truefalse') loadTrueFalse();
     else if (type === 'scramble') loadScramble();
     else if (type === 'matching') loadMatching();
+    else if (type === 'columndrop') loadColumnDrop();
+    else if (type === 'memory') loadMemory();
   }
 
   function closeGame() {
@@ -3145,6 +3394,500 @@
         updatePointsBadge(data.total_points);
         matchingPairs = {};
       });
+  }
+
+  // --- column drop (tetris-style block puzzle) ---
+  let cdState = null;
+  let cdLoop = null;
+  let cdCanvas = null;
+  let cdCtx = null;
+  let cdNextCanvas = null;
+  let cdNextCtx = null;
+
+  const CD_COLS = 10;
+  const CD_ROWS = 18;
+  const CD_CELL = 26;
+  const CD_SYMBOLS = [
+    { glyph: '\u03A9', color: '#ffca28', name: 'omega' },
+    { glyph: '\u03A8', color: '#ef5350', name: 'psi' },
+    { glyph: '\u039B', color: '#42a5f5', name: 'lambda' },
+    { glyph: '\u0394', color: '#66bb6a', name: 'delta' },
+    { glyph: '\u03A6', color: '#ab47bc', name: 'phi' },
+    { glyph: '\u0398', color: '#ff8a65', name: 'theta' },
+    { glyph: '\u03A3', color: '#26a69a', name: 'sigma' },
+  ];
+  const CD_SHAPES = [
+    [[1,1,1,1]],
+    [[1,1],[1,1]],
+    [[0,1,0],[1,1,1]],
+    [[1,0,0],[1,1,1]],
+    [[0,0,1],[1,1,1]],
+    [[1,1,0],[0,1,1]],
+    [[0,1,1],[1,1,0]],
+  ];
+
+  function loadColumnDrop() {
+    const arena = document.getElementById('game-arena');
+    arena.innerHTML =
+      '<div class="ga-header"><span class="ga-title">Column Drop</span><button class="ga-back" onclick="closeColumnDrop()">&larr; back</button></div>' +
+      '<div class="cd-wrap">' +
+        '<div class="cd-canvas-wrap">' +
+          '<canvas id="cd-canvas" width="' + (CD_COLS * CD_CELL) + '" height="' + (CD_ROWS * CD_CELL) + '"></canvas>' +
+          '<div class="cd-over" id="cd-over"></div>' +
+        '</div>' +
+        '<div class="cd-sidebar">' +
+          '<div class="cd-stat"><div class="cds-val" id="cd-score">0</div><div class="cds-label">score</div></div>' +
+          '<div class="cd-stat"><div class="cds-val" id="cd-lines">0</div><div class="cds-label">rows cleared</div></div>' +
+          '<div class="cd-stat"><div class="cds-val" id="cd-level">1</div><div class="cds-label">level</div></div>' +
+          '<div class="cd-next"><div class="cdn-label">next</div><canvas id="cd-next-canvas" width="104" height="52"></canvas></div>' +
+          '<div class="cd-controls">' +
+            '<button class="cd-btn" onclick="cdMove(-1)">&larr;</button>' +
+            '<button class="cd-btn" onclick="cdRotate()">rotate</button>' +
+            '<button class="cd-btn" onclick="cdMove(1)">&rarr;</button>' +
+            '<button class="cd-btn" onclick="cdDrop()">drop</button>' +
+          '</div>' +
+          '<div class="cd-legend">arrow keys to move &middot; up to rotate &middot; space to drop</div>' +
+        '</div>' +
+      '</div>';
+
+    cdCanvas = document.getElementById('cd-canvas');
+    cdCtx = cdCanvas.getContext('2d');
+    cdNextCanvas = document.getElementById('cd-next-canvas');
+    cdNextCtx = cdNextCanvas.getContext('2d');
+
+    cdState = {
+      grid: Array.from({length: CD_ROWS}, function() { return new Array(CD_COLS).fill(null); }),
+      current: null,
+      next: null,
+      score: 0,
+      lines: 0,
+      level: 1,
+      dropTimer: 0,
+      dropInterval: 800,
+      gameOver: false,
+      paused: false,
+    };
+
+    cdSpawnPiece();
+    cdDraw();
+    cdDrawNext();
+
+    document.addEventListener('keydown', cdKeyHandler);
+
+    cdLoop = setInterval(cdTick, 50);
+  }
+
+  function cdSpawnPiece() {
+    var symIdx = Math.floor(Math.random() * CD_SYMBOLS.length);
+    var shapeIdx = Math.floor(Math.random() * CD_SHAPES.length);
+    var piece = {
+      shape: CD_SHAPES[shapeIdx],
+      sym: CD_SYMBOLS[symIdx],
+      x: Math.floor((CD_COLS - CD_SHAPES[shapeIdx][0].length) / 2),
+      y: 0,
+    };
+    if (cdState.current === null) {
+      cdState.current = piece;
+      cdState.next = {
+        shape: CD_SHAPES[Math.floor(Math.random() * CD_SHAPES.length)],
+        sym: CD_SYMBOLS[Math.floor(Math.random() * CD_SYMBOLS.length)],
+      };
+    } else {
+      cdState.current = cdState.next;
+      cdState.next = piece;
+    }
+    if (cdCollides(cdState.current, 0, 0)) {
+      cdState.gameOver = true;
+      cdEndGame();
+    }
+  }
+
+  function cdCollides(piece, dx, dy, shape) {
+    var s = shape || piece.shape;
+    for (var r = 0; r < s.length; r++) {
+      for (var c = 0; c < s[r].length; c++) {
+        if (!s[r][c]) continue;
+        var nx = piece.x + c + dx;
+        var ny = piece.y + r + dy;
+        if (nx < 0 || nx >= CD_COLS || ny >= CD_ROWS) return true;
+        if (ny >= 0 && cdState.grid[ny][nx]) return true;
+      }
+    }
+    return false;
+  }
+
+  function cdLockPiece() {
+    var p = cdState.current;
+    for (var r = 0; r < p.shape.length; r++) {
+      for (var c = 0; c < p.shape[r].length; c++) {
+        if (p.shape[r][c]) {
+          var gy = p.y + r;
+          var gx = p.x + c;
+          if (gy >= 0 && gy < CD_ROWS && gx >= 0 && gx < CD_COLS) {
+            cdState.grid[gy][gx] = p.sym;
+          }
+        }
+      }
+    }
+    cdClearLines();
+    cdSpawnPiece();
+    cdDrawNext();
+  }
+
+  function cdClearLines() {
+    var cleared = 0;
+    for (var r = CD_ROWS - 1; r >= 0; r--) {
+      var full = true;
+      for (var c = 0; c < CD_COLS; c++) {
+        if (!cdState.grid[r][c]) { full = false; break; }
+      }
+      if (full) {
+        cdState.grid.splice(r, 1);
+        cdState.grid.unshift(new Array(CD_COLS).fill(null));
+        cleared++;
+        r++;
+      }
+    }
+    if (cleared > 0) {
+      var pts = [0, 10, 30, 60, 100][cleared] || 100;
+      var bonus = cleared >= 2 ? cleared * 5 : 0;
+      cdState.score += pts + bonus;
+      cdState.lines += cleared;
+      var newLevel = Math.floor(cdState.lines / 5) + 1;
+      if (newLevel > cdState.level) {
+        cdState.level = newLevel;
+        cdState.dropInterval = Math.max(150, 800 - (cdState.level - 1) * 70);
+      }
+      cdUpdateStats();
+      // award points via API
+      fetch('/api/award', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'view_site', detail: 'column drop: ' + cleared + ' lines' })
+      }).then(function(r) { return r.json(); }).then(function(d) {
+        updatePointsBadge(d.total_points);
+      }).catch(function() {});
+    }
+  }
+
+  function cdTick() {
+    if (!cdState || cdState.gameOver || cdState.paused) return;
+    cdState.dropTimer += 50;
+    if (cdState.dropTimer >= cdState.dropInterval) {
+      cdState.dropTimer = 0;
+      if (!cdCollides(cdState.current, 0, 1)) {
+        cdState.current.y++;
+      } else {
+        cdLockPiece();
+      }
+      cdDraw();
+    }
+  }
+
+  function cdDraw() {
+    if (!cdCtx) return;
+    cdCtx.clearRect(0, 0, cdCanvas.width, cdCanvas.height);
+    // grid
+    for (var r = 0; r < CD_ROWS; r++) {
+      for (var c = 0; c < CD_COLS; c++) {
+        if (cdState.grid[r][c]) {
+          cdDrawCell(cdCtx, c * CD_CELL, r * CD_CELL, cdState.grid[r][c]);
+        } else {
+          cdCtx.fillStyle = 'rgba(255,255,255,0.02)';
+          cdCtx.fillRect(c * CD_CELL + 1, r * CD_CELL + 1, CD_CELL - 2, CD_CELL - 2);
+        }
+      }
+    }
+    // current piece
+    if (cdState.current) {
+      var p = cdState.current;
+      for (var r2 = 0; r2 < p.shape.length; r2++) {
+        for (var c2 = 0; c2 < p.shape[r2].length; c2++) {
+          if (p.shape[r2][c2]) {
+            cdDrawCell(cdCtx, (p.x + c2) * CD_CELL, (p.y + r2) * CD_CELL, p.sym);
+          }
+        }
+      }
+    }
+  }
+
+  function cdDrawCell(ctx, x, y, sym) {
+    ctx.fillStyle = sym.color;
+    ctx.fillRect(x + 1, y + 1, CD_CELL - 2, CD_CELL - 2);
+    ctx.fillStyle = 'rgba(255,255,255,0.15)';
+    ctx.fillRect(x + 1, y + 1, CD_CELL - 2, 3);
+    ctx.fillStyle = 'rgba(0,0,0,0.15)';
+    ctx.fillRect(x + 1, y + CD_CELL - 4, CD_CELL - 2, 3);
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 14px Inter, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(sym.glyph, x + CD_CELL / 2, y + CD_CELL / 2);
+  }
+
+  function cdDrawNext() {
+    if (!cdNextCtx || !cdState.next) return;
+    cdNextCtx.clearRect(0, 0, cdNextCanvas.width, cdNextCanvas.height);
+    var s = cdState.next.shape;
+    var cellSize = 20;
+    var offsetX = (cdNextCanvas.width - s[0].length * cellSize) / 2;
+    var offsetY = (cdNextCanvas.height - s.length * cellSize) / 2;
+    for (var r = 0; r < s.length; r++) {
+      for (var c = 0; c < s[r].length; c++) {
+        if (s[r][c]) {
+          cdNextCtx.fillStyle = cdState.next.sym.color;
+          cdNextCtx.fillRect(offsetX + c * cellSize + 1, offsetY + r * cellSize + 1, cellSize - 2, cellSize - 2);
+          cdNextCtx.fillStyle = '#fff';
+          cdNextCtx.font = 'bold 12px Inter, sans-serif';
+          cdNextCtx.textAlign = 'center';
+          cdNextCtx.textBaseline = 'middle';
+          cdNextCtx.fillText(cdState.next.sym.glyph, offsetX + c * cellSize + cellSize / 2, offsetY + r * cellSize + cellSize / 2);
+        }
+      }
+    }
+  }
+
+  function cdMove(dir) {
+    if (!cdState || cdState.gameOver) return;
+    if (!cdCollides(cdState.current, dir, 0)) {
+      cdState.current.x += dir;
+      cdDraw();
+    }
+  }
+
+  function cdRotate() {
+    if (!cdState || cdState.gameOver) return;
+    var s = cdState.current.shape;
+    var rotated = [];
+    for (var c = 0; c < s[0].length; c++) {
+      var row = [];
+      for (var r = s.length - 1; r >= 0; r--) {
+        row.push(s[r][c]);
+      }
+      rotated.push(row);
+    }
+    if (!cdCollides(cdState.current, 0, 0, rotated)) {
+      cdState.current.shape = rotated;
+      cdDraw();
+    }
+  }
+
+  function cdDrop() {
+    if (!cdState || cdState.gameOver) return;
+    while (!cdCollides(cdState.current, 0, 1)) {
+      cdState.current.y++;
+    }
+    cdLockPiece();
+    cdDraw();
+    cdDrawNext();
+  }
+
+  function cdKeyHandler(e) {
+    if (!cdState || cdState.gameOver) return;
+    if (e.key === 'ArrowLeft') { e.preventDefault(); cdMove(-1); }
+    else if (e.key === 'ArrowRight') { e.preventDefault(); cdMove(1); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); cdRotate(); }
+    else if (e.key === 'ArrowDown') { e.preventDefault(); if (!cdCollides(cdState.current, 0, 1)) { cdState.current.y++; cdDraw(); } }
+    else if (e.key === ' ') { e.preventDefault(); cdDrop(); }
+  }
+
+  function cdUpdateStats() {
+    if (document.getElementById('cd-score')) document.getElementById('cd-score').textContent = cdState.score;
+    if (document.getElementById('cd-lines')) document.getElementById('cd-lines').textContent = cdState.lines;
+    if (document.getElementById('cd-level')) document.getElementById('cd-level').textContent = cdState.level;
+  }
+
+  function cdEndGame() {
+    clearInterval(cdLoop);
+    document.removeEventListener('keydown', cdKeyHandler);
+    var points = cdState.score;
+    var drachmae = Math.floor(points / 10);
+    // award bonus points
+    fetch('/api/award', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'identify_text', detail: 'column drop game over: ' + points + ' pts' })
+    }).then(function(r) { return r.json(); }).then(function(d) {
+      updatePointsBadge(d.total_points);
+    }).catch(function() {});
+    var overEl = document.getElementById('cd-over');
+    if (overEl) {
+      overEl.innerHTML =
+        '<div class="cdo-score">' + points + '</div>' +
+        '<div class="cdo-label">final score</div>' +
+        '<div class="cdo-points positive">+' + drachmae + ' drachmae earned</div>' +
+        '<button class="cd-btn" style="max-width:120px" onclick="loadColumnDrop()">play again</button>';
+      overEl.classList.add('visible');
+    }
+    cdUpdateStats();
+  }
+
+  function closeColumnDrop() {
+    clearInterval(cdLoop);
+    document.removeEventListener('keydown', cdKeyHandler);
+    cdState = null;
+    closeGame();
+  }
+
+  // --- mosaic memory game ---
+  let mmState = null;
+
+  const MM_SYMBOLS = [
+    { glyph: '\u03A9', color: '#ffca28', name: 'Omega' },
+    { glyph: '\u039B', color: '#42a5f5', name: 'Lambda' },
+    { glyph: '\u0394', color: '#66bb6a', name: 'Delta' },
+    { glyph: '\u03A6', color: '#ab47bc', name: 'Phi' },
+    { glyph: '\u0398', color: '#ff8a65', name: 'Theta' },
+    { glyph: '\u03A8', color: '#ef5350', name: 'Psi' },
+    { glyph: '\u03A3', color: '#26a69a', name: 'Sigma' },
+    { glyph: '\u0393', color: '#7986cb', name: 'Gamma' },
+  ];
+
+  function loadMemory() {
+    const arena = document.getElementById('game-arena');
+    arena.innerHTML =
+      '<div class="ga-header"><span class="ga-title">Mosaic Memory</span><button class="ga-back" onclick="closeGame()">&larr; back</button></div>' +
+      '<div class="mm-stats">' +
+        '<div class="mm-stat"><div class="mms-val" id="mm-matches">0</div><div class="mms-label">pairs found</div></div>' +
+        '<div class="mm-stat"><div class="mms-val" id="mm-moves">0</div><div class="mms-label">moves</div></div>' +
+        '<div class="mm-stat"><div class="mms-val" id="mm-misses">0</div><div class="mms-label">misses</div></div>' +
+      '</div>' +
+      '<div class="mm-board" id="mm-board"></div>';
+
+    var cards = [];
+    var pairs = MM_SYMBOLS.slice(0, 8);
+    for (var i = 0; i < pairs.length; i++) {
+      cards.push({ id: i, sym: pairs[i] });
+      cards.push({ id: i, sym: pairs[i] });
+    }
+    // shuffle
+    for (var j = cards.length - 1; j > 0; j--) {
+      var k = Math.floor(Math.random() * (j + 1));
+      var tmp = cards[j]; cards[j] = cards[k]; cards[k] = tmp;
+    }
+
+    mmState = {
+      cards: cards,
+      flipped: [],
+      matched: new Set(),
+      moves: 0,
+      misses: 0,
+      matches: 0,
+      locked: false,
+      startTime: Date.now(),
+    };
+
+    renderMemoryBoard();
+  }
+
+  function renderMemoryBoard() {
+    var board = document.getElementById('mm-board');
+    board.innerHTML = '';
+    board.style.gridTemplateColumns = 'repeat(4, 1fr)';
+    mmState.cards.forEach(function(card, idx) {
+      var el = document.createElement('div');
+      el.className = 'mm-card';
+      if (mmState.matched.has(idx)) el.classList.add('matched');
+      el.innerHTML =
+        '<div class="mm-card-inner">' +
+          '<div class="mm-card-face mm-card-front">' +
+            '<svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>' +
+          '</div>' +
+          '<div class="mm-card-face mm-card-back" style="color:' + card.sym.color + '">' + card.sym.glyph + '</div>' +
+        '</div>';
+      el.addEventListener('click', function() { flipMemoryCard(idx); });
+      board.appendChild(el);
+    });
+  }
+
+  function flipMemoryCard(idx) {
+    if (!mmState || mmState.locked) return;
+    if (mmState.matched.has(idx)) return;
+    if (mmState.flipped.includes(idx)) return;
+
+    mmState.flipped.push(idx);
+    var cardEl = document.querySelectorAll('.mm-card')[idx];
+    cardEl.classList.add('flipped');
+
+    if (mmState.flipped.length === 2) {
+      mmState.moves++;
+      mmState.locked = true;
+      var a = mmState.flipped[0];
+      var b = mmState.flipped[1];
+      var cardA = mmState.cards[a];
+      var cardB = mmState.cards[b];
+
+      if (cardA.id === cardB.id) {
+        // match!
+        setTimeout(function() {
+          mmState.matched.add(a);
+          mmState.matched.add(b);
+          mmState.matches++;
+          mmState.flipped = [];
+          mmState.locked = false;
+          document.querySelectorAll('.mm-card')[a].classList.add('matched');
+          document.querySelectorAll('.mm-card')[b].classList.add('matched');
+          updateMemoryStats();
+          // award points
+          fetch('/api/award', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'view_site', detail: 'memory match: ' + cardA.sym.name })
+          }).then(function(r) { return r.json(); }).then(function(d) {
+            updatePointsBadge(d.total_points);
+          }).catch(function() {});
+          if (mmState.matches === 8) endMemoryGame();
+        }, 400);
+      } else {
+        // miss
+        mmState.misses++;
+        document.querySelectorAll('.mm-card')[a].classList.add('wrong');
+        document.querySelectorAll('.mm-card')[b].classList.add('wrong');
+        setTimeout(function() {
+          document.querySelectorAll('.mm-card')[a].classList.remove('flipped', 'wrong');
+          document.querySelectorAll('.mm-card')[b].classList.remove('flipped', 'wrong');
+          mmState.flipped = [];
+          mmState.locked = false;
+          updateMemoryStats();
+        }, 800);
+        updateMemoryStats();
+      }
+    }
+  }
+
+  function updateMemoryStats() {
+    if (document.getElementById('mm-matches')) document.getElementById('mm-matches').textContent = mmState.matches;
+    if (document.getElementById('mm-moves')) document.getElementById('mm-moves').textContent = mmState.moves;
+    if (document.getElementById('mm-misses')) document.getElementById('mm-misses').textContent = mmState.misses;
+  }
+
+  function endMemoryGame() {
+    var timeSec = Math.round((Date.now() - mmState.startTime) / 1000);
+    var flawless = mmState.misses === 0;
+    var bonus = flawless ? 10 : 0;
+    var points = mmState.matches * 3 - mmState.misses + bonus;
+
+    // award bonus
+    var action = flawless ? 'trace_journey' : 'view_event';
+    fetch('/api/award', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: action, detail: 'memory game complete: ' + mmState.matches + ' pairs' })
+    }).then(function(r) { return r.json(); }).then(function(d) {
+      updatePointsBadge(d.total_points);
+    }).catch(function() {});
+
+    var arena = document.getElementById('game-arena');
+    var result = document.createElement('div');
+    result.className = 'quiz-result';
+    result.innerHTML =
+      '<div class="qr-score">' + mmState.matches + '/8</div>' +
+      '<div class="qr-label">' + (flawless ? 'flawless victory!' : 'well played') + '</div>' +
+      '<div class="qr-points positive">+' + points + ' drachmae</div>' +
+      (flawless ? '<div class="qr-perfect">no mistakes &mdash; perfect bonus!</div>' : '') +
+      '<div style="font-size:0.8rem;color:#9a7a8a;margin-top:0.5rem">' + mmState.moves + ' moves &middot; ' + timeSec + 's</div>' +
+      '<button class="cd-btn" style="max-width:120px;margin-top:0.8rem" onclick="loadMemory()">play again</button>';
+    arena.appendChild(result);
   }
 
   function updatePointsBadge(total) {
