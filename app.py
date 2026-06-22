@@ -120,15 +120,29 @@ ACHIEVEMENTS = [
 
 def award_points(action, detail=""):
     pts = POINTS.get(action, 0)
-    if pts <= 0:
+    if pts == 0:
         return None
-    total = session.get("total_points", 0) + pts
+    total = max(0, session.get("total_points", 0) + pts)
     counts = session.get("action_counts", {})
     counts[action] = counts.get(action, 0) + 1
     session["total_points"] = total
     session["action_counts"] = counts
     session.modified = True
     return {"action": action, "points": pts, "detail": detail}
+
+
+def adjust_points(delta, detail=""):
+    """Award or deduct arbitrary points (for quiz games)."""
+    total = max(0, session.get("total_points", 0) + delta)
+    session["total_points"] = total
+    counts = session.get("action_counts", {})
+    if delta > 0:
+        counts["quiz_correct"] = counts.get("quiz_correct", 0) + 1
+    elif delta < 0:
+        counts["quiz_wrong"] = counts.get("quiz_wrong", 0) + 1
+    session["action_counts"] = counts
+    session.modified = True
+    return {"points": delta, "total": total}
 
 
 def get_user_stats():
@@ -1116,6 +1130,131 @@ EVENTS = {
 }
 
 # ---------------------------------------------------------------------------
+# CLASSICS GAMES — trivia, word scramble, matching
+# ---------------------------------------------------------------------------
+TRIVIA_QUESTIONS = [
+    {"q": "Who wrote the Aeneid?", "choices": ["Virgil", "Ovid", "Horace", "Lucan"], "answer": 0, "explain": "Virgil composed the Aeneid between c. 29-19 BCE at Augustus' request."},
+    {"q": "What body of water did Caesar cross saying 'the die is cast'?", "choices": ["Tiber", "Rubicon", "Rhine", "Po"], "answer": 1, "explain": "Crossing the Rubicon in 49 BCE meant treason — and civil war."},
+    {"q": "How many men did Leonidas have at Thermopylae (approximately)?", "choices": ["300", "7,000", "1,000", "12,000"], "answer": 1, "explain": "The 300 were the Spartan elite; the total Greek force was about 7,000."},
+    {"q": "Which emperor allegedly fiddled while Rome burned?", "choices": ["Caligula", "Nero", "Commodus", "Domitian"], "answer": 1, "explain": "Nero was at Antium when the fire began in 64 CE; he later blamed the Christians."},
+    {"q": "What is the opening word of Homer's Iliad in Greek?", "choices": ["ἄνδρα (man)", "μῆνιν (rage)", "θέα (goddess)", "ἔννεπε (tell)"], "answer": 1, "explain": "'Μῆνιν ἄειδε θεά' — 'Sing, goddess, of the rage of Achilles'."},
+    {"q": "Which Carthaginian general crossed the Alps with elephants?", "choices": ["Hamilcar Barca", "Hannibal", "Hasdrubal", "Mago"], "answer": 1, "explain": "Hannibal crossed the Alps in 218 BCE with 26,000 men and war elephants."},
+    {"q": "What was the name of Odysseus' homeland?", "choices": ["Sparta", "Ithaca", "Pylos", "Mycenae"], "answer": 1, "explain": "Odysseus spent ten years trying to return to Ithaca after Troy."},
+    {"q": "Who was the first Roman emperor?", "choices": ["Julius Caesar", "Augustus", "Tiberius", "Nero"], "answer": 1, "explain": "Augustus (Octavian) became princeps in 27 BCE; Caesar was never emperor."},
+    {"q": "Which god is associated with the Oracle at Delphi?", "choices": ["Zeus", "Apollo", "Athena", "Hermes"], "answer": 1, "explain": "Apollo slew the Python at Delphi and claimed the oracle as his own."},
+    {"q": "What does 'Veni, vidi, vici' mean?", "choices": ["I came, I saw, I conquered", "I came, I saw, I left", "I came, I waited, I won", "I saw, I came, I ruled"], "answer": 0, "explain": "Caesar's famous dispatch after the Battle of Zela in 47 BCE."},
+    {"q": "Which Roman general defeated Hannibal at Zama?", "choices": ["Scipio Africanus", "Fabius Maximus", "Marcellus", "Flaminius"], "answer": 0, "explain": "Scipio turned Hannibal's own envelopment tactic against him in 202 BCE."},
+    {"q": "What is the Latin word for 'war'?", "choices": ["pax", "bellum", "arma", "legio"], "answer": 1, "explain": "'Bellum' gives us 'bellicose' and 'rebellion'."},
+    {"q": "Who was the last pharaoh of Egypt?", "choices": ["Nefertiti", "Hatshepsut", "Cleopatra VII", "Ramses II"], "answer": 2, "explain": "Cleopatra VII died in 30 BCE after Actium; Egypt became a Roman province."},
+    {"q": "Which Greek city-state was known for its military discipline?", "choices": ["Athens", "Sparta", "Corinth", "Thebes"], "answer": 1, "explain": "Spartan boys entered the agoge (military training) at age 7."},
+    {"q": "What was the Roman name for the Mediterranean Sea?", "choices": ["Oceanus", "Mare Nostrum", "Mare Internum", "Pontus"], "answer": 1, "explain": "'Mare Nostrum' means 'Our Sea' — Rome controlled all of it by 30 BCE."},
+    {"q": "Who wrote the 'Commentarii de Bello Gallico'?", "choices": ["Cicero", "Julius Caesar", "Sallust", "Livy"], "answer": 1, "explain": "Caesar wrote his own war memoirs in the third person — brilliant propaganda."},
+    {"q": "Which structure was one of the Seven Wonders located in Alexandria?", "choices": ["The Colossus", "The Pharos", "The Hanging Gardens", "The Mausoleum"], "answer": 1, "explain": "The Pharos lighthouse guided sailors for over 1,500 years."},
+    {"q": "What does 'carpe diem' mean?", "choices": ["seize the day", "trust the gods", "make peace", "come and see"], "answer": 0, "explain": "From Horace's Odes 1.11 — the original 'YOLO'."},
+    {"q": "Who was the king of Troy during the Trojan War?", "choices": ["Agamemnon", "Priam", "Hector", "Paris"], "answer": 1, "explain": "Priam ruled Troy for decades; he was killed by Neoptolemus during the sack."},
+    {"q": "What was the name of the Roman senate house?", "choices": ["Curia", "Basilica", "Forum", "Comitium"], "answer": 0, "explain": "The Curia Julia, built by Caesar and completed by Augustus, still stands in the Forum."},
+    {"q": "Which philosopher taught Alexander the Great?", "choices": ["Plato", "Socrates", "Aristotle", "Pythagoras"], "answer": 2, "explain": "Aristotle tutored Alexander from age 13 to 16 at Mieza."},
+    {"q": "What was the Roman legion's standard called?", "choices": ["Vexillum", "Aquila", "Signum", "Imago"], "answer": 1, "explain": "The aquila (eagle) was sacred; losing it was the ultimate disgrace."},
+    {"q": "Who wrote 'The Histories' — the first work of Western history?", "choices": ["Thucydides", "Herodotus", "Polybius", "Livy"], "answer": 1, "explain": "Herodotus (c. 484-425 BCE) earned the title 'Father of History' from Cicero."},
+    {"q": "What does 'alea iacta est' mean?", "choices": ["the die is cast", "all is lost", "fortune favors the bold", "the gods decide"], "answer": 0, "explain": "Caesar's words at the Rubicon — originally a line from Menander."},
+    {"q": "Which battle ended the Roman Republic?", "choices": ["Cannae", "Actium", "Pharsalus", "Zama"], "answer": 2, "explain": "At Pharsalus (48 BCE), Caesar defeated Pompey; the Republic never recovered."},
+]
+
+TRUE_FALSE_QUESTIONS = [
+    {"q": "The Romans used concrete in their construction.", "answer": True, "explain": "Roman concrete (opus caementicium) used volcanic ash — some structures are still standing."},
+    {"q": "Spartacus was a Roman citizen.", "answer": False, "explain": "Spartacus was a Thracian, enslaved as a gladiator in the ludus at Capua."},
+    {"q": "The Colosseum could be flooded for naval battles.", "answer": True, "explain": "The earliest emperors staged naumachiae (mock sea battles) before the hypogeum was built."},
+    {"q": "Julius Caesar was the first Roman emperor.", "answer": False, "explain": "Caesar was dictator perpetuo but never emperor — that was his adopted heir Augustus."},
+    {"q": "The Library of Alexandria still stands today.", "answer": False, "explain": "It was destroyed in stages; the final destruction was in 642 CE during the Arab conquest."},
+    {"q": "Homer was blind.", "answer": True, "explain": "Tradition depicts Homer as blind — the 'blind bard' is a stock figure in Greek poetry."},
+    {"q": "The Parthenon was originally painted in bright colors.", "answer": True, "explain": "Greek temples were vibrantly painted; the white marble look is weathering, not design."},
+    {"q": "Cleopatra was ethnically Egyptian.", "answer": False, "explain": "She was a Ptolemy — descended from a Macedonian Greek general of Alexander the Great."},
+    {"q": "The Rubicon still exists and can be visited.", "answer": True, "explain": "The Fiumicino river near Rimini is generally accepted as the ancient Rubicon."},
+    {"q": "Vindolanda writing tablets were found on Hadrian's Wall.", "answer": True, "explain": "The thin wooden tablets preserve Roman soldiers' letters — including a birthday invitation."},
+    {"q": "The Aeneid was finished before Virgil died.", "answer": False, "explain": "Virgil asked on his deathbed to burn it as unfinished; Augustus ordered it published."},
+    {"q": "Socrates wrote down his own philosophy.", "answer": False, "explain": "Socrates wrote nothing — we know him through Plato's dialogues and Xenophon's memoirs."},
+    {"q": "The Romans crucified 6,000 of Spartacus' men along the Appian Way.", "answer": True, "explain": "After the final battle in 71 BCE, Crassus ordered the mass crucifixion from Capua to Rome."},
+    {"q": "Augustus' Res Gestae was his autobiography.", "answer": True, "explain": "The 'Achievements of the Divine Augustus' was inscribed on his mausoleum and copied across the Empire."},
+    {"q": "The Battle of Marathon gave its name to the modern race.", "answer": True, "explain": "The legend of Pheidippides' run inspired the modern marathon (though his actual route was longer)."},
+]
+
+SCRAMBLE_WORDS = [
+    {"scrambled": "RUBICNO", "answer": "RUBICON", "hint": "Caesar crossed this river in 49 BCE"},
+    {"scrambled": "EIDNEA", "answer": "AENEID", "hint": "Virgil's epic about a Trojan's journey to Italy"},
+    {"scrambled": "SLEISOS", "answer": "ILIOS", "hint": "Greek name for the city at the heart of the Trojan War"},
+    {"scrambled": "OSCIRSUE", "answer": "ODYSSEUS", "hint": "His nostos took ten years"},
+    {"scrambled": "BAINHLA", "answer": "HANNIBAL", "hint": "Carthaginian who crossed the Alps"},
+    {"scrambled": "SPEAPALRR", "answer": "PALIMPSEST", "hint": "A manuscript scraped clean and reused — from Greek 'again-scraped'"},
+    {"scrambled": "VEODINSINI", "answer": "NEVIIDIVI", "hint": "An anagram of Caesar's famous three-word dispatch at Zela"},
+    {"scrambled": "AIMUROT", "answer": "MAIORUM", "hint": "The 'mos ___' was the Roman way of the ancestors"},
+    {"scrambled": "PPEISCO", "answer": "SCIPIO", "hint": "Roman general who defeated Hannibal at Zama"},
+    {"scrambled": "FIDODELHP", "answer": "DELPHI", "hint": "Home of the most famous oracle in the Greek world"},
+    {"scrambled": "ILIV", "answer": "LIVY", "hint": "Roman historian who wrote Ab Urbe Condita"},
+    {"scrambled": "KSSNOOS", "answer": "KNOSSOS", "hint": "Minoan palace excavated by Arthur Evans"},
+    {"scrambled": "ASOEYRPL", "answer": "POMPEII", "hint": "Anagram! City buried by Vesuvius in 79 CE"},
+    {"scrambled": "RAXEELND", "answer": "ALEXANDR", "hint": "Start of a city name founded by a Macedonian king in Egypt"},
+    {"scrambled": "ATCIUM", "answer": "ACTIUM", "hint": "Naval battle that ended the Roman Republic"},
+]
+
+MATCHING_SETS = [
+    {
+        "title": "Match each author to their work",
+        "pairs": [
+            {"left": "Virgil", "right": "Aeneid"},
+            {"left": "Homer", "right": "Odyssey"},
+            {"left": "Ovid", "right": "Metamorphoses"},
+            {"left": "Caesar", "right": "De Bello Gallico"},
+            {"left": "Herodotus", "right": "Histories"},
+            {"left": "Livy", "right": "Ab Urbe Condita"},
+        ],
+    },
+    {
+        "title": "Match each god to their symbol",
+        "pairs": [
+            {"left": "Poseidon", "right": "Trident"},
+            {"left": "Athena", "right": "Owl"},
+            {"left": "Apollo", "right": "Lyre"},
+            {"left": "Hermes", "right": "Caduceus"},
+            {"left": "Ares", "right": "Spear"},
+            {"left": "Artemis", "right": "Bow"},
+        ],
+    },
+    {
+        "title": "Match each Roman emperor to their deed",
+        "pairs": [
+            {"left": "Augustus", "right": "Founded the Principate"},
+            {"left": "Nero", "right": "Persecuted Christians"},
+            {"left": "Hadrian", "right": "Built the Wall"},
+            {"left": "Trajan", "right": "Conquered Dacia"},
+            {"left": "Constantine", "right": "Legalized Christianity"},
+            {"left": "Marcus Aurelius", "right": "Wrote Meditations"},
+        ],
+    },
+    {
+        "title": "Match each Latin phrase to its meaning",
+        "pairs": [
+            {"left": "Veni, vidi, vici", "right": "I came, I saw, I conquered"},
+            {"left": "Carpe diem", "right": "Seize the day"},
+            {"left": "Alea iacta est", "right": "The die is cast"},
+            {"left": "Memento mori", "right": "Remember you must die"},
+            {"left": "Sic transit gloria mundi", "right": "Thus passes the glory of the world"},
+            {"left": "Labor omnia vincit", "right": "Work conquers all"},
+        ],
+    },
+    {
+        "title": "Match each battle to its victor",
+        "pairs": [
+            {"left": "Marathon", "right": "Athens"},
+            {"left": "Thermopylae", "right": "Persia"},
+            {"left": "Salamis", "right": "Greece"},
+            {"left": "Cannae", "right": "Carthage"},
+            {"left": "Zama", "right": "Rome"},
+            {"left": "Actium", "right": "Octavian"},
+        ],
+    },
+]
+
+# ---------------------------------------------------------------------------
 # CLASSICAL TEXT RECOGNITION
 # ---------------------------------------------------------------------------
 PHRASE_LIBRARY = [
@@ -1478,6 +1617,148 @@ def api_award():
         "achievements_unlocked": stats["achievements_unlocked"],
         "all_achievements": stats["achievements"],
     })
+
+@app.route("/api/quiz/trivia")
+@login_required
+def api_quiz_trivia():
+    import random
+    count = int(request.args.get("count", "5"))
+    count = min(count, len(TRIVIA_QUESTIONS))
+    indices = random.sample(range(len(TRIVIA_QUESTIONS)), count)
+    questions = [{"qid": i, "q": TRIVIA_QUESTIONS[i]["q"], "choices": TRIVIA_QUESTIONS[i]["choices"]} for i in indices]
+    return jsonify({"questions": questions})
+
+@app.route("/api/quiz/truefalse")
+@login_required
+def api_quiz_truefalse():
+    import random
+    count = int(request.args.get("count", "5"))
+    count = min(count, len(TRUE_FALSE_QUESTIONS))
+    indices = random.sample(range(len(TRUE_FALSE_QUESTIONS)), count)
+    questions = [{"qid": i, "q": TRUE_FALSE_QUESTIONS[i]["q"]} for i in indices]
+    return jsonify({"questions": questions})
+
+@app.route("/api/quiz/check", methods=["POST"])
+@login_required
+def api_quiz_check():
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "No data"}), 400
+    game_type = data.get("type", "")
+    answers = data.get("answers", [])
+    if not answers:
+        return jsonify({"error": "No answers"}), 400
+
+    if game_type == "trivia":
+        correct = 0
+        results = []
+        for ans in answers:
+            qid = ans.get("qid", -1)
+            q = TRIVIA_QUESTIONS[qid] if 0 <= qid < len(TRIVIA_QUESTIONS) else None
+            if not q:
+                continue
+            is_correct = ans.get("choice") == q["answer"]
+            if is_correct:
+                correct += 1
+            results.append({"correct": is_correct, "explain": q["explain"], "answer": q["answer"]})
+        points = correct * 5 - (len(answers) - correct) * 2
+        if correct == len(answers) and len(answers) > 0:
+            points += 20
+        adjust = adjust_points(points, f"trivia: {correct}/{len(answers)}")
+        stats = get_user_stats()
+        return jsonify({"correct": correct, "total": len(answers), "points": points, "results": results, "total_points": stats["total_points"]})
+
+    elif game_type == "truefalse":
+        correct = 0
+        results = []
+        for ans in answers:
+            qid = ans.get("qid", -1)
+            q = TRUE_FALSE_QUESTIONS[qid] if 0 <= qid < len(TRUE_FALSE_QUESTIONS) else None
+            if not q:
+                continue
+            is_correct = ans.get("answer") == q["answer"]
+            if is_correct:
+                correct += 1
+            results.append({"correct": is_correct, "explain": q["explain"], "answer": q["answer"]})
+        points = correct * 4 - (len(answers) - correct) * 2
+        if correct == len(answers) and len(answers) > 0:
+            points += 15
+        adjust = adjust_points(points, f"truefalse: {correct}/{len(answers)}")
+        stats = get_user_stats()
+        return jsonify({"correct": correct, "total": len(answers), "points": points, "results": results, "total_points": stats["total_points"]})
+
+    elif game_type == "scramble":
+        correct = 0
+        results = []
+        for ans in answers:
+            word = next((w for w in SCRAMBLE_WORDS if w["answer"].upper() == ans.get("answer", "").upper()), None)
+            is_correct = word is not None
+            if is_correct:
+                correct += 1
+            results.append({"correct": is_correct, "answer": word["answer"] if word else ans.get("answer", "")})
+        points = correct * 6 - (len(answers) - correct) * 3
+        if correct == len(answers) and len(answers) > 0:
+            points += 25
+        adjust = adjust_points(points, f"scramble: {correct}/{len(answers)}")
+        stats = get_user_stats()
+        return jsonify({"correct": correct, "total": len(answers), "points": points, "results": results, "total_points": stats["total_points"]})
+
+    elif game_type == "matching":
+        correct = 0
+        results = []
+        for ans in answers:
+            is_correct = _check_match(ans.get("setId", 0), ans.get("left", ""), ans.get("matched", ""))
+            if is_correct:
+                correct += 1
+            results.append({"correct": is_correct})
+        points = correct * 4 - (len(answers) - correct) * 2
+        if correct == len(answers) and len(answers) > 0:
+            points += 20
+        adjust = adjust_points(points, f"matching: {correct}/{len(answers)}")
+        stats = get_user_stats()
+        return jsonify({"correct": correct, "total": len(answers), "points": points, "results": results, "total_points": stats["total_points"]})
+
+    return jsonify({"error": "Invalid game type"}), 400
+
+
+def _check_match(set_id, left, matched):
+    if set_id >= len(MATCHING_SETS):
+        return False
+    for pair in MATCHING_SETS[set_id]["pairs"]:
+        if pair["left"].lower() == left.lower() and pair["right"].lower() == matched.lower():
+            return True
+    return False
+
+
+@app.route("/api/quiz/scramble")
+@login_required
+def api_quiz_scramble():
+    import random
+    count = int(request.args.get("count", "5"))
+    count = min(count, len(SCRAMBLE_WORDS))
+    words = random.sample(SCRAMBLE_WORDS, count)
+    return jsonify({"words": [{"scrambled": w["scrambled"], "hint": w["hint"]} for w in words]})
+
+
+@app.route("/api/quiz/matching")
+@login_required
+def api_quiz_matching():
+    import random
+    count = int(request.args.get("count", "1"))
+    count = min(count, len(MATCHING_SETS))
+    sets = random.sample(MATCHING_SETS, count)
+    result = []
+    for i, s in enumerate(sets):
+        rights = [p["right"] for p in s["pairs"]]
+        shuffled_rights = rights[:]
+        random.shuffle(shuffled_rights)
+        result.append({
+            "setId": MATCHING_SETS.index(s),
+            "title": s["title"],
+            "lefts": [p["left"] for p in s["pairs"]],
+            "rights": shuffled_rights,
+        })
+    return jsonify({"sets": result})
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))

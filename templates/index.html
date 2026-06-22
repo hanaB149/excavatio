@@ -202,6 +202,328 @@
     }
 
     /* achievements tab */
+    /* games / arena tab */
+    .games-box { max-width: 900px; margin: 0 auto; }
+    .games-intro { text-align: center; margin-bottom: 1.5rem; }
+    .games-intro h2 { font-size: 1.4rem; color: #c94f7c; margin-bottom: 0.4rem; }
+    .games-intro p { font-size: 0.88rem; color: #7a5a6a; line-height: 1.5; }
+
+    .games-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 0.8rem;
+      margin-bottom: 1.5rem;
+    }
+    .game-card {
+      background: rgba(255,255,255,0.82);
+      backdrop-filter: blur(10px);
+      border: 2px solid rgba(244, 143, 177, 0.18);
+      border-radius: 16px;
+      padding: 1.2rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-align: center;
+    }
+    .game-card:hover {
+      border-color: #f48fb1;
+      transform: translateY(-3px);
+      box-shadow: 0 8px 28px rgba(244,143,177,0.14);
+    }
+    .game-card .gc-icon {
+      width: 44px;
+      height: 44px;
+      margin: 0 auto 0.6rem;
+      border-radius: 50%;
+      background: rgba(244,143,177,0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .game-card .gc-icon svg {
+      width: 24px;
+      height: 24px;
+      stroke: #c94f7c;
+    }
+    .game-card .gc-name {
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: #c94f7c;
+      margin-bottom: 0.3rem;
+    }
+    .game-card .gc-desc {
+      font-size: 0.78rem;
+      color: #7a5a6a;
+      line-height: 1.5;
+      margin-bottom: 0.5rem;
+    }
+    .game-card .gc-points {
+      font-size: 0.7rem;
+      color: #9a7a8a;
+      font-weight: 600;
+      background: rgba(244,143,177,0.06);
+      border-radius: 8px;
+      padding: 0.3rem 0.5rem;
+    }
+
+    .game-arena {
+      display: none;
+      background: rgba(255,255,255,0.85);
+      backdrop-filter: blur(12px);
+      border: 2px solid rgba(244, 143, 177, 0.22);
+      border-radius: 18px;
+      box-shadow: 0 6px 30px rgba(244, 143, 177, 0.1);
+      padding: 1.5rem;
+      animation: fadeSlideUp 0.4s ease;
+    }
+    .game-arena.visible { display: block; }
+    .game-arena .ga-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    .game-arena .ga-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #c94f7c;
+    }
+    .game-arena .ga-back {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #9a7a8a;
+      background: rgba(244,143,177,0.08);
+      border: none;
+      border-radius: 8px;
+      padding: 0.4rem 0.8rem;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.2s ease;
+    }
+    .game-arena .ga-back:hover { background: rgba(244,143,177,0.16); color: #c94f7c; }
+    .game-arena .ga-score {
+      font-size: 0.8rem;
+      color: #7a5a6a;
+      font-weight: 600;
+    }
+    .game-arena .ga-score span { color: #c94f7c; font-weight: 800; }
+
+    .quiz-question {
+      margin-bottom: 1.2rem;
+      padding: 1rem;
+      background: rgba(254,246,248,0.6);
+      border-radius: 12px;
+      border: 1px solid rgba(244,143,177,0.12);
+    }
+    .quiz-question .qq-text {
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: #4a2c3a;
+      margin-bottom: 0.7rem;
+      line-height: 1.5;
+    }
+    .quiz-question .qq-num {
+      display: inline-block;
+      background: #f48fb1;
+      color: white;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 0.1rem 0.45rem;
+      border-radius: 6px;
+      margin-right: 0.4rem;
+      vertical-align: middle;
+    }
+    .quiz-choices {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+    .quiz-choice {
+      padding: 0.6rem 0.9rem;
+      border: 2px solid rgba(244,143,177,0.15);
+      border-radius: 10px;
+      font-size: 0.88rem;
+      color: #4a2c3a;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      background: rgba(255,255,255,0.5);
+      font-family: inherit;
+      text-align: left;
+    }
+    .quiz-choice:hover {
+      border-color: #f48fb1;
+      background: rgba(255,255,255,0.8);
+    }
+    .quiz-choice.selected {
+      border-color: #c94f7c;
+      background: rgba(244,143,177,0.1);
+    }
+    .quiz-choice.correct {
+      border-color: #81c784;
+      background: rgba(129,199,132,0.12);
+      color: #2e7d32;
+    }
+    .quiz-choice.wrong {
+      border-color: #e57373;
+      background: rgba(229,115,115,0.1);
+      color: #c62828;
+    }
+    .quiz-explain {
+      margin-top: 0.5rem;
+      font-size: 0.8rem;
+      color: #7a5a6a;
+      font-style: italic;
+      font-family: 'Source Serif 4', serif;
+      padding: 0.4rem 0.6rem;
+      background: rgba(255,255,255,0.5);
+      border-radius: 8px;
+      border-left: 2px solid #f48fb1;
+    }
+    .tf-buttons {
+      display: flex;
+      gap: 0.6rem;
+    }
+    .tf-btn {
+      flex: 1;
+      padding: 0.6rem;
+      border: 2px solid rgba(244,143,177,0.15);
+      border-radius: 10px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      background: rgba(255,255,255,0.5);
+      font-family: inherit;
+      color: #4a2c3a;
+    }
+    .tf-btn:hover { border-color: #f48fb1; background: rgba(255,255,255,0.8); }
+    .tf-btn.selected { border-color: #c94f7c; background: rgba(244,143,177,0.1); }
+    .tf-btn.correct { border-color: #81c784; background: rgba(129,199,132,0.12); color: #2e7d32; }
+    .tf-btn.wrong { border-color: #e57373; background: rgba(229,115,115,0.1); color: #c62828; }
+
+    .scramble-item {
+      margin-bottom: 1rem;
+    }
+    .scramble-letters {
+      font-size: 1.5rem;
+      font-weight: 800;
+      letter-spacing: 0.15em;
+      color: #c94f7c;
+      font-family: 'Source Serif 4', serif;
+      margin-bottom: 0.3rem;
+    }
+    .scramble-hint {
+      font-size: 0.8rem;
+      color: #9a7a8a;
+      margin-bottom: 0.4rem;
+      font-style: italic;
+    }
+    .scramble-input {
+      width: 100%;
+      padding: 0.5rem 0.8rem;
+      border: 2px solid rgba(244,143,177,0.2);
+      border-radius: 10px;
+      font-size: 0.92rem;
+      font-family: 'Inter', sans-serif;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: #4a2c3a;
+      background: rgba(255,255,255,0.7);
+      transition: all 0.2s ease;
+    }
+    .scramble-input:focus {
+      outline: none;
+      border-color: #f48fb1;
+      background: white;
+    }
+
+    .matching-set {
+      margin-bottom: 1.5rem;
+    }
+    .matching-set .ms-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #c94f7c;
+      margin-bottom: 0.6rem;
+    }
+    .matching-pair {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem;
+      margin-bottom: 0.4rem;
+      align-items: center;
+    }
+    .matching-left, .matching-right {
+      padding: 0.5rem 0.8rem;
+      border: 2px solid rgba(244,143,177,0.15);
+      border-radius: 10px;
+      font-size: 0.85rem;
+      color: #4a2c3a;
+      background: rgba(255,255,255,0.5);
+      transition: all 0.2s ease;
+    }
+    .matching-right {
+      cursor: pointer;
+      text-align: center;
+      font-weight: 500;
+    }
+    .matching-right:hover { border-color: #f48fb1; background: rgba(255,255,255,0.8); }
+    .matching-right.selected { border-color: #c94f7c; background: rgba(244,143,177,0.1); }
+    .matching-right.matched { border-color: #81c784; background: rgba(129,199,132,0.12); color: #2e7d32; }
+    .matching-right.wrong { border-color: #e57373; background: rgba(229,115,115,0.1); color: #c62828; }
+    .matching-left.selected-left { border-color: #c94f7c; background: rgba(244,143,177,0.1); }
+
+    .quiz-submit {
+      width: 100%;
+      padding: 0.85rem;
+      border: none;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #f48fb1, #ce93d8);
+      color: white;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.25s ease;
+      margin-top: 0.5rem;
+      box-shadow: 0 4px 16px rgba(244,143,177,0.25);
+    }
+    .quiz-submit:hover { transform: translateY(-1px); box-shadow: 0 6px 22px rgba(244,143,177,0.35); }
+    .quiz-submit:active { transform: translateY(0); }
+    .quiz-submit:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    .quiz-result {
+      text-align: center;
+      padding: 1.5rem;
+      animation: popBounce 0.5s ease;
+    }
+    .quiz-result .qr-score {
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: #c94f7c;
+    }
+    .quiz-result .qr-label {
+      font-size: 0.9rem;
+      color: #7a5a6a;
+      margin-bottom: 0.5rem;
+    }
+    .quiz-result .qr-points {
+      display: inline-block;
+      font-size: 0.85rem;
+      font-weight: 700;
+      padding: 0.4rem 1rem;
+      border-radius: 10px;
+      margin-top: 0.5rem;
+    }
+    .quiz-result .qr-points.positive { background: rgba(129,199,132,0.15); color: #2e7d32; }
+    .quiz-result .qr-points.negative { background: rgba(229,115,115,0.1); color: #c62828; }
+    .quiz-result .qr-perfect {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: #ffb74d;
+      margin-top: 0.5rem;
+      animation: heartbeat 1.5s ease-in-out infinite;
+    }
+
     .achieve-box { max-width: 900px; margin: 0 auto; }
     .achieve-intro { text-align: center; margin-bottom: 1.5rem; }
     .achieve-intro h2 { font-size: 1.4rem; color: #c94f7c; margin-bottom: 0.4rem; }
@@ -1284,6 +1606,7 @@
   <button class="active" data-tab="map-tab">excavation map</button>
   <button data-tab="text-tab">text identifier</button>
   <button data-tab="source-tab">source connections</button>
+  <button data-tab="games-tab">arena</button>
   <button data-tab="achieve-tab">achievements</button>
 </nav>
 
@@ -1399,6 +1722,44 @@
       <div class="source-search-meta" id="source-search-meta"></div>
       <div class="source-events" id="source-events"></div>
       <div class="source-detail" id="source-detail"></div>
+    </div>
+  </div>
+</div>
+
+<div id="games-tab" class="tab-content">
+  <div class="container">
+    <div class="games-box">
+      <div class="games-intro">
+        <h2>the arena</h2>
+        <p>test your knowledge of the ancient world. win drachmae for correct answers — lose them for mistakes. all four games are classics-themed.</p>
+      </div>
+      <div class="games-grid" id="games-grid">
+        <div class="game-card" data-game="trivia">
+          <div class="gc-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 9a3 3 0 016 0c0 2-3 2-3 4M12 17v.01" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div>
+          <div class="gc-name">Trivia Quiz</div>
+          <div class="gc-desc">Multiple-choice questions on ancient history, literature, and culture.</div>
+          <div class="gc-points">+5 correct &middot; -2 wrong &middot; +20 perfect</div>
+        </div>
+        <div class="game-card" data-game="truefalse">
+          <div class="gc-icon"><svg viewBox="0 0 24 24"><path d="M4 4l16 16M20 4L4 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/></svg></div>
+          <div class="gc-name">True or False</div>
+          <div class="gc-desc">Classical facts — decide if each statement is true or false.</div>
+          <div class="gc-points">+4 correct &middot; -2 wrong &middot; +15 perfect</div>
+        </div>
+        <div class="game-card" data-game="scramble">
+          <div class="gc-icon"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="8" cy="7" r="2"/><circle cx="16" cy="12" r="2"/><circle cx="10" cy="17" r="2"/></svg></div>
+          <div class="gc-name">Word Scramble</div>
+          <div class="gc-desc">Unscramble Latin words, classical names, and ancient places.</div>
+          <div class="gc-points">+6 correct &middot; -3 wrong &middot; +25 perfect</div>
+        </div>
+        <div class="game-card" data-game="matching">
+          <div class="gc-icon"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="7" height="4" rx="1" fill="none" stroke="currentColor" stroke-width="2"/><rect x="14" y="4" width="7" height="4" rx="1" fill="none" stroke="currentColor" stroke-width="2"/><rect x="3" y="16" width="7" height="4" rx="1" fill="none" stroke="currentColor" stroke-width="2"/><rect x="14" y="16" width="7" height="4" rx="1" fill="none" stroke="currentColor" stroke-width="2"/><path d="M10 6h4M10 18h4" fill="none" stroke="currentColor" stroke-width="2"/></svg></div>
+          <div class="gc-name">Matching Game</div>
+          <div class="gc-desc">Match authors to works, gods to symbols, emperors to deeds.</div>
+          <div class="gc-points">+4 correct &middot; -2 wrong &middot; +20 perfect</div>
+        </div>
+      </div>
+      <div class="game-arena" id="game-arena"></div>
     </div>
   </div>
 </div>
@@ -2165,6 +2526,402 @@
       if (btn.dataset.tab === 'achieve-tab') loadStats();
     });
   });
+
+  // --- games / arena ---
+  let currentGame = null;
+  let gameQuestions = [];
+  let gameAnswers = [];
+
+  document.querySelectorAll('.game-card').forEach(card => {
+    card.addEventListener('click', () => startGame(card.dataset.game));
+  });
+
+  function startGame(type) {
+    currentGame = type;
+    gameAnswers = [];
+    const arena = document.getElementById('game-arena');
+    arena.innerHTML = '<div class="ga-header"><span class="ga-title">loading...</span><button class="ga-back" onclick="closeGame()">&larr; back to games</button></div>';
+    arena.classList.add('visible');
+    document.getElementById('games-grid').style.display = 'none';
+
+    if (type === 'trivia') loadTrivia();
+    else if (type === 'truefalse') loadTrueFalse();
+    else if (type === 'scramble') loadScramble();
+    else if (type === 'matching') loadMatching();
+  }
+
+  function closeGame() {
+    document.getElementById('game-arena').classList.remove('visible');
+    document.getElementById('games-grid').style.display = '';
+    currentGame = null;
+  }
+
+  function loadTrivia() {
+    fetch('/api/quiz/trivia?count=5')
+      .then(r => r.json())
+      .then(data => {
+        gameQuestions = data.questions;
+        gameAnswers = new Array(data.questions.length).fill(null);
+        renderTrivia();
+      });
+  }
+
+  function renderTrivia() {
+    const arena = document.getElementById('game-arena');
+    let html = '<div class="ga-header"><span class="ga-title">Trivia Quiz</span><button class="ga-back" onclick="closeGame()">&larr; back</button></div>';
+    gameQuestions.forEach((q, qi) => {
+      html += '<div class="quiz-question">';
+      html += '<div class="qq-text"><span class="qq-num">Q' + (qi + 1) + '</span>' + q.q + '</div>';
+      html += '<div class="quiz-choices">';
+      q.choices.forEach((c, ci) => {
+        html += '<button class="quiz-choice" data-qi="' + qi + '" data-ci="' + ci + '" onclick="selectTrivia(' + qi + ',' + ci + ')">' + c + '</button>';
+      });
+      html += '</div>';
+      html += '</div>';
+    });
+    html += '<button class="quiz-submit" onclick="submitTrivia()">submit answers</button>';
+    arena.innerHTML = html;
+  }
+
+  function selectTrivia(qi, ci) {
+    gameAnswers[qi] = ci;
+    document.querySelectorAll('.quiz-choice[data-qi="' + qi + '"]').forEach(el => {
+      el.classList.toggle('selected', parseInt(el.dataset.ci) === ci);
+    });
+  }
+
+  function submitTrivia() {
+    const unanswered = gameAnswers.filter(a => a === null).length;
+    if (unanswered > 0) {
+      alert('You have ' + unanswered + ' unanswered question' + (unanswered > 1 ? 's' : '') + '!');
+      return;
+    }
+    fetch('/api/quiz/check', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type: 'trivia', answers: gameAnswers.map((a, i) => ({ qid: gameQuestions[i].qid, choice: a })) })
+    })
+      .then(r => r.json())
+      .then(data => {
+        renderTriviaResults(data);
+        updatePointsBadge(data.total_points);
+      });
+  }
+
+  function renderTriviaResults(data) {
+    const arena = document.getElementById('game-arena');
+    gameQuestions.forEach((q, qi) => {
+      const result = data.results[qi];
+      const choices = document.querySelectorAll('.quiz-choice[data-qi="' + qi + '"]');
+      choices.forEach(el => {
+        const ci = parseInt(el.dataset.ci);
+        el.classList.remove('selected');
+        if (ci === result.answer) el.classList.add('correct');
+        else if (ci === gameAnswers[qi]) el.classList.add('wrong');
+        el.style.pointerEvents = 'none';
+      });
+      const qEl = el => el.closest('.quiz-question');
+      const qDiv = document.querySelector('.quiz-choice[data-qi="' + qi + '"]').closest('.quiz-question');
+      const explain = document.createElement('div');
+      explain.className = 'quiz-explain';
+      explain.textContent = result.explain;
+      qDiv.appendChild(explain);
+    });
+    const resultDiv = document.createElement('div');
+    resultDiv.className = 'quiz-result';
+    resultDiv.innerHTML =
+      '<div class="qr-score">' + data.correct + '/' + data.total + '</div>' +
+      '<div class="qr-label">' + (data.correct === data.total ? 'flawless!' : 'well played') + '</div>' +
+      '<div class="qr-points ' + (data.points >= 0 ? 'positive' : 'negative') + '">' + (data.points >= 0 ? '+' : '') + data.points + ' drachmae</div>' +
+      (data.correct === data.total ? '<div class="qr-perfect">perfect score bonus!</div>' : '');
+    arena.appendChild(resultDiv);
+    document.querySelector('.quiz-submit').style.display = 'none';
+  }
+
+  function loadTrueFalse() {
+    fetch('/api/quiz/truefalse?count=5')
+      .then(r => r.json())
+      .then(data => {
+        gameQuestions = data.questions;
+        gameAnswers = new Array(data.questions.length).fill(null);
+        renderTrueFalse();
+      });
+  }
+
+  function renderTrueFalse() {
+    const arena = document.getElementById('game-arena');
+    let html = '<div class="ga-header"><span class="ga-title">True or False</span><button class="ga-back" onclick="closeGame()">&larr; back</button></div>';
+    gameQuestions.forEach((q, qi) => {
+      html += '<div class="quiz-question">';
+      html += '<div class="qq-text"><span class="qq-num">Q' + (qi + 1) + '</span>' + q.q + '</div>';
+      html += '<div class="tf-buttons">';
+      html += '<button class="tf-btn" data-qi="' + qi + '" data-val="true" onclick="selectTF(' + qi + ',true)">True</button>';
+      html += '<button class="tf-btn" data-qi="' + qi + '" data-val="false" onclick="selectTF(' + qi + ',false)">False</button>';
+      html += '</div>';
+      html += '</div>';
+    });
+    html += '<button class="quiz-submit" onclick="submitTF()">submit answers</button>';
+    arena.innerHTML = html;
+  }
+
+  function selectTF(qi, val) {
+    gameAnswers[qi] = val;
+    document.querySelectorAll('.tf-btn[data-qi="' + qi + '"]').forEach(el => {
+      el.classList.toggle('selected', el.dataset.val === String(val));
+    });
+  }
+
+  function submitTF() {
+    const unanswered = gameAnswers.filter(a => a === null).length;
+    if (unanswered > 0) {
+      alert('You have ' + unanswered + ' unanswered question' + (unanswered > 1 ? 's' : '') + '!');
+      return;
+    }
+    fetch('/api/quiz/check', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type: 'truefalse', answers: gameAnswers.map((a, i) => ({ qid: gameQuestions[i].qid, answer: a })) })
+    })
+      .then(r => r.json())
+      .then(data => {
+        gameQuestions.forEach((q, qi) => {
+          const result = data.results[qi];
+          document.querySelectorAll('.tf-btn[data-qi="' + qi + '"]').forEach(el => {
+            el.classList.remove('selected');
+            const isTrue = el.dataset.val === 'true';
+            if (isTrue === result.answer) el.classList.add('correct');
+            else if (isTrue === gameAnswers[qi]) el.classList.add('wrong');
+            el.style.pointerEvents = 'none';
+          });
+          const qDiv = document.querySelector('.tf-btn[data-qi="' + qi + '"]').closest('.quiz-question');
+          const explain = document.createElement('div');
+          explain.className = 'quiz-explain';
+          explain.textContent = result.explain;
+          qDiv.appendChild(explain);
+        });
+        const arena = document.getElementById('game-arena');
+        const resultDiv = document.createElement('div');
+        resultDiv.className = 'quiz-result';
+        resultDiv.innerHTML =
+          '<div class="qr-score">' + data.correct + '/' + data.total + '</div>' +
+          '<div class="qr-label">' + (data.correct === data.total ? 'flawless!' : 'well played') + '</div>' +
+          '<div class="qr-points ' + (data.points >= 0 ? 'positive' : 'negative') + '">' + (data.points >= 0 ? '+' : '') + data.points + ' drachmae</div>' +
+          (data.correct === data.total ? '<div class="qr-perfect">perfect score bonus!</div>' : '');
+        arena.appendChild(resultDiv);
+        document.querySelector('.quiz-submit').style.display = 'none';
+        updatePointsBadge(data.total_points);
+      });
+  }
+
+  function loadScramble() {
+    fetch('/api/quiz/scramble?count=5')
+      .then(r => r.json())
+      .then(data => {
+        gameQuestions = data.words;
+        renderScramble();
+      });
+  }
+
+  function renderScramble() {
+    const arena = document.getElementById('game-arena');
+    let html = '<div class="ga-header"><span class="ga-title">Word Scramble</span><button class="ga-back" onclick="closeGame()">&larr; back</button></div>';
+    gameQuestions.forEach((w, wi) => {
+      html += '<div class="quiz-question">';
+      html += '<div class="scramble-item">';
+      html += '<div class="scramble-letters">' + w.scrambled + '</div>';
+      html += '<div class="scramble-hint">hint: ' + w.hint + '</div>';
+      html += '<input type="text" class="scramble-input" data-wi="' + wi + '" placeholder="your answer...">';
+      html += '</div>';
+      html += '</div>';
+    });
+    html += '<button class="quiz-submit" onclick="submitScramble()">submit answers</button>';
+    arena.innerHTML = html;
+  }
+
+  function submitScramble() {
+    const answers = [];
+    document.querySelectorAll('.scramble-input').forEach(el => {
+      answers.push({ answer: el.value.trim() });
+    });
+    const empty = answers.filter(a => !a.answer).length;
+    if (empty > 0) {
+      alert('You have ' + empty + ' unscrambled word' + (empty > 1 ? 's' : '') + '!');
+      return;
+    }
+    fetch('/api/quiz/check', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type: 'scramble', answers: answers })
+    })
+      .then(r => r.json())
+      .then(data => {
+        const inputs = document.querySelectorAll('.scramble-input');
+        data.results.forEach((r, i) => {
+          const input = inputs[i];
+          input.style.border = r.correct ? '2px solid #81c784' : '2px solid #e57373';
+          input.style.background = r.correct ? 'rgba(129,199,132,0.1)' : 'rgba(229,115,115,0.08)';
+          input.value = r.answer;
+          input.style.pointerEvents = 'none';
+          const qDiv = input.closest('.quiz-question');
+          if (!r.correct) {
+            const explain = document.createElement('div');
+            explain.className = 'quiz-explain';
+            explain.textContent = 'Correct answer: ' + r.answer;
+            qDiv.appendChild(explain);
+          }
+        });
+        const arena = document.getElementById('game-arena');
+        const resultDiv = document.createElement('div');
+        resultDiv.className = 'quiz-result';
+        resultDiv.innerHTML =
+          '<div class="qr-score">' + data.correct + '/' + data.total + '</div>' +
+          '<div class="qr-label">' + (data.correct === data.total ? 'flawless!' : 'well played') + '</div>' +
+          '<div class="qr-points ' + (data.points >= 0 ? 'positive' : 'negative') + '">' + (data.points >= 0 ? '+' : '') + data.points + ' drachmae</div>' +
+          (data.correct === data.total ? '<div class="qr-perfect">perfect score bonus!</div>' : '');
+        arena.appendChild(resultDiv);
+        document.querySelector('.quiz-submit').style.display = 'none';
+        updatePointsBadge(data.total_points);
+      });
+  }
+
+  function loadMatching() {
+    fetch('/api/quiz/matching?count=1')
+      .then(r => r.json())
+      .then(data => {
+        gameQuestions = data.sets;
+        gameAnswers = {};
+        renderMatching();
+      });
+  }
+
+  function renderMatching() {
+    const arena = document.getElementById('game-arena');
+    let html = '<div class="ga-header"><span class="ga-title">Matching Game</span><button class="ga-back" onclick="closeGame()">&larr; back</button></div>';
+    gameQuestions.forEach((s, si) => {
+      html += '<div class="matching-set" data-si="' + si + '">';
+      html += '<div class="ms-title">' + s.title + '</div>';
+      s.lefts.forEach((left, li) => {
+        html += '<div class="matching-pair">';
+        html += '<div class="matching-left" data-si="' + si + '" data-li="' + li + '" data-left="' + left + '">' + left + '</div>';
+        html += '<div class="matching-right" data-si="' + si + '" data-li="' + li + '">' + (s._matched ? s._matched[li] || '?' : '?') + '</div>';
+        html += '</div>';
+      });
+      html += '</div>';
+    });
+    html += '<button class="quiz-submit" onclick="startMatchingInteraction()">start matching</button>';
+    arena.innerHTML = html;
+  }
+
+  let matchingSelectedLeft = null;
+  let matchingPairs = {};
+
+  function startMatchingInteraction() {
+    const arena = document.getElementById('game-arena');
+    const set = gameQuestions[0];
+    let html = '<div class="ga-header"><span class="ga-title">' + set.title + '</span><button class="ga-back" onclick="closeGame()">&larr; back</button></div>';
+    html += '<div class="matching-set" data-si="0">';
+    set.lefts.forEach((left, li) => {
+      html += '<div class="matching-pair">';
+      html += '<div class="matching-left" data-si="0" data-li="' + li + '" data-left="' + left + '" onclick="selectMatchLeft(this)">' + left + '</div>';
+      html += '<div class="matching-right" data-si="0" data-li="' + li + '" onclick="selectMatchRight(this)">' + (matchingPairs[li] || '— tap to assign —') + '</div>';
+      html += '</div>';
+    });
+    html += '</div>';
+    const remaining = set.rights.filter(r => !Object.values(matchingPairs).includes(r));
+    if (remaining.length > 0) {
+      html += '<div style="margin-top:1rem;font-size:0.8rem;color:#9a7a8a;font-weight:600;margin-bottom:0.4rem;">available options (tap a row, then tap an option):</div>';
+      html += '<div style="display:flex;flex-wrap:wrap;gap:0.4rem;">';
+      set.rights.forEach(r => {
+        const used = Object.values(matchingPairs).includes(r);
+        html += '<button class="matching-right" style="display:inline-block;max-width:200px;" data-right="' + r + '" onclick="assignMatch(this)" ' + (used ? 'disabled style="opacity:0.4;pointer-events:none;"' : '') + '>' + r + '</button>';
+      });
+      html += '</div>';
+    }
+    html += '<button class="quiz-submit" onclick="submitMatching()">submit matches</button>';
+    arena.innerHTML = html;
+  }
+
+  function selectMatchLeft(el) {
+    document.querySelectorAll('.matching-left').forEach(e => e.classList.remove('selected-left'));
+    el.classList.add('selected-left');
+    matchingSelectedLeft = el.dataset.li;
+  }
+
+  function assignMatch(el) {
+    if (matchingSelectedLeft === null) {
+      alert('Select a left item first!');
+      return;
+    }
+    matchingPairs[matchingSelectedLeft] = el.dataset.right;
+    matchingSelectedLeft = null;
+    startMatchingInteraction();
+  }
+
+  function selectMatchRight(el) {
+    // unassign
+    const li = el.dataset.li;
+    if (matchingPairs[li]) {
+      delete matchingPairs[li];
+      startMatchingInteraction();
+    }
+  }
+
+  function submitMatching() {
+    const set = gameQuestions[0];
+    const answers = set.lefts.map((left, li) => ({
+      setId: set.setId,
+      left: left,
+      matched: matchingPairs[li] || ''
+    }));
+    const unassigned = answers.filter(a => !a.matched).length;
+    if (unassigned > 0) {
+      alert('You have ' + unassigned + ' unassigned pair' + (unassigned > 1 ? 's' : '') + '!');
+      return;
+    }
+    fetch('/api/quiz/check', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type: 'matching', answers: answers })
+    })
+      .then(r => r.json())
+      .then(data => {
+        const pairs = document.querySelectorAll('.matching-pair');
+        data.results.forEach((r, i) => {
+          const leftEl = pairs[i].querySelector('.matching-left');
+          const rightEl = pairs[i].querySelector('.matching-right');
+          if (r.correct) {
+            leftEl.style.borderColor = '#81c784';
+            rightEl.style.borderColor = '#81c784';
+            rightEl.style.background = 'rgba(129,199,132,0.12)';
+            rightEl.style.color = '#2e7d32';
+          } else {
+            leftEl.style.borderColor = '#e57373';
+            rightEl.style.borderColor = '#e57373';
+            rightEl.style.background = 'rgba(229,115,115,0.1)';
+            rightEl.style.color = '#c62828';
+          }
+        });
+        const arena = document.getElementById('game-arena');
+        const resultDiv = document.createElement('div');
+        resultDiv.className = 'quiz-result';
+        resultDiv.innerHTML =
+          '<div class="qr-score">' + data.correct + '/' + data.total + '</div>' +
+          '<div class="qr-label">' + (data.correct === data.total ? 'flawless!' : 'well played') + '</div>' +
+          '<div class="qr-points ' + (data.points >= 0 ? 'positive' : 'negative') + '">' + (data.points >= 0 ? '+' : '') + data.points + ' drachmae</div>' +
+          (data.correct === data.total ? '<div class="qr-perfect">perfect score bonus!</div>' : '');
+        arena.appendChild(resultDiv);
+        document.querySelector('.quiz-submit').style.display = 'none';
+        updatePointsBadge(data.total_points);
+        matchingPairs = {};
+      });
+  }
+
+  function updatePointsBadge(total) {
+    const badge = document.getElementById('points-badge');
+    badge.textContent = total;
+    badge.classList.add('bump');
+    setTimeout(() => badge.classList.remove('bump'), 500);
+  }
 </script>
 </body>
 </html>
