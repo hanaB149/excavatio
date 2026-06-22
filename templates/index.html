@@ -1541,6 +1541,20 @@
       border-radius: 3px;
     }
 
+    .journey-stop-label {
+      background: rgba(255,255,255,0.92) !important;
+      border: 1.5px solid rgba(244,143,177,0.3) !important;
+      border-radius: 6px !important;
+      padding: 0.15rem 0.5rem !important;
+      font-size: 0.7rem !important;
+      font-family: 'Inter', sans-serif !important;
+      font-weight: 600 !important;
+      color: #5a3c4a !important;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08) !important;
+      white-space: nowrap !important;
+    }
+    .journey-stop-label::before { display: none !important; }
+
     /* excavation analytics */
     .analytics-bar {
       background: rgba(255,255,255,0.82);
@@ -2756,6 +2770,10 @@
         weight: 2,
         fillOpacity: 0.9,
       }).addTo(map);
+      marker.bindTooltip(
+        '<span style="font-weight:700;color:' + journey.color + '">' + (i + 1) + '. ' + stop.name + '</span>',
+        { permanent: true, direction: 'top', offset: [0, -8], className: 'journey-stop-label' }
+      );
       marker.bindPopup('<strong>' + stop.name + '</strong><br><span style="font-size:0.8rem;color:#9a7a8a;">' + stop.desc + '</span>');
       journeyLayers[journey.id].markers.push(marker);
       stopMarkers.push({ marker: marker, data: stop, index: i });
