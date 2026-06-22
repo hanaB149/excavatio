@@ -3263,6 +3263,15 @@
     });
   });
 
+  // save progress when user leaves the page (close tab, navigate away)
+  window.addEventListener('beforeunload', function() {
+    navigator.sendBeacon('/api/save-progress', JSON.stringify({}));
+  });
+  // also save periodically so progress isn't lost on crash/force-close
+  setInterval(function() {
+    fetch('/api/save-progress', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' }).catch(function() {});
+  }, 60000);
+
   // --- games / arena ---
   let currentGame = null;
   let gameQuestions = [];

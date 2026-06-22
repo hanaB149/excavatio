@@ -94,11 +94,25 @@ def create_user(username, email, password):
         "email": email,
         "password_hash": generate_password_hash(password),
         "created_at": datetime.now().isoformat(),
+        "total_points": 0,
+        "action_counts": {},
     }
     users.append(user)
     with _persist_lock:
         _persist_users()
     return user
+
+
+def save_user_progress(user_id):
+    """Persist the current session's points/counts back to the user store."""
+    users = _load_users()
+    for u in users:
+        if u.get("id") == user_id:
+            u["total_points"] = session.get("total_points", 0)
+            u["action_counts"] = session.get("action_counts", {})
+            break
+    with _persist_lock:
+        _persist_users()
 
 
 POINTS = {
@@ -1454,15 +1468,15 @@ def login():
 
     session["user_id"] = user["id"]
     session["username"] = user["username"]
-    if "total_points" not in session:
-        session["total_points"] = 0
-    if "action_counts" not in session:
-        session["action_counts"] = {}
+    session["total_points"] = user.get("total_points", 0)
+    session["action_counts"] = user.get("action_counts", {})
     return redirect(url_for("index"))
 
 
 @app.route("/logout")
 def logout():
+    if "user_id" in session:
+        save_user_progress(session["user_id"])
     session.clear()
     return redirect(url_for("welcome"))
 
@@ -1659,6 +1673,12 @@ def api_identify():
 @login_required
 def api_stats():
     return jsonify(get_user_stats())
+
+@app.route("/api/save-progress", methods=["POST"])
+@login_required
+def api_save_progress():
+    save_user_progress(session["user_id"])
+    return jsonify({"saved": True})
 
 @app.route("/api/award", methods=["POST"])
 @login_required
