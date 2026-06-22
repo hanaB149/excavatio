@@ -3,20 +3,51 @@ import json
 import re
 import html
 import logging
+from functools import wraps
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 import requests
 from flask import (
-    Flask, render_template, request, jsonify
+    Flask, render_template, request, jsonify, redirect, url_for, session
 )
+from werkzeug.security import generate_password_hash, check_password_hash
+from flask_sqlalchemy import SQLAlchemy
 from dotenv import load_dotenv
 
 load_dotenv()
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-key-change-in-prod")
+
+database_url = os.environ.get("DATABASE_URL", "")
+if database_url:
+    app.config["SQLALCHEMY_DATABASE_URI"] = database_url
+else:
+    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///excavatio.db"
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+
+db = SQLAlchemy(app)
+
+
+class User(db.Model):
+    __tablename__ = "users"
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(80), unique=True, nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    password_hash = db.Column(db.Text, nullable=False)
+    created_at = db.Column(db.DateTime, server_default=db.func.now())
+
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
+
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
+
+
+with app.app_context():
+    db.create_all()
 
 EXCAVATIONS = [
     {"id": "pompeii", "title": "Pompeii", "lat": 40.7497, "lng": 14.4856, "description": "Roman city buried by Vesuvius in 79 CE. Excavations since 1748.", "period": "Roman (79 CE)", "startYear": 1748, "endYear": None, "ongoing": True, "featureTypes": ["city", "roman", "volcanic"], "era": "ancient"},
@@ -1062,10 +1093,82 @@ def find_text_match(input_text):
     return best
 
 # ---------------------------------------------------------------------------
+# AUTHENTICATION
+# ---------------------------------------------------------------------------
+
+def login_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if "user_id" not in session:
+            return redirect(url_for("welcome"))
+        return f(*args, **kwargs)
+    return decorated
+
+
+@app.route("/welcome")
+def welcome():
+    if "user_id" in session:
+        return redirect(url_for("index"))
+    return render_template("welcome.html")
+
+
+@app.route("/signup", methods=["POST"])
+def signup():
+    username = request.form.get("username", "").strip()
+    email = request.form.get("email", "").strip()
+    password = request.form.get("password", "")
+
+    if not username or not email or not password:
+        return render_template("welcome.html", mode="signup", error="All fields are required.", username=username, email=email)
+    if len(username) < 3:
+        return render_template("welcome.html", mode="signup", error="Username must be at least 3 characters.", username=username, email=email)
+    if len(password) < 6:
+        return render_template("welcome.html", mode="signup", error="Password must be at least 6 characters.", username=username, email=email)
+
+    if User.query.filter_by(username=username).first():
+        return render_template("welcome.html", mode="signup", error="That username is already taken.", email=email)
+    if User.query.filter_by(email=email).first():
+        return render_template("welcome.html", mode="signup", error="An account with that email already exists.", username=username)
+
+    user = User(username=username, email=email)
+    user.set_password(password)
+    db.session.add(user)
+    db.session.commit()
+
+    session["user_id"] = user.id
+    session["username"] = user.username
+    return redirect(url_for("index"))
+
+
+@app.route("/login", methods=["POST"])
+def login():
+    username = request.form.get("username", "").strip()
+    password = request.form.get("password", "")
+
+    if not username or not password:
+        return render_template("welcome.html", mode="login", error="Please enter your username and password.")
+
+    user = User.query.filter_by(username=username).first()
+    if not user or not user.check_password(password):
+        return render_template("welcome.html", mode="login", error="Invalid username or password.")
+
+    session["user_id"] = user.id
+    session["username"] = user.username
+    return redirect(url_for("index"))
+
+
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect(url_for("welcome"))
+
+
+# ---------------------------------------------------------------------------
 # ROUTES
 # ---------------------------------------------------------------------------
 
 @app.route("/")
+@login_required
 def index():
     return render_template("index.html")
 
@@ -1116,6 +1219,7 @@ def query_ai(passage, api_key):
     return data
 
 @app.route("/api/excavations")
+@login_required
 def api_excavations():
     era = request.args.get("era", "")
     status = request.args.get("status", "")
@@ -1133,6 +1237,7 @@ def api_excavations():
     })
 
 @app.route("/api/journeys")
+@login_required
 def api_journeys():
     journey_id = request.args.get("id", "")
     if journey_id and journey_id in JOURNEYS:
@@ -1140,6 +1245,7 @@ def api_journeys():
     return jsonify(list(JOURNEYS.values()))
 
 @app.route("/api/sources")
+@login_required
 def api_sources():
     event_id = request.args.get("id", "")
     if event_id and event_id in EVENTS:
@@ -1198,6 +1304,7 @@ def query_ai_event_search(query, api_key):
     return [m for m in data if m.get("id") in valid_ids]
 
 @app.route("/api/search-events", methods=["POST"])
+@login_required
 def api_search_events():
     data = request.get_json()
     if not data:
@@ -1217,6 +1324,7 @@ def api_search_events():
     return jsonify({"matches": [], "source": "fallback", "message": "AI search unavailable"})
 
 @app.route("/api/identify", methods=["POST"])
+@login_required
 def api_identify():
     data = request.get_json()
     if not data:

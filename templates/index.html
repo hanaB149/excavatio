@@ -154,6 +154,31 @@
       font-size: 0.85rem;
       font-weight: 400;
     }
+    header .user-box {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+    }
+    header .user-box .user-name {
+      font-size: 0.82rem;
+      font-weight: 600;
+      opacity: 0.95;
+    }
+    header .user-box .logout-btn {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: #fff;
+      text-decoration: none;
+      background: rgba(255,255,255,0.18);
+      padding: 0.35rem 0.8rem;
+      border-radius: 8px;
+      transition: all 0.2s ease;
+      font-family: inherit;
+    }
+    header .user-box .logout-btn:hover {
+      background: rgba(255,255,255,0.32);
+    }
 
     nav {
       background: rgba(255,255,255,0.65);
@@ -1025,7 +1050,8 @@
     .popup-site .popup-status.completed { background: #e0e0e0; color: #616161; }
 
     @media (max-width: 600px) {
-      header { flex-direction: column; text-align: center; padding: 1rem; }
+      header { flex-direction: column; text-align: center; padding: 1rem; gap: 0.4rem; }
+      header .user-box { margin-left: 0; }
       .timeline-labels { font-size: 0.6rem; }
       .filter-chip { font-size: 0.7rem; padding: 0.25rem 0.7rem; }
     }
@@ -1047,6 +1073,10 @@
   </span>
   <h1>Excavatio</h1>
   <span>ancient world explorer</span>
+  <div class="user-box">
+    <span class="user-name">{{ session.get('username', '') }}</span>
+    <a href="/logout" class="logout-btn">sign out</a>
+  </div>
 </header>
 
 <nav>
