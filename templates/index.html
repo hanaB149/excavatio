@@ -1740,7 +1740,7 @@
     panel.innerHTML = html;
     panel.classList.add('visible');
     if (ev.lat != null && ev.lng != null) {
-      sourceEventMap = L.map('source-event-map', { scrollWheelZoom: false }).setView([ev.lat, ev.lng], 5);
+      sourceEventMap = L.map('source-event-map', { scrollWheelZoom: false }).setView([ev.lat, ev.lng], 6);
       sourceEventMap.on('focus', function() { sourceEventMap.scrollWheelZoom.enable(); });
       sourceEventMap.on('blur', function() { sourceEventMap.scrollWheelZoom.disable(); });
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
