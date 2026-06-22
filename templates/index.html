@@ -2772,7 +2772,7 @@
       }).addTo(map);
       marker.bindTooltip(
         '<span style="font-weight:700;color:' + journey.color + '">' + (i + 1) + '. ' + stop.name + '</span>',
-        { permanent: true, direction: 'top', offset: [0, -8], className: 'journey-stop-label' }
+        { direction: 'top', offset: [0, -8], className: 'journey-stop-label' }
       );
       marker.bindPopup('<strong>' + stop.name + '</strong><br><span style="font-size:0.8rem;color:#9a7a8a;">' + stop.desc + '</span>');
       journeyLayers[journey.id].markers.push(marker);
