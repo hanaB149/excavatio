@@ -2457,18 +2457,12 @@
   function filterByYear(year) {
     const siteEls = document.querySelectorAll('.site-chip');
     const hidden = [];
-    const visibleSites = [];
     siteEls.forEach(el => {
       const sy = parseFloat(el.dataset.start);
       const ey = el.dataset.end ? parseFloat(el.dataset.end) : 9999;
       const visible = sy <= year;
       el.style.display = visible ? '' : 'none';
-      if (!visible) {
-        hidden.push(el.dataset.id);
-      } else {
-        const site = allSites.find(s => s.id === el.dataset.id);
-        if (site) visibleSites.push(site);
-      }
+      if (!visible) hidden.push(el.dataset.id);
     });
     Object.entries(mapMarkers).forEach(([id, m]) => {
       if (hidden.includes(id)) {
@@ -2477,6 +2471,7 @@
         m.layer.addTo(map);
       }
     });
+    const visibleSites = allSites.filter(s => s.startYear <= year);
     renderAnalytics(visibleSites);
   }
 
