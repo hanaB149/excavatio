@@ -746,6 +746,20 @@
       gap: 0.4rem 1rem;
     }
     .source-detail .sd-meta span { display: inline-flex; align-items: center; gap: 0.3rem; }
+
+    .sd-map-wrap {
+      margin-bottom: 1.2rem;
+      border-radius: 14px;
+      overflow: hidden;
+      border: 2px solid rgba(244, 143, 177, 0.25);
+      box-shadow: 0 4px 18px rgba(244, 143, 177, 0.1);
+      animation: fadeSlideUp 0.4s ease;
+    }
+    .sd-map {
+      height: 260px;
+      width: 100%;
+    }
+
     .source-detail .sd-summary {
       font-size: 0.93rem;
       line-height: 1.7;
@@ -1589,6 +1603,7 @@
   let allEvents = [];
   let activeEventId = null;
   let sourceSearchQuery = '';
+  let sourceEventMap = null;
 
   function loadEvents() {
     if (allEvents.length) { renderEventChips(); return; }
@@ -1683,12 +1698,17 @@
 
   function renderEventDetail(ev) {
     const panel = document.getElementById('source-detail');
+    if (sourceEventMap) { sourceEventMap.remove(); sourceEventMap = null; }
     let html =
       '<h3>' + ev.name + '</h3>' +
       '<div class="sd-meta">' +
         '<span><strong>date:</strong> ' + ev.date + '</span>' +
         '<span><strong>location:</strong> ' + ev.location + '</span>' +
-      '</div>' +
+      '</div>';
+    if (ev.lat != null && ev.lng != null) {
+      html += '<div class="sd-map-wrap"><div class="sd-map" id="source-event-map"></div></div>';
+    }
+    html +=
       '<p class="sd-summary">' + ev.summary + '</p>' +
       '<div class="sd-figs"><strong>key figures:</strong> ' + (ev.keyFigures || []).join(', ') + '</div>' +
       '<div class="sd-conseq"><strong>consequences:</strong> ' + ev.consequences + '</div>' +
@@ -1719,6 +1739,17 @@
     html += '</div>';
     panel.innerHTML = html;
     panel.classList.add('visible');
+    if (ev.lat != null && ev.lng != null) {
+      sourceEventMap = L.map('source-event-map', { scrollWheelZoom: false }).setView([ev.lat, ev.lng], 5);
+      sourceEventMap.on('focus', function() { sourceEventMap.scrollWheelZoom.enable(); });
+      sourceEventMap.on('blur', function() { sourceEventMap.scrollWheelZoom.disable(); });
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 18,
+        attribution: '&copy; <a href="https://openstreetmap.org/copyright">OSM</a>'
+      }).addTo(sourceEventMap);
+      L.marker([ev.lat, ev.lng]).addTo(sourceEventMap);
+      setTimeout(function() { if (sourceEventMap) sourceEventMap.invalidateSize(); }, 120);
+    }
   }
 
   // load events when the source tab is first activated
