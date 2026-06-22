@@ -1072,6 +1072,24 @@
       border-radius: 2px;
       transition: width 0.5s ease;
     }
+    .achieve-card .ac-tier-dots {
+      display: flex;
+      gap: 0.25rem;
+      margin-bottom: 0.5rem;
+      justify-content: center;
+    }
+    .achieve-card .ac-tier-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: rgba(244,143,177,0.15);
+      transition: all 0.3s ease;
+    }
+    .achieve-card .ac-tier-dot.earned {
+      background: #ffd54f;
+      box-shadow: 0 0 6px rgba(255,213,79,0.4);
+    }
+    .achieve-card.locked .ac-tier-dot.earned { background: rgba(244,143,177,0.2); }
 
     .achieve-log {
       background: rgba(255,255,255,0.82);
@@ -2963,18 +2981,29 @@
 
     const grid = document.getElementById('achieve-grid');
     grid.innerHTML = '';
-    stats.achievements.forEach(a => {
-      const unlocked = stats.achievements_unlocked.includes(a.id);
-      const count = a.action ? (stats.action_counts[a.action] || 0) : stats.total_points;
-      const target = a.count || a.points;
-      const pct = Math.min(100, Math.round((count / target) * 100));
+    const tiers = stats.tiers || [];
+    tiers.forEach(t => {
+      const currentTier = t.current_tier;
+      const unlocked = currentTier !== null;
+      const nextTier = t.next_tier;
+      const maxed = t.maxed;
+      const target = nextTier ? nextTier.threshold : (t.tiers[t.tiers.length - 1].threshold);
+      const pct = maxed ? 100 : Math.min(100, Math.round((t.current / target) * 100));
+      const tierLabel = unlocked ? currentTier : 'Not yet earned';
+      const progressText = maxed ? 'MAXED OUT' : (unlocked ? 'Next: ' + t.current + '/' + target : t.current + '/' + target);
+      const desc = nextTier ? nextTier.desc : t.tiers[t.tiers.length - 1].desc;
       const card = document.createElement('div');
       card.className = 'achieve-card ' + (unlocked ? 'unlocked' : 'locked');
+      const tierDots = t.tiers.map((tier, i) => {
+        const earned = t.current_tier_idx >= i;
+        return '<span class="ac-tier-dot ' + (earned ? 'earned' : '') + '"></span>';
+      }).join('');
       card.innerHTML =
-        '<div class="ac-icon">' + (ACHIEVE_ICONS[a.icon] || ACHIEVE_ICONS.laurel) + '</div>' +
-        '<div class="ac-name">' + a.name + '</div>' +
-        '<div class="ac-desc">' + a.desc + '</div>' +
-        '<div class="ac-progress">' + (unlocked ? 'unlocked' : count + ' / ' + target) + '</div>' +
+        '<div class="ac-icon">' + (ACHIEVE_ICONS[t.icon] || ACHIEVE_ICONS.laurel) + '</div>' +
+        '<div class="ac-tier-dots">' + tierDots + '</div>' +
+        '<div class="ac-name">' + tierLabel + '</div>' +
+        '<div class="ac-desc">' + desc + '</div>' +
+        '<div class="ac-progress">' + progressText + '</div>' +
         '<div class="ac-bar"><div class="ac-bar-fill" style="width:' + pct + '%"></div></div>';
       grid.appendChild(card);
     });

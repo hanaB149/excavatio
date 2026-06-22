@@ -110,11 +110,48 @@ POINTS = {
 }
 
 ACHIEVEMENTS = [
-    {"id": "cartographer", "name": "Cartographer", "desc": "View 10 excavation sites", "icon": "map", "action": "view_site", "count": 10, "points": 20},
-    {"id": "wayfarer", "name": "Wayfarer", "desc": "Trace 5 ancient journeys", "icon": "route", "action": "trace_journey", "count": 5, "points": 25},
-    {"id": "philologist", "name": "Philologist", "desc": "Identify 3 classical texts", "icon": "scroll", "action": "identify_text", "count": 3, "points": 30},
-    {"id": "historian", "name": "Historian", "desc": "Explore 5 source connections", "icon": "book", "action": "view_event", "count": 5, "points": 25},
-    {"id": "polymath", "name": "Polymath", "desc": "Earn 100 total drachmae", "icon": "laurel", "action": None, "count": None, "points": 100},
+    {"id": "cartographer", "name": "Cartographer", "icon": "map", "action": "view_site",
+     "tiers": [
+         {"threshold": 10, "label": "Cartographer I", "desc": "View 10 excavation sites"},
+         {"threshold": 25, "label": "Cartographer II", "desc": "View 25 excavation sites"},
+         {"threshold": 50, "label": "Cartographer III", "desc": "View 50 excavation sites"},
+         {"threshold": 100, "label": "Master Cartographer", "desc": "View 100 excavation sites"},
+     ]},
+    {"id": "wayfarer", "name": "Wayfarer", "icon": "route", "action": "trace_journey",
+     "tiers": [
+         {"threshold": 5, "label": "Wayfarer I", "desc": "Trace 5 ancient journeys"},
+         {"threshold": 10, "label": "Wayfarer II", "desc": "Trace 10 ancient journeys"},
+         {"threshold": 20, "label": "Wayfarer III", "desc": "Trace 20 ancient journeys"},
+         {"threshold": 50, "label": "Master Wayfarer", "desc": "Trace 50 ancient journeys"},
+     ]},
+    {"id": "philologist", "name": "Philologist", "icon": "scroll", "action": "identify_text",
+     "tiers": [
+         {"threshold": 3, "label": "Philologist I", "desc": "Identify 3 classical texts"},
+         {"threshold": 10, "label": "Philologist II", "desc": "Identify 10 classical texts"},
+         {"threshold": 25, "label": "Philologist III", "desc": "Identify 25 classical texts"},
+         {"threshold": 50, "label": "Master Philologist", "desc": "Identify 50 classical texts"},
+     ]},
+    {"id": "historian", "name": "Historian", "icon": "book", "action": "view_event",
+     "tiers": [
+         {"threshold": 5, "label": "Historian I", "desc": "Explore 5 source connections"},
+         {"threshold": 15, "label": "Historian II", "desc": "Explore 15 source connections"},
+         {"threshold": 30, "label": "Historian III", "desc": "Explore 30 source connections"},
+         {"threshold": 60, "label": "Master Historian", "desc": "Explore 60 source connections"},
+     ]},
+    {"id": "polymath", "name": "Polymath", "icon": "laurel", "action": None,
+     "tiers": [
+         {"threshold": 100, "label": "Polymath I", "desc": "Earn 100 total drachmae"},
+         {"threshold": 250, "label": "Polymath II", "desc": "Earn 250 total drachmae"},
+         {"threshold": 500, "label": "Polymath III", "desc": "Earn 500 total drachmae"},
+         {"threshold": 1000, "label": "Master Polymath", "desc": "Earn 1000 total drachmae"},
+     ]},
+    {"id": "gamer", "name": "Gladiator", "icon": "laurel", "action": "quiz_correct",
+     "tiers": [
+         {"threshold": 5, "label": "Gladiator I", "desc": "Win 5 game rounds"},
+         {"threshold": 15, "label": "Gladiator II", "desc": "Win 15 game rounds"},
+         {"threshold": 30, "label": "Gladiator III", "desc": "Win 30 game rounds"},
+         {"threshold": 60, "label": "Master Gladiator", "desc": "Win 60 game rounds"},
+     ]},
 ]
 
 
@@ -134,33 +171,58 @@ def award_points(action, detail=""):
 def adjust_points(delta, detail=""):
     """Award or deduct arbitrary points (for quiz games)."""
     total = max(0, session.get("total_points", 0) + delta)
-    session["total_points"] = total
     counts = session.get("action_counts", {})
     if delta > 0:
         counts["quiz_correct"] = counts.get("quiz_correct", 0) + 1
     elif delta < 0:
         counts["quiz_wrong"] = counts.get("quiz_wrong", 0) + 1
+    session["total_points"] = total
     session["action_counts"] = counts
     session.modified = True
     return {"points": delta, "total": total}
 
 
+def _compute_unlocked(total, counts):
+    """Return (unlocked_ids, tier_info) where tier_info has per-achievement current tier + progress."""
+    unlocked = []
+    tiers_out = []
+    for a in ACHIEVEMENTS:
+        if a["action"] is None:
+            current = total
+        else:
+            current = counts.get(a["action"], 0)
+        highest = -1
+        for ti, tier in enumerate(a["tiers"]):
+            if current >= tier["threshold"]:
+                highest = ti
+                unlocked.append(a["id"] + "_" + str(ti))
+        if highest >= 0:
+            next_tier = a["tiers"][highest + 1] if highest + 1 < len(a["tiers"]) else None
+        else:
+            next_tier = a["tiers"][0]
+        tiers_out.append({
+            "id": a["id"],
+            "icon": a["icon"],
+            "current": current,
+            "current_tier": highest >= 0 and a["tiers"][highest]["label"] or None,
+            "current_tier_idx": highest,
+            "next_tier": next_tier,
+            "maxed": highest == len(a["tiers"]) - 1,
+            "tiers": a["tiers"],
+        })
+    return unlocked, tiers_out
+
+
 def get_user_stats():
     total = session.get("total_points", 0)
     counts = session.get("action_counts", {})
-    unlocked = []
-    for a in ACHIEVEMENTS:
-        if a["action"] is None:
-            if total >= a["points"]:
-                unlocked.append(a["id"])
-        else:
-            if counts.get(a["action"], 0) >= a["count"]:
-                unlocked.append(a["id"])
+    unlocked, tiers = _compute_unlocked(total, counts)
     return {
         "total_points": total,
         "action_counts": counts,
         "achievements_unlocked": unlocked,
         "achievements": ACHIEVEMENTS,
+        "tiers": tiers,
     }
 
 EXCAVATIONS = [
