@@ -634,6 +634,46 @@
       color: #c94f7c;
       font-weight: 600;
     }
+    .source-search-meta .ai-badge {
+      display: inline-block;
+      background: linear-gradient(135deg, #ce93d8, #7986cb);
+      color: white;
+      font-size: 0.65rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      padding: 0.1rem 0.4rem;
+      border-radius: 5px;
+      vertical-align: middle;
+      margin-right: 0.3rem;
+    }
+    .source-search-meta .ai-searching {
+      color: #7986cb;
+      font-weight: 600;
+    }
+    .source-search-meta .ai-searching::after {
+      content: '';
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border: 2px solid #7986cb;
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-left: 0.4rem;
+      vertical-align: middle;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .source-event-chip .ev-reason {
+      margin-top: 0.4rem;
+      padding-top: 0.4rem;
+      border-top: 1px dashed rgba(244, 143, 177, 0.25);
+      font-size: 0.78rem;
+      line-height: 1.5;
+      color: #7a5a6a;
+      font-style: italic;
+      font-family: 'Source Serif 4', serif;
+    }
 
     .source-events {
       display: grid;
@@ -1570,11 +1610,40 @@
     return hay.includes(q.toLowerCase());
   }
 
-  function renderEventChips() {
+  function renderEventChips(aiMatches) {
     const container = document.getElementById('source-events');
     const meta = document.getElementById('source-search-meta');
     container.innerHTML = '';
-    const filtered = allEvents.filter(ev => eventMatchesQuery(ev, sourceSearchQuery));
+
+    if (aiMatches) {
+      // AI semantic search results
+      if (!aiMatches.length) {
+        meta.innerHTML = '<span class="no-results">no events match "' + sourceSearchQuery + '"</span>';
+        return;
+      }
+      meta.innerHTML = '<span class="ai-badge">AI</span> ' + aiMatches.length + ' event' + (aiMatches.length === 1 ? '' : 's') + ' match "' + sourceSearchQuery + '"';
+      aiMatches.forEach(m => {
+        const ev = allEvents.find(e => e.id === m.id);
+        if (!ev) return;
+        const chip = document.createElement('button');
+        chip.className = 'source-event-chip';
+        if (ev.id === activeEventId) chip.classList.add('active');
+        chip.dataset.id = ev.id;
+        chip.innerHTML =
+          '<div class="ev-name">' + ev.name + '</div>' +
+          '<div class="ev-date">' + ev.date + '</div>' +
+          '<div class="ev-loc">' + ev.location + '</div>' +
+          (m.reason ? '<div class="ev-reason">' + m.reason + '</div>' : '');
+        chip.addEventListener('click', () => selectEvent(ev.id));
+        container.appendChild(chip);
+      });
+      return;
+    }
+
+    // local keyword filter (instant)
+    const filtered = sourceSearchQuery
+      ? allEvents.filter(ev => eventMatchesQuery(ev, sourceSearchQuery))
+      : allEvents;
     if (!filtered.length) {
       meta.innerHTML = '<span class="no-results">no events match "' + sourceSearchQuery + '"</span>';
       return;
@@ -1659,18 +1728,56 @@
     });
   });
 
-  // source search bar
+  // source search bar — AI semantic search with local keyword fallback
   const sourceSearchInput = document.getElementById('source-search-input');
   const sourceSearchClear = document.getElementById('source-search-clear');
+  let aiSearchTimer = null;
+  let aiSearchToken = 0;
+
+  function runAISearch(query) {
+    const token = ++aiSearchToken;
+    const meta = document.getElementById('source-search-meta');
+    meta.innerHTML = '<span class="ai-searching">searching with AI…</span>';
+    fetch('/api/search-events', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query })
+    })
+      .then(r => r.json())
+      .then(data => {
+        if (token !== aiSearchToken) return; // a newer search superseded this
+        if (data.source === 'ai' && data.matches) {
+          renderEventChips(data.matches);
+        } else {
+          // AI unavailable — keep local keyword results already shown
+          if (!allEvents.filter(ev => eventMatchesQuery(ev, query)).length) {
+            meta.innerHTML = '<span class="no-results">no events match "' + query + '"</span>';
+          }
+        }
+      })
+      .catch(() => {
+        if (token !== aiSearchToken) return;
+        // network error — keep local results
+      });
+  }
+
   sourceSearchInput.addEventListener('input', () => {
     sourceSearchQuery = sourceSearchInput.value.trim();
     sourceSearchClear.classList.toggle('visible', !!sourceSearchQuery);
+    clearTimeout(aiSearchTimer);
+    // instant local keyword filter for immediate feedback
     renderEventChips();
+    // debounce AI semantic search for natural-language queries
+    if (sourceSearchQuery.length >= 3) {
+      aiSearchTimer = setTimeout(() => runAISearch(sourceSearchQuery), 550);
+    }
   });
   sourceSearchClear.addEventListener('click', () => {
     sourceSearchInput.value = '';
     sourceSearchQuery = '';
     sourceSearchClear.classList.remove('visible');
+    clearTimeout(aiSearchTimer);
+    aiSearchToken++;
     renderEventChips();
     sourceSearchInput.focus();
   });

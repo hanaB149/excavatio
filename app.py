@@ -1146,6 +1146,76 @@ def api_sources():
         return jsonify(EVENTS[event_id])
     return jsonify(list(EVENTS.values()))
 
+def query_ai_event_search(query, api_key):
+    catalog = []
+    for eid, ev in EVENTS.items():
+        catalog.append(
+            f"- id: {eid} | name: {ev['name']} | date: {ev['date']} | location: {ev['location']} | "
+            f"figures: {', '.join(ev.get('keyFigures', []))} | "
+            f"sources: {', '.join(s['author'] + ' (' + s['work'] + ')' for s in ev['sources'])} | "
+            f"summary: {ev['summary']}"
+        )
+    prompt = (
+        "You are a world-class classical historian. The user is searching a database of historical events "
+        "from the ancient Mediterranean world. Each event is listed below with its id, name, date, location, "
+        "key figures, ancient sources that mention it, and a summary.\n\n"
+        "The user's search query may be natural language (e.g. 'battles where the underdog won', "
+        "'events involving Cleopatra', 'naval battles', 'the fall of a city'). "
+        "Match the query to the most relevant events — considering themes, outcomes, figures, and context, "
+        "not just literal keywords.\n\n"
+        "Return ONLY valid JSON: a list of objects, each with:\n"
+        '- "id": the event id from the catalog\n'
+        '- "reason": a short explanation (1 sentence) of why this event matches the query\n\n'
+        "If no events match, return an empty list: []\n"
+        "Do not include events not in the catalog. Order by relevance (most relevant first).\n\n"
+        "Event catalog:\n" + "\n".join(catalog) + "\n\n"
+        "User query: '''" + query + "'''"
+    )
+    url = "https://api.aiand.com/v1/chat/completions"
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json",
+    }
+    body = {
+        "model": "deepseek-ai/deepseek-v4-pro",
+        "messages": [{"role": "user", "content": prompt}],
+        "temperature": 0.1,
+        "max_tokens": 1000,
+    }
+    r = requests.post(url, json=body, headers=headers, timeout=30)
+    r.raise_for_status()
+    resp = r.json()
+    raw = resp["choices"][0]["message"]["content"]
+    raw = raw.strip()
+    if raw.startswith("```"):
+        raw = raw.split("\n", 1)[-1]
+        raw = raw.rsplit("```", 1)[0]
+    raw = raw.strip()
+    data = json.loads(raw)
+    if not isinstance(data, list):
+        return []
+    valid_ids = set(EVENTS.keys())
+    return [m for m in data if m.get("id") in valid_ids]
+
+@app.route("/api/search-events", methods=["POST"])
+def api_search_events():
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "No data"}), 400
+    query = data.get("query", "").strip()
+    if not query:
+        return jsonify({"matches": [], "source": "none"})
+
+    ai_key = os.environ.get("AIAND_API_KEY", "")
+    if ai_key:
+        try:
+            matches = query_ai_event_search(query, ai_key)
+            return jsonify({"matches": matches, "source": "ai"})
+        except Exception as e:
+            logger.error(f"AI event search error: {e}")
+
+    return jsonify({"matches": [], "source": "fallback", "message": "AI search unavailable"})
+
 @app.route("/api/identify", methods=["POST"])
 def api_identify():
     data = request.get_json()
