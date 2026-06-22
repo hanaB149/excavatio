@@ -572,6 +572,61 @@
     .maze-btn:hover { border-color: #7e57c2; background: rgba(255,255,255,0.85); }
     .maze-btn:active { transform: scale(0.92); }
 
+    /* labours of hercules */
+    .lh-slots {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.4rem;
+      margin-bottom: 0.8rem;
+    }
+    .lh-slot {
+      background: rgba(255,255,255,0.5);
+      border: 2px dashed rgba(239,83,80,0.15);
+      border-radius: 10px;
+      padding: 0.4rem 0.6rem;
+      min-height: 58px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      animation: fadeSlideUp 0.35s ease backwards;
+    }
+    .lh-slot:hover { border-color: rgba(239,83,80,0.3); background: rgba(255,255,255,0.7); }
+    .lh-slot.filled { border-style: solid; border-color: rgba(239,83,80,0.2); background: rgba(255,255,255,0.7); }
+    .lh-slot.perfect { border-color: #81c784; background: rgba(129,199,132,0.12); }
+    .lh-slot.missed { border-color: #e57373; background: rgba(229,115,115,0.1); }
+    .lh-slot .lhs-num {
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: #ef5350;
+      margin-bottom: 0.15rem;
+    }
+    .lh-slot .lhs-empty {
+      font-size: 0.65rem;
+      color: #b08a9a;
+    }
+    .lh-slot .lhs-img { font-size: 1.2rem; }
+    .lh-slot .lhs-name { font-size: 0.72rem; font-weight: 600; color: #5a3c4a; }
+    .lh-cards {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem;
+    }
+    .lh-card {
+      background: rgba(255,255,255,0.6);
+      border: 2px solid rgba(239,83,80,0.15);
+      border-radius: 12px;
+      padding: 0.6rem 0.7rem;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      animation: fadeSlideUp 0.35s ease backwards;
+      text-align: center;
+    }
+    .lh-card:hover { border-color: #ef5350; background: rgba(255,255,255,0.85); transform: translateY(-2px); }
+    .lh-card.selected { border-color: #ef5350; background: rgba(239,83,80,0.08); box-shadow: 0 0 0 3px rgba(239,83,80,0.1); }
+    .lh-card .lhc-img { font-size: 1.3rem; margin-bottom: 0.15rem; }
+    .lh-card .lhc-name { font-size: 0.78rem; font-weight: 700; color: #5a3c4a; }
+    .lh-card .lhc-desc { font-size: 0.68rem; color: #9a7a8a; line-height: 1.3; }
+
     /* hercules labours game */
 
     /* column drop (tetris-style) game */
@@ -4362,223 +4417,358 @@
 
   // --- labours of hercules ---
   const LABOURS = [
-    { num: 1, name: 'Nemean Lion', prompt: 'Slay the Nemean Lion, whose hide could not be pierced by any weapon.', hint: 'If only I could strangle it...' },
-    { num: 2, name: 'Lernaean Hydra', prompt: 'Kill the nine-headed Lernaean Hydra, whose heads regrew when cut.', hint: 'I need a firebrand to cauterize the stumps.' },
-    { num: 3, name: 'Ceryneian Hind', prompt: 'Capture the golden-horned Ceryneian Hind, sacred to Artemis.', hint: 'I must bring it back alive, not dead.' },
-    { num: 4, name: 'Erymanthian Boar', prompt: 'Bring back the monstrous Erymanthian Boar alive.', hint: 'Deep snow might slow it down.' },
-    { num: 5, name: 'Augean Stables', prompt: 'Clean the Augean Stables in a single day — thousands of cattle.', hint: 'I could divert the rivers Alpheus and Peneus.' },
-    { num: 6, name: 'Stymphalian Birds', prompt: 'Drive away the man-eating Stymphalian Birds.', hint: 'A bronze rattle from Hephaestus would scare them off.' },
-    { num: 7, name: 'Cretan Bull', prompt: 'Capture the mad Cretan Bull that was terrorizing Crete.', hint: 'Minos would be glad to see this beast gone.' },
-    { num: 8, name: 'Mares of Diomedes', prompt: 'Tame and bring back the man-eating Mares of Diomedes.', hint: 'Lord Diomedes himself became their meal.' },
-    { num: 9, name: 'Hippolyta\'s Girdle', prompt: 'Obtain the magical girdle of Hippolyta, queen of the Amazons.', hint: 'Hera may stir trouble among the Amazons.' },
-    { num: 10, name: 'Geryon\'s Cattle', prompt: 'Steal the cattle of the three-bodied giant Geryon.', hint: 'I can cross the Libyan desert — a cup of Helios might help.' },
-    { num: 11, name: 'Apples of Hesperides', prompt: 'Fetch the golden apples from the garden of the Hesperides.', hint: 'I might need someone to hold the sky while I look.' },
-    { num: 12, name: 'Cerberus', prompt: 'Bring Cerberus, the three-headed guard dog of the Underworld, to the surface.', hint: 'No weapons — I must wrestle him bare-handed.' },
+    { name: 'Nemean Lion', desc: 'A beast with impenetrable golden fur', img: '\uD83E\uDD81' },
+    { name: 'Lernaean Hydra', desc: 'A serpent with nine regenerating heads', img: '\uD83D\uDC0D' },
+    { name: 'Ceryneian Hind', desc: 'A golden-horned deer sacred to Artemis', img: '\uD83E\uDD8C' },
+    { name: 'Erymanthian Boar', desc: 'A monstrous boar terrorizing Arcadia', img: '\uD83D\uDC17' },
+    { name: 'Augean Stables', desc: 'A thousand cattle stables never cleaned', img: '\uD83D\uDED2' },
+    { name: 'Stymphalian Birds', desc: 'Man-eating birds with bronze feathers', img: '\uD83E\uDDA6' },
+    { name: 'Cretan Bull', desc: 'A mad bull that breathes fire', img: '\uD83D\uDC02' },
+    { name: 'Mares of Diomedes', desc: 'Four man-eating mares that breathe fire', img: '\uD83D\uDC0E' },
+    { name: 'Hippolyta\'s Girdle', desc: 'The magical belt of the Amazon queen', img: '\uD83D\uDC66' },
+    { name: 'Geryon\'s Cattle', desc: 'Red cattle guarded by a three-bodied giant', img: '\uD83D\uDC04' },
+    { name: 'Apples of Hesperides', desc: 'Golden apples from a garden guarded by a dragon', img: '\uD83C\uDF4E' },
+    { name: 'Cerberus', desc: 'The three-headed hound of the Underworld', img: '\uD83D\uDC36' },
   ];
 
   let laboursState = null;
 
   function loadLabours() {
-    laboursState = { answers: new Array(12).fill(''), submitted: false, score: 0 };
-    const arena = document.getElementById('game-arena');
-    let html = '<div class="ga-header"><span class="ga-title">Labours of Hercules</span><button class="ga-back" onclick="closeGame()">&larr; back</button></div>';
-    html += '<div style="font-size:0.85rem;color:#7a5a6a;margin-bottom:1rem;line-height:1.5;">Name each of Hercules\' twelve labours in the correct order. Partial names may count &mdash; be as specific as you can!</div>';
-    LABOURS.forEach((lab, i) => {
-      html += '<div class="labours-question">' +
-        '<div class="lq-num">Labour ' + (i + 1) + '</div>' +
-        '<div class="lq-prompt">' + lab.prompt + '</div>' +
-        '<input type="text" class="labours-input" data-i="' + i + '" placeholder="your answer..." ' + (laboursState.submitted ? 'disabled' : '') + '>' +
-        '</div>';
-    });
-    html += '<button class="quiz-submit" onclick="submitLabours()">submit labours</button>';
+    var shuffled = LABOURS.slice().sort(function() { return Math.random() - 0.5; });
+    laboursState = {
+      cards: shuffled,
+      slots: new Array(12).fill(null),
+      nextCard: 0,
+      submitted: false,
+      wrongCount: 0,
+      startTime: Date.now(),
+    };
+    var arena = document.getElementById('game-arena');
+    var html =
+      '<div class="ga-header"><span class="ga-title">Labours of Hercules</span><button class="ga-back" onclick="closeGame()">&larr; back</button></div>' +
+      '<div style="font-size:0.85rem;color:#7a5a6a;margin-bottom:0.8rem;line-height:1.5;text-align:center;">Drag each labour card into the correct numbered slot to complete the story. Click a card to select it, then click a slot to place it.</div>' +
+      '<div style="display:flex;gap:0.5rem;justify-content:center;margin-bottom:0.8rem;flex-wrap:wrap;">' +
+        '<div class="mm-stat"><div class="mms-val" id="lh-placed">0</div><div class="mms-label">placed</div></div>' +
+        '<div class="mm-stat"><div class="mms-val" id="lh-wrong">0</div><div class="mms-label">mistakes</div></div>' +
+        '<div class="mm-stat"><div class="mms-val" id="lh-time">0s</div><div class="mms-label">time</div></div>' +
+      '</div>' +
+      '<div class="lh-slots" id="lh-slots"></div>' +
+      '<div class="lh-cards" id="lh-cards"></div>';
     arena.innerHTML = html;
+    // timer
+    laboursState.timer = setInterval(function() {
+      if (!laboursState || laboursState.submitted) return;
+      var elapsed = Math.floor((Date.now() - laboursState.startTime) / 1000);
+      var tEl = document.getElementById('lh-time');
+      if (tEl) tEl.textContent = elapsed + 's';
+    }, 1000);
+    renderLabours();
+  }
+
+  var laboursSelected = null;
+
+  function renderLabours() {
+    if (!laboursState) return;
+    var slotsEl = document.getElementById('lh-slots');
+    var cardsEl = document.getElementById('lh-cards');
+    if (!slotsEl || !cardsEl) return;
+    slotsEl.innerHTML = '';
+    cardsEl.innerHTML = '';
+    for (var i = 0; i < 12; i++) {
+      var slot = document.createElement('div');
+      slot.className = 'lh-slot';
+      if (laboursState.slots[i]) {
+        slot.classList.add('filled');
+        slot.innerHTML = '<div class="lhs-img">' + laboursState.slots[i].img + '</div><div class="lhs-num">' + (i + 1) + '</div><div class="lhs-name">' + laboursState.slots[i].name + '</div>';
+        slot.style.animationDelay = (i * 0.05) + 's';
+      } else {
+        slot.innerHTML = '<div class="lhs-num">' + (i + 1) + '</div><div class="lhs-empty">place labour ' + (i + 1) + '</div>';
+      }
+      slot.dataset.idx = i;
+      slot.addEventListener('click', function() {
+        var idx = parseInt(this.dataset.idx);
+        if (laboursState.submitted) return;
+        if (laboursState.slots[idx]) {
+          // pick up placed card back to hand
+          laboursState.nextCard--;
+          laboursState.cards.splice(laboursState.nextCard, 0, laboursState.slots[idx]);
+          laboursState.slots[idx] = null;
+          laboursSelected = null;
+          document.getElementById('lh-placed').textContent = laboursState.slots.filter(function(s) { return s; }).length;
+          renderLabours();
+        } else if (laboursSelected !== null) {
+          // place selected card
+          var card = laboursState.cards.splice(laboursSelected, 1)[0];
+          laboursState.slots[idx] = card;
+          laboursSelected = null;
+          document.getElementById('lh-placed').textContent = laboursState.slots.filter(function(s) { return s; }).length;
+          var correct = true;
+          for (var j = 0; j < 12; j++) {
+            if (laboursState.slots[j] && laboursState.slots[j].name !== LABOURS[j].name) { correct = false; break; }
+          }
+          if (!correct && laboursState.slots[idx]) {
+            if (laboursState.slots[idx].name !== LABOURS[idx].name) {
+              laboursState.wrongCount++;
+              document.getElementById('lh-wrong').textContent = laboursState.wrongCount;
+            }
+          }
+          renderLabours();
+        }
+        if (laboursState.slots.filter(function(s) { return s; }).length === 12) {
+          setTimeout(submitLabours, 400);
+        }
+      });
+      slotsEl.appendChild(slot);
+    }
+    laboursState.cards.forEach(function(card, ci) {
+      var cardEl = document.createElement('div');
+      cardEl.className = 'lh-card';
+      if (laboursSelected === ci) cardEl.classList.add('selected');
+      cardEl.innerHTML = '<div class="lhc-img">' + card.img + '</div><div class="lhc-name">' + card.name + '</div><div class="lhc-desc">' + card.desc + '</div>';
+      cardEl.addEventListener('click', function() {
+        if (laboursState.submitted) return;
+        laboursSelected = (laboursSelected === ci) ? null : ci;
+        renderLabours();
+      });
+      cardsEl.appendChild(cardEl);
+    });
   }
 
   function submitLabours() {
     if (laboursState.submitted) return;
     laboursState.submitted = true;
-    var inputs = document.querySelectorAll('.labours-input');
+    clearInterval(laboursState.timer);
     var correct = 0;
-    var feedback = [];
-    inputs.forEach(function(inp, i) {
-      var val = inp.value.trim().toLowerCase();
-      var target = LABOURS[i].name.toLowerCase();
-      var isCorrect = val && (val === target || val.indexOf(target) >= 0 || target.indexOf(val) >= 0);
-      if (isCorrect) {
-        correct++;
-        inp.classList.add('correct');
-        inp.value = LABOURS[i].name;
-      } else {
-        inp.classList.add('wrong');
-        inp.value = inp.value || '(empty)';
-        feedback.push('Labour ' + (i + 1) + ' was: ' + LABOURS[i].name);
-      }
-      inp.disabled = true;
-    });
-    var points = correct * 5 - (12 - correct) * 2;
+    for (var i = 0; i < 12; i++) {
+      if (laboursState.slots[i] && laboursState.slots[i].name === LABOURS[i].name) correct++;
+    }
+    var elapsed = Math.floor((Date.now() - laboursState.startTime) / 1000);
+    var timeBonus = elapsed < 60 ? 20 : elapsed < 120 ? 10 : 0;
+    var points = correct * 5 - laboursState.wrongCount * 2 + timeBonus;
     if (correct === 12) points += 30;
-    laboursState.score = points;
     fetch('/api/award', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action: 'trace_journey', detail: 'labours: ' + correct + '/12' })
     }).then(function(r) { return r.json(); }).then(function(d) { updatePointsBadge(d.total_points); }).catch(function() {});
+    // mark slots
+    var slots = document.querySelectorAll('.lh-slot');
+    for (var j = 0; j < 12; j++) {
+      if (slots[j]) {
+        if (laboursState.slots[j] && laboursState.slots[j].name === LABOURS[j].name) {
+          slots[j].classList.add('perfect');
+        } else {
+          slots[j].classList.add('missed');
+        }
+      }
+    }
     var arena = document.getElementById('game-arena');
     var result = document.createElement('div');
     result.className = 'quiz-result';
     result.innerHTML =
       '<div class="qr-score">' + correct + '/12</div>' +
-      '<div class="qr-label">' + (correct === 12 ? 'a true hero!' : 'the gods are not impressed') + '</div>' +
-      '<div class="qr-points ' + (points >= 0 ? 'positive' : 'negative') + '">' + (points >= 0 ? '+' : '') + points + ' drachmae</div>' +
-      (correct === 12 ? '<div class="qr-perfect">all twelve labours complete!</div>' : '') +
-      (feedback.length ? '<div style="font-size:0.8rem;color:#7a5a6a;margin-top:0.5rem;text-align:left;line-height:1.6;">' + feedback.join('<br>') + '</div>' : '') +
-      '<button class="cd-btn" style="max-width:120px;margin-top:0.8rem" onclick="loadLabours()">play again</button>';
+      '<div class="qr-label">' + (correct === 12 ? 'the labours are complete!' : 'some labours remain') + '</div>' +
+      '<div class="qr-points positive">+' + points + ' drachmae</div>' +
+      (timeBonus > 0 ? '<div style="font-size:0.8rem;color:#9a7a8a;margin-top:0.3rem;">time bonus: +' + timeBonus + ' (' + elapsed + 's)</div>' : '') +
+      (correct === 12 ? '<div class="qr-perfect">hero of myth!</div>' : '') +
+      '<div style="font-size:0.8rem;color:#9a7a8a;margin-top:0.5rem">' + laboursState.wrongCount + ' mistakes &middot; ' + elapsed + 's</div>' +
+      '<button class="cd-btn" style="max-width:140px;margin-top:0.8rem" onclick="loadLabours()">play again</button>';
     arena.appendChild(result);
-    document.querySelector('.quiz-submit').style.display = 'none';
   }
 
   // --- labyrinth maze ---
   let mazeState = null;
   let mazeLoop = null;
+  let mazeLevel = 1;
 
-  const MAZE_DATA = [
-    // level 0: 5x5
-    { size: 5, walls: [[1,1,1,1,1],[1,0,0,0,1],[1,1,1,0,1],[1,0,0,0,1],[1,1,1,1,1]],
-      start: {r:1,c:1}, end: {r:3,c:3}, theseusName: 'Theseus', monsterName: 'Minotaur' },
-  ];
-
-  function buildMaze(level) {
-    var d = MAZE_DATA[0];
+  function mazeGenerate(size) {
     var grid = [];
-    for (var r = 0; r < d.size; r++) {
-      grid[r] = [];
-      for (var c = 0; c < d.size; c++) {
-        grid[r][c] = d.walls[r * d.size + c] === undefined ? 0 : d.walls[r][c];
+    for (var r = 0; r < size; r++) { grid[r] = new Array(size).fill(1); }
+    function carve(r, c) {
+      grid[r][c] = 0;
+      var dirs = [[-2,0],[2,0],[0,-2],[0,2]];
+      for (var i = dirs.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = dirs[i]; dirs[i] = dirs[j]; dirs[j] = t; }
+      for (var d = 0; d < dirs.length; d++) {
+        var nr = r + dirs[d][0], nc = c + dirs[d][1];
+        if (nr > 0 && nr < size - 1 && nc > 0 && nc < size - 1 && grid[nr][nc] === 1) {
+          grid[r + dirs[d][0] / 2][c + dirs[d][1] / 2] = 0;
+          carve(nr, nc);
+        }
       }
     }
+    carve(1, 1);
     return grid;
   }
 
   function loadMaze() {
-    var cellSize = 70;
-    var d = MAZE_DATA[0];
+    var size = Math.min(7 + mazeLevel * 2, 15);
+    var grid = mazeGenerate(size);
+    var start = {r: 1, c: 1};
+    var end = {r: size - 2, c: size - 2};
     mazeState = {
-      level: 0,
-      grid: buildMaze(0),
-      size: d.size,
-      playerPos: { r: d.start.r, c: d.start.c },
-      endPos: { r: d.end.r, c: d.end.c },
+      size: size,
+      grid: grid,
+      playerPos: {r: start.r, c: start.c},
+      endPos: {r: end.r, c: end.c},
+      minotaurPos: {r: end.r - 1, c: end.c},
       moves: 0,
       wrongTurns: 0,
       won: false,
       gameOver: false,
-      cellSize: cellSize,
+      flashTimer: 0,
+      cellSize: Math.max(28, Math.min(42, Math.floor(380 / size))),
     };
+    var canvasSize = size * mazeState.cellSize;
     var arena = document.getElementById('game-arena');
     arena.innerHTML =
       '<div class="ga-header"><span class="ga-title">Labyrinth Escape</span><button class="ga-back" onclick="closeMaze()">&larr; back</button></div>' +
-      '<div class="maze-instruction">Guide <strong>Theseus</strong> through the labyrinth to slay the <strong>Minotaur</strong> and escape. Use arrow keys or tap the buttons.</div>' +
-      '<div class="maze-stats" style="display:flex;gap:0.8rem;justify-content:center;margin-bottom:0.6rem;flex-wrap:wrap;">' +
+      '<div class="maze-instruction">Guide <strong>Theseus</strong> (\u0398) past the <strong>Minotaur</strong> (\u039c) who hunts you. Reach the golden glow to escape. Arrow keys or buttons.</div>' +
+      '<div style="display:flex;gap:0.8rem;justify-content:center;margin-bottom:0.6rem;flex-wrap:wrap;">' +
+        '<div class="mm-stat"><div class="mms-val" id="mz-level">' + mazeLevel + '</div><div class="mms-label">level</div></div>' +
         '<div class="mm-stat"><div class="mms-val" id="mz-moves">0</div><div class="mms-label">moves</div></div>' +
-        '<div class="mm-stat"><div class="mms-val" id="mz-wrong">0</div><div class="mms-label">wrong turns</div></div>' +
+        '<div class="mm-stat"><div class="mms-val" style="color:#ef5350" id="mz-wrong">0</div><div class="mms-label">wall hits</div></div>' +
       '</div>' +
-      '<div class="maze-wrap"><canvas id="maze-canvas" width="' + (cellSize * d.size) + '" height="' + (cellSize * d.size) + '"></canvas></div>' +
-      '<div class="maze-controls">' +
-        '<button class="maze-btn" onclick="mazeMove(-1,0)">&#9650;</button>' +
-      '</div>' +
-      '<div class="maze-controls">' +
-        '<button class="maze-btn" onclick="mazeMove(0,-1)">&#9664;</button>' +
-        '<button class="maze-btn" onclick="mazeMove(0,1)">&#9654;</button>' +
-      '</div>' +
-      '<div class="maze-controls">' +
-        '<button class="maze-btn" onclick="mazeMove(1,0)">&#9660;</button>' +
-      '</div>';
+      '<div class="maze-wrap"><canvas id="maze-canvas" width="' + canvasSize + '" height="' + canvasSize + '"></canvas></div>' +
+      '<div class="maze-controls"><button class="maze-btn" onclick="mazeMove(-1,0)">\u25B2</button></div>' +
+      '<div class="maze-controls"><button class="maze-btn" onclick="mazeMove(0,-1)">\u25C0</button><button class="maze-btn" onclick="mazeMove(0,1)">\u25B6</button></div>' +
+      '<div class="maze-controls"><button class="maze-btn" onclick="mazeMove(1,0)">\u25BC</button></div>';
 
     drawMaze();
     document.addEventListener('keydown', mazeKeyHandler);
-    mazeLoop = setInterval(mazeTick, 150);
+    mazeLoop = setInterval(mazeTick, 280);
   }
 
   function drawMaze() {
     var canvas = document.getElementById('maze-canvas');
     if (!canvas) return;
     var ctx = canvas.getContext('2d');
-    var s = mazeState;
-    var cs = s.cellSize;
-    var grid = s.grid;
+    var s = mazeState, cs = s.cellSize, sz = s.size;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    for (var r = 0; r < s.size; r++) {
-      for (var c = 0; c < s.size; c++) {
+    for (var r = 0; r < sz; r++) {
+      for (var c = 0; c < sz; c++) {
         var x = c * cs, y = r * cs;
-        if (grid[r][c] === 1) {
+        if (s.grid[r][c] === 1) {
           ctx.fillStyle = '#2a1a4e';
           ctx.fillRect(x, y, cs, cs);
-        } else {
-          ctx.fillStyle = '#1a1a2e';
-          ctx.fillRect(x, y, cs, cs);
-          ctx.strokeStyle = 'rgba(126,87,194,0.1)';
+          ctx.strokeStyle = 'rgba(126,87,194,0.06)';
           ctx.strokeRect(x, y, cs, cs);
         }
       }
     }
-    // end
-    ctx.fillStyle = '#ffd54f';
+    s.flashTimer++;
+    var flash = Math.sin(s.flashTimer * 0.15) * 0.25 + 0.75;
+    ctx.shadowColor = '#ffd54f';
+    ctx.shadowBlur = 22 * flash;
+    ctx.fillStyle = 'rgba(255,213,79,' + flash + ')';
     ctx.beginPath();
-    ctx.arc(s.endPos.c * cs + cs / 2, s.endPos.r * cs + cs / 2, cs / 4, 0, Math.PI * 2);
+    ctx.arc(s.endPos.c * cs + cs / 2, s.endPos.r * cs + cs / 2, cs / 2.5, 0, Math.PI * 2);
     ctx.fill();
-    // player
-    ctx.fillStyle = '#42a5f5';
-    ctx.beginPath();
-    ctx.arc(s.playerPos.c * cs + cs / 2, s.playerPos.r * cs + cs / 2, cs / 3, 0, Math.PI * 2);
-    ctx.fill();
+    ctx.shadowBlur = 0;
     ctx.fillStyle = '#fff';
-    ctx.font = 'bold ' + (cs / 3) + 'px Inter, sans-serif';
+    ctx.font = 'bold ' + Math.round(cs / 2) + 'px Inter, sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText('\u0398', s.playerPos.c * cs + cs / 2, s.playerPos.r * cs + cs / 2);
+    ctx.fillText('\u039c', s.endPos.c * cs + cs / 2, s.endPos.r * cs + cs / 2 + 1);
+    if (!s.won && !s.gameOver) {
+      var mr = s.minotaurPos.r, mc = s.minotaurPos.c;
+      var dist = Math.abs(mr - s.playerPos.r) + Math.abs(mc - s.playerPos.c);
+      var danger = dist < 5;
+      ctx.shadowColor = danger ? '#ff1744' : '#b71c1c';
+      ctx.shadowBlur = danger ? 28 : 10;
+      ctx.fillStyle = danger ? '#ef5350' : '#c62828';
+      ctx.beginPath();
+      ctx.arc(mc * cs + cs / 2, mr * cs + cs / 2, cs / 2.2, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold ' + Math.round(cs / 2.3) + 'px Inter, sans-serif';
+      ctx.fillText('\u039c', mc * cs + cs / 2, mr * cs + cs / 2 + 1);
+    }
+    ctx.shadowColor = '#42a5f5';
+    ctx.shadowBlur = 14;
+    ctx.fillStyle = '#42a5f5';
+    ctx.beginPath();
+    ctx.arc(s.playerPos.c * cs + cs / 2, s.playerPos.r * cs + cs / 2, cs / 2.6, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold ' + Math.round(cs / 1.9) + 'px Inter, sans-serif';
+    ctx.fillText('\u0398', s.playerPos.c * cs + cs / 2, s.playerPos.r * cs + cs / 2 + 1);
   }
 
   function mazeTick() {
     if (!mazeState || mazeState.won || mazeState.gameOver) return;
-    // auto-walk along correct path after timeout
+    var mr = mazeState.minotaurPos.r, mc = mazeState.minotaurPos.c;
+    var pr = mazeState.playerPos.r, pc = mazeState.playerPos.c;
+    var dr = Math.sign(pr - mr), dc = Math.sign(pc - mc);
+    var choices = [];
+    if (dr && mazeState.grid[mr + dr] && mazeState.grid[mr + dr][mc] === 0) choices.push({r: mr + dr, c: mc});
+    if (dc && mazeState.grid[mr][mc + dc] === 0) choices.push({r: mr, c: mc + dc});
+    if (choices.length) {
+      var best = choices.reduce(function(a, b) {
+        var da = Math.abs(a.r - pr) + Math.abs(a.c - pc);
+        var db = Math.abs(b.r - pr) + Math.abs(b.c - pc);
+        return da < db ? a : b;
+      });
+      mazeState.minotaurPos = best;
+    }
+    if (mazeState.minotaurPos.r === pr && mazeState.minotaurPos.c === pc) {
+      mazeState.gameOver = true;
+      clearInterval(mazeLoop);
+      document.removeEventListener('keydown', mazeKeyHandler);
+      var arena = document.getElementById('game-arena');
+      var result = document.createElement('div');
+      result.className = 'quiz-result';
+      result.innerHTML =
+        '<div style="font-size:2rem;font-weight:800;color:#ef5350;">Caught!</div>' +
+        '<div class="qr-label">The Minotaur devoured Theseus. Try again.</div>' +
+        '<button class="cd-btn" style="max-width:140px;margin-top:0.8rem" onclick="loadMaze()">try again</button>';
+      arena.appendChild(result);
+      return;
+    }
+    drawMaze();
   }
 
   function mazeMove(dr, dc) {
     if (!mazeState || mazeState.won || mazeState.gameOver) return;
-    var nr = mazeState.playerPos.r + dr;
-    var nc = mazeState.playerPos.c + dc;
+    var nr = mazeState.playerPos.r + dr, nc = mazeState.playerPos.c + dc;
     if (nr < 0 || nr >= mazeState.size || nc < 0 || nc >= mazeState.size) return;
     if (mazeState.grid[nr][nc] === 1) {
       mazeState.wrongTurns++;
-      document.getElementById('mz-wrong').textContent = mazeState.wrongTurns;
+      var wEl = document.getElementById('mz-wrong');
+      if (wEl) wEl.textContent = mazeState.wrongTurns;
       return;
     }
-    mazeState.playerPos = { r: nr, c: nc };
+    mazeState.playerPos = {r: nr, c: nc};
     mazeState.moves++;
-    document.getElementById('mz-moves').textContent = mazeState.moves;
+    var mEl = document.getElementById('mz-moves');
+    if (mEl) mEl.textContent = mazeState.moves;
     drawMaze();
     if (nr === mazeState.endPos.r && nc === mazeState.endPos.c) {
       mazeState.won = true;
       clearInterval(mazeLoop);
       document.removeEventListener('keydown', mazeKeyHandler);
-      var points = 10 - mazeState.wrongTurns * 5;
+      var points = 20 - mazeState.wrongTurns * 5;
       if (mazeState.wrongTurns === 0) points += 50;
       if (points < 0) points = 0;
       fetch('/api/award', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'trace_journey', detail: 'maze complete: ' + mazeState.moves + ' moves' })
+        body: JSON.stringify({ action: 'trace_journey', detail: 'maze level ' + mazeLevel + ': ' + mazeState.moves + ' moves' })
       }).then(function(r) { return r.json(); }).then(function(d) { updatePointsBadge(d.total_points); }).catch(function() {});
+      mazeLevel++;
       var arena = document.getElementById('game-arena');
       var result = document.createElement('div');
       result.className = 'quiz-result';
       result.innerHTML =
-        '<div class="qr-score">Escaped!</div>' +
-        '<div class="qr-label">' + (mazeState.wrongTurns === 0 ? 'flawless victory!' : 'the minotaur is defeated') + '</div>' +
+        '<div class="qr-score">Escape!</div>' +
+        '<div class="qr-label">' + (mazeState.wrongTurns === 0 ? 'flawless — the legend lives!' : 'Theseus escapes the labyrinth') + '</div>' +
         '<div class="qr-points positive">+' + points + ' drachmae</div>' +
-        (mazeState.wrongTurns === 0 ? '<div class="qr-perfect">no wrong turns — perfect!</div>' : '') +
-        '<div style="font-size:0.8rem;color:#9a7a8a;margin-top:0.5rem">' + mazeState.moves + ' moves &middot; ' + mazeState.wrongTurns + ' wrong turns</div>' +
-        '<button class="cd-btn" style="max-width:120px;margin-top:0.8rem" onclick="loadMaze()">play again</button>';
+        (mazeState.wrongTurns === 0 ? '<div class="qr-perfect">no wall hits — perfect run!</div>' : '') +
+        '<div style="font-size:0.8rem;color:#9a7a8a;margin-top:0.5rem">' + mazeState.moves + ' moves &middot; ' + mazeState.wrongTurns + ' wall hits &middot; next level: ' + mazeLevel + '</div>' +
+        '<div style="display:flex;gap:0.5rem;justify-content:center;margin-top:0.8rem">' +
+          '<button class="cd-btn" onclick="loadMaze()">next level</button>' +
+        '</div>';
       arena.appendChild(result);
     }
   }
