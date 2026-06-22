@@ -563,6 +563,78 @@
     .source-intro h2 { font-size: 1.4rem; color: #c94f7c; margin-bottom: 0.4rem; }
     .source-intro p { font-size: 0.9rem; color: #7a5a6a; line-height: 1.5; }
 
+    .source-search {
+      position: relative;
+      max-width: 640px;
+      margin: 0 auto 0.6rem;
+    }
+    .source-search .ss-icon {
+      position: absolute;
+      left: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 18px;
+      height: 18px;
+      color: #b08a9a;
+      pointer-events: none;
+    }
+    .source-search input {
+      width: 100%;
+      padding: 0.85rem 2.6rem 0.85rem 2.8rem;
+      border: 2px solid rgba(244, 143, 177, 0.25);
+      border-radius: 14px;
+      font-size: 0.92rem;
+      font-family: 'Inter', sans-serif;
+      font-weight: 500;
+      color: #4a2c3a;
+      background: rgba(255,255,255,0.88);
+      backdrop-filter: blur(10px);
+      transition: all 0.3s ease;
+    }
+    .source-search input::placeholder { color: #b8869a; font-weight: 400; }
+    .source-search input:focus {
+      outline: none;
+      border-color: #f48fb1;
+      background: white;
+      box-shadow: 0 0 0 5px rgba(244, 143, 177, 0.1);
+    }
+    .source-search #source-search-clear {
+      position: absolute;
+      right: 0.6rem;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 26px;
+      height: 26px;
+      border: none;
+      border-radius: 50%;
+      background: rgba(244,143,177,0.12);
+      color: #c94f7c;
+      font-size: 1.2rem;
+      line-height: 1;
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      font-family: inherit;
+    }
+    .source-search #source-search-clear.visible { display: flex; }
+    .source-search #source-search-clear:hover {
+      background: rgba(244,143,177,0.25);
+      transform: translateY(-50%) scale(1.1);
+    }
+    .source-search-meta {
+      text-align: center;
+      font-size: 0.8rem;
+      color: #9a7a8a;
+      margin-bottom: 1rem;
+      min-height: 1.1rem;
+    }
+    .source-search-meta .no-results {
+      color: #c94f7c;
+      font-weight: 600;
+    }
+
     .source-events {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
@@ -1033,6 +1105,12 @@
         <h2>ancient source connections</h2>
         <p>select a historical event to see where it appears in ancient literature and material culture — and why each source mentions it.</p>
       </div>
+      <div class="source-search">
+        <svg class="ss-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/><line x1="16.5" y1="16.5" x2="21" y2="21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <input type="text" id="source-search-input" placeholder="search by event, figure, date, or source (e.g. 'actium', 'herodotus', '480 BCE', 'aeneid')...">
+        <button id="source-search-clear" aria-label="clear search">&times;</button>
+      </div>
+      <div class="source-search-meta" id="source-search-meta"></div>
       <div class="source-events" id="source-events"></div>
       <div class="source-detail" id="source-detail"></div>
     </div>
@@ -1470,6 +1548,7 @@
   // --- source connections tab ---
   let allEvents = [];
   let activeEventId = null;
+  let sourceSearchQuery = '';
 
   function loadEvents() {
     if (allEvents.length) { renderEventChips(); return; }
@@ -1481,12 +1560,32 @@
       });
   }
 
+  function eventMatchesQuery(ev, q) {
+    if (!q) return true;
+    const hay = [
+      ev.name, ev.date, ev.location, ev.summary, ev.consequences,
+      (ev.keyFigures || []).join(' '),
+      ev.sources.map(s => [s.author, s.work, s.citation, s.reference, s.why].join(' ')).join(' '),
+    ].join(' ').toLowerCase();
+    return hay.includes(q.toLowerCase());
+  }
+
   function renderEventChips() {
     const container = document.getElementById('source-events');
+    const meta = document.getElementById('source-search-meta');
     container.innerHTML = '';
-    allEvents.forEach(ev => {
+    const filtered = allEvents.filter(ev => eventMatchesQuery(ev, sourceSearchQuery));
+    if (!filtered.length) {
+      meta.innerHTML = '<span class="no-results">no events match "' + sourceSearchQuery + '"</span>';
+      return;
+    }
+    meta.innerHTML = sourceSearchQuery
+      ? filtered.length + ' event' + (filtered.length === 1 ? '' : 's') + ' match "' + sourceSearchQuery + '"'
+      : '';
+    filtered.forEach(ev => {
       const chip = document.createElement('button');
       chip.className = 'source-event-chip';
+      if (ev.id === activeEventId) chip.classList.add('active');
       chip.dataset.id = ev.id;
       chip.innerHTML =
         '<div class="ev-name">' + ev.name + '</div>' +
@@ -1558,6 +1657,22 @@
     btn.addEventListener('click', () => {
       if (btn.dataset.tab === 'source-tab') loadEvents();
     });
+  });
+
+  // source search bar
+  const sourceSearchInput = document.getElementById('source-search-input');
+  const sourceSearchClear = document.getElementById('source-search-clear');
+  sourceSearchInput.addEventListener('input', () => {
+    sourceSearchQuery = sourceSearchInput.value.trim();
+    sourceSearchClear.classList.toggle('visible', !!sourceSearchQuery);
+    renderEventChips();
+  });
+  sourceSearchClear.addEventListener('click', () => {
+    sourceSearchInput.value = '';
+    sourceSearchQuery = '';
+    sourceSearchClear.classList.remove('visible');
+    renderEventChips();
+    sourceSearchInput.focus();
   });
 </script>
 </body>
