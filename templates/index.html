@@ -1470,23 +1470,54 @@
     }
     .journey-panel {
       display: none;
-      margin-top: 0.7rem;
-      padding: 1rem 1.2rem;
-      background: rgba(255,255,255,0.6);
-      border-radius: 14px;
-      border: 1px solid rgba(244, 143, 177, 0.12);
+      position: fixed;
+      top: 50%;
+      right: 1.5rem;
+      transform: translateY(-50%);
+      width: 360px;
+      max-height: 70vh;
+      overflow-y: auto;
+      padding: 1.2rem 1.4rem;
+      background: rgba(255,255,255,0.95);
+      backdrop-filter: blur(16px);
+      border-radius: 18px;
+      border: 2px solid rgba(244, 143, 177, 0.25);
+      box-shadow: 0 12px 48px rgba(244,143,177,0.18);
+      z-index: 1000;
+      animation: fadeSlideUp 0.3s ease;
     }
     .journey-panel.visible { display: block; }
+    .journey-panel .jp-close {
+      position: absolute;
+      top: 0.7rem;
+      right: 0.9rem;
+      width: 26px;
+      height: 26px;
+      border: none;
+      border-radius: 50%;
+      background: rgba(244,143,177,0.12);
+      color: #c94f7c;
+      font-size: 1.1rem;
+      line-height: 1;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      font-family: inherit;
+    }
+    .journey-panel .jp-close:hover { background: rgba(244,143,177,0.25); transform: scale(1.1); }
     .journey-panel .jp-title {
       font-weight: 800;
-      font-size: 0.95rem;
-      margin-bottom: 0.2rem;
+      font-size: 1.05rem;
+      margin-bottom: 0.3rem;
+      padding-right: 1.5rem;
     }
     .journey-panel .jp-desc {
       font-size: 0.82rem;
       color: #7a4a6a;
-      line-height: 1.5;
-      margin-bottom: 0.5rem;
+      line-height: 1.55;
+      margin-bottom: 0.6rem;
     }
     .journey-panel .jp-stops {
       display: flex;
@@ -1494,6 +1525,7 @@
       overflow-x: auto;
       padding-bottom: 0.3rem;
       scrollbar-width: thin;
+      flex-wrap: wrap;
     }
     .journey-panel .jp-stops::-webkit-scrollbar { height: 3px; }
     .journey-panel .jp-stops::-webkit-scrollbar-thumb { background: #f48fb1; border-radius: 4px; }
@@ -2128,6 +2160,7 @@
       header .user-box { margin-left: 0; }
       .timeline-labels { font-size: 0.6rem; }
       .filter-chip { font-size: 0.7rem; padding: 0.25rem 0.7rem; }
+      .journey-panel { width: calc(100vw - 2rem); right: 1rem; left: 1rem; max-height: 60vh; }
     }
   </style>
 </head>
@@ -2217,6 +2250,7 @@
         </div>
         <div class="journey-chips" id="journey-chips"></div>
         <div class="journey-panel" id="journey-panel">
+          <button class="jp-close" onclick="closeJourneyPanel()">&times;</button>
           <div class="jp-title" id="jp-title"></div>
           <div class="jp-desc" id="jp-desc"></div>
           <div class="jp-stops" id="jp-stops"></div>
@@ -2734,12 +2768,7 @@
 
   function toggleJourney(journey) {
     if (activeJourneyId === journey.id) {
-      clearJourney(journey.id);
-      activeJourneyId = null;
-      document.getElementById('journey-panel').classList.remove('visible');
-      document.querySelectorAll('.journey-chip').forEach(c => c.classList.remove('active'));
-      document.getElementById('journey-legend').innerHTML = '';
-      showExcavationMarkers();
+      closeJourneyPanel();
       return;
     }
     Object.keys(journeyLayers).forEach(id => clearJourney(id));
@@ -2790,7 +2819,7 @@
     const ff = journey.factFile;
     const ffDiv = document.createElement('div');
     ffDiv.id = 'jp-factfile';
-    ffDiv.style.cssText = 'background:rgba(255,255,255,0.5);border-radius:12px;margin-top:0.6rem;border:1px solid rgba(244,143,177,0.1);overflow:hidden;';
+    ffDiv.style.cssText = 'background:rgba(254,246,248,0.7);border-radius:12px;margin-top:0.6rem;border:1px solid rgba(244,143,177,0.1);overflow:hidden;';
     let ffHtml = '';
     if (ff) {
       ffHtml += '<div style="display:grid;grid-template-columns:auto 1fr;gap:0.2rem 0.8rem;padding:0.7rem 0.9rem 0.5rem;font-size:0.73rem;">';
@@ -2836,6 +2865,17 @@
 
     const legend = document.getElementById('journey-legend');
     legend.innerHTML = '<span class="jl-item"><span class="jl-line" style="background:' + journey.color + '"></span>' + journey.stops.length + ' stops</span>';
+  }
+
+  function closeJourneyPanel() {
+    if (activeJourneyId) {
+      clearJourney(activeJourneyId);
+      activeJourneyId = null;
+    }
+    document.getElementById('journey-panel').classList.remove('visible');
+    document.querySelectorAll('.journey-chip').forEach(c => c.classList.remove('active'));
+    document.getElementById('journey-legend').innerHTML = '';
+    showExcavationMarkers();
   }
 
   function clearJourney(id) {
