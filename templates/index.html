@@ -179,6 +179,206 @@
     header .user-box .logout-btn:hover {
       background: rgba(255,255,255,0.32);
     }
+    header .user-box .points-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      background: linear-gradient(135deg, #ffd54f, #ffb74d);
+      color: #5d4037;
+      font-size: 0.78rem;
+      font-weight: 800;
+      padding: 0.25rem 0.6rem;
+      border-radius: 50px;
+      box-shadow: 0 2px 8px rgba(255,183,77,0.3);
+      transition: all 0.3s ease;
+    }
+    header .user-box .points-badge::before {
+      content: '\25C8';
+      font-size: 0.7rem;
+    }
+    header .user-box .points-badge.bump {
+      transform: scale(1.3);
+      box-shadow: 0 4px 16px rgba(255,183,77,0.5);
+    }
+
+    /* achievements tab */
+    .achieve-box { max-width: 900px; margin: 0 auto; }
+    .achieve-intro { text-align: center; margin-bottom: 1.5rem; }
+    .achieve-intro h2 { font-size: 1.4rem; color: #c94f7c; margin-bottom: 0.4rem; }
+    .achieve-intro p { font-size: 0.9rem; color: #7a5a6a; line-height: 1.5; }
+
+    .achieve-summary {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+    }
+    .achieve-total {
+      background: rgba(255,255,255,0.82);
+      backdrop-filter: blur(10px);
+      border: 2px solid rgba(244, 143, 177, 0.18);
+      border-radius: 16px;
+      padding: 1.2rem 1.8rem;
+      text-align: center;
+      min-width: 140px;
+      transition: all 0.3s ease;
+    }
+    .achieve-total:hover {
+      border-color: #f48fb1;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 22px rgba(244,143,177,0.1);
+    }
+    .achieve-total .at-number {
+      font-size: 2rem;
+      font-weight: 800;
+      color: #c94f7c;
+      line-height: 1;
+    }
+    .achieve-total .at-label {
+      font-size: 0.75rem;
+      color: #9a7a8a;
+      margin-top: 0.3rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .achieve-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 0.8rem;
+      margin-bottom: 2rem;
+    }
+    .achieve-card {
+      background: rgba(255,255,255,0.82);
+      backdrop-filter: blur(10px);
+      border: 2px solid rgba(244, 143, 177, 0.18);
+      border-radius: 16px;
+      padding: 1.1rem;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .achieve-card.unlocked {
+      border-color: #ffd54f;
+      background: linear-gradient(135deg, rgba(255,213,79,0.12), rgba(255,255,255,0.85));
+      box-shadow: 0 4px 18px rgba(255,183,77,0.12);
+    }
+    .achieve-card.unlocked::before {
+      content: '\2714';
+      position: absolute;
+      top: 0.6rem;
+      right: 0.8rem;
+      color: #ffb74d;
+      font-size: 1.1rem;
+      font-weight: 800;
+    }
+    .achieve-card.locked {
+      opacity: 0.6;
+    }
+    .achieve-card .ac-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 0.6rem;
+      background: rgba(244,143,177,0.12);
+    }
+    .achieve-card.unlocked .ac-icon {
+      background: rgba(255,183,77,0.2);
+    }
+    .achieve-card .ac-icon svg {
+      width: 20px;
+      height: 20px;
+      fill: none;
+      stroke: #c94f7c;
+      stroke-width: 2;
+    }
+    .achieve-card.unlocked .ac-icon svg {
+      stroke: #e65100;
+    }
+    .achieve-card .ac-name {
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: #c94f7c;
+      margin-bottom: 0.2rem;
+    }
+    .achieve-card .ac-desc {
+      font-size: 0.8rem;
+      color: #7a5a6a;
+      line-height: 1.5;
+      margin-bottom: 0.5rem;
+    }
+    .achieve-card .ac-progress {
+      font-size: 0.72rem;
+      color: #9a7a8a;
+      font-weight: 600;
+    }
+    .achieve-card .ac-bar {
+      height: 4px;
+      background: rgba(244,143,177,0.12);
+      border-radius: 2px;
+      margin-top: 0.4rem;
+      overflow: hidden;
+    }
+    .achieve-card .ac-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #f48fb1, #ffd54f);
+      border-radius: 2px;
+      transition: width 0.5s ease;
+    }
+
+    .achieve-log {
+      background: rgba(255,255,255,0.82);
+      backdrop-filter: blur(10px);
+      border: 2px solid rgba(244, 143, 177, 0.18);
+      border-radius: 16px;
+      padding: 1.2rem 1.4rem;
+    }
+    .achieve-log h3 {
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #9a6a8a;
+      margin-bottom: 0.8rem;
+    }
+    .achieve-feed-item {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.5rem 0;
+      border-bottom: 1px dashed rgba(244,143,177,0.12);
+      font-size: 0.85rem;
+    }
+    .achieve-feed-item:last-child { border-bottom: none; }
+    .achieve-feed-item .af-points {
+      background: rgba(255,213,79,0.18);
+      color: #e65100;
+      font-weight: 800;
+      font-size: 0.75rem;
+      padding: 0.15rem 0.5rem;
+      border-radius: 8px;
+      white-space: nowrap;
+    }
+    .achieve-feed-item .af-action {
+      color: #5a3c4a;
+      font-weight: 500;
+      flex: 1;
+    }
+    .achieve-feed-item .af-time {
+      font-size: 0.72rem;
+      color: #b08a9a;
+    }
+    .achieve-feed-empty {
+      color: #b08a9a;
+      font-size: 0.85rem;
+      font-style: italic;
+      text-align: center;
+      padding: 1rem;
+    }
 
     nav {
       background: rgba(255,255,255,0.65);
@@ -1074,6 +1274,7 @@
   <h1>Excavatio</h1>
   <span>ancient world explorer</span>
   <div class="user-box">
+    <span class="points-badge" id="points-badge" title="your drachmae">0</span>
     <span class="user-name">{{ session.get('username', '') }}</span>
     <a href="/logout" class="logout-btn">sign out</a>
   </div>
@@ -1083,6 +1284,7 @@
   <button class="active" data-tab="map-tab">excavation map</button>
   <button data-tab="text-tab">text identifier</button>
   <button data-tab="source-tab">source connections</button>
+  <button data-tab="achieve-tab">achievements</button>
 </nav>
 
 <div id="map-tab" class="tab-content active">
@@ -1197,6 +1399,36 @@
       <div class="source-search-meta" id="source-search-meta"></div>
       <div class="source-events" id="source-events"></div>
       <div class="source-detail" id="source-detail"></div>
+    </div>
+  </div>
+</div>
+
+<div id="achieve-tab" class="tab-content">
+  <div class="container">
+    <div class="achieve-box">
+      <div class="achieve-intro">
+        <h2>your achievements</h2>
+        <p>earn drachmae by exploring the ancient world. each action builds your standing as a scholar of antiquity.</p>
+      </div>
+      <div class="achieve-summary">
+        <div class="achieve-total">
+          <div class="at-number" id="achieve-total-points">0</div>
+          <div class="at-label">total drachmae</div>
+        </div>
+        <div class="achieve-total">
+          <div class="at-number" id="achieve-total-actions">0</div>
+          <div class="at-label">actions performed</div>
+        </div>
+        <div class="achieve-total">
+          <div class="at-number" id="achieve-total-badges">0</div>
+          <div class="at-label">badges unlocked</div>
+        </div>
+      </div>
+      <div class="achieve-grid" id="achieve-grid"></div>
+      <div class="achieve-log">
+        <h3>recent activity</h3>
+        <div id="achieve-feed"></div>
+      </div>
     </div>
   </div>
 </div>
@@ -1358,6 +1590,8 @@
 
     map.setView([site.lat, site.lng], 6, { animate: true });
 
+    awardUserPoints('view_site', site.title);
+
     Object.entries(mapMarkers).forEach(([mid, m]) => {
       const ongoing = m.data.ongoing;
       const dotColor = mid === id ? '#f48fb1' : (ongoing ? '#66bb6a' : '#ce93d8');
@@ -1433,6 +1667,8 @@
       c.classList.toggle('active', c.textContent.trim() === journey.name);
     });
     hideExcavationMarkers();
+
+    awardUserPoints('trace_journey', journey.name);
 
     const coords = journey.stops.map(s => [s.lat, s.lng]);
 
@@ -1724,6 +1960,7 @@
     const ev = allEvents.find(e => e.id === eventId);
     if (!ev) return;
     renderEventDetail(ev);
+    awardUserPoints('view_event', ev.name);
   }
 
   function renderEventDetail(ev) {
@@ -1841,6 +2078,92 @@
     aiSearchToken++;
     renderEventChips();
     sourceSearchInput.focus();
+  });
+
+  // --- achievements & points system ---
+  const ACHIEVE_ICONS = {
+    map: '<svg viewBox="0 0 24 24"><path d="M9 2L3 4v18l6-2 6 2 6-2V2l-6 2-6-2z"/><line x1="9" y1="2" x2="9" y2="20"/><line x1="15" y1="4" x2="15" y2="22"/></svg>',
+    route: '<svg viewBox="0 0 24 24"><circle cx="6" cy="19" r="2"/><circle cx="18" cy="5" r="2"/><path d="M6 17V9a4 4 0 014-4h4M14 7v8a4 4 0 01-4 4"/></svg>',
+    scroll: '<svg viewBox="0 0 24 24"><path d="M5 4h14v16H5z"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg>',
+    book: '<svg viewBox="0 0 24 24"><path d="M4 4h16v16H4z"/><line x1="12" y1="4" x2="12" y2="20"/></svg>',
+    laurel: '<svg viewBox="0 0 24 24"><path d="M12 22V8M8 12c-2-2-2-6 0-8M16 12c2-2 2-6 0-8M6 16c-2 0-4-2-4-4M18 16c2 0 4-2 4-4"/></svg>',
+  };
+
+  const ACTION_LABELS = {
+    view_site: 'viewed excavation site',
+    trace_journey: 'traced ancient journey',
+    identify_text: 'identified classical text',
+    view_event: 'explored source connection',
+    ai_search: 'AI semantic search',
+  };
+
+  let userStats = null;
+
+  function awardUserPoints(action, detail) {
+    fetch('/api/award', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action, detail })
+    })
+      .then(r => r.json())
+      .then(data => {
+        if (!data.awarded) return;
+        const badge = document.getElementById('points-badge');
+        badge.textContent = data.total_points;
+        badge.classList.add('bump');
+        setTimeout(() => badge.classList.remove('bump'), 500);
+        userStats = data;
+        if (document.getElementById('achieve-tab').classList.contains('active')) {
+          renderAchievements();
+        }
+      })
+      .catch(() => {});
+  }
+
+  function loadStats() {
+    fetch('/api/stats')
+      .then(r => r.json())
+      .then(data => {
+        userStats = data;
+        document.getElementById('points-badge').textContent = data.total_points;
+        renderAchievements();
+      })
+      .catch(() => {});
+  }
+
+  function renderAchievements() {
+    if (!userStats) return;
+    const stats = userStats;
+    document.getElementById('achieve-total-points').textContent = stats.total_points;
+    const totalActions = Object.values(stats.action_counts).reduce((a, b) => a + b, 0);
+    document.getElementById('achieve-total-actions').textContent = totalActions;
+    document.getElementById('achieve-total-badges').textContent = stats.achievements_unlocked.length;
+
+    const grid = document.getElementById('achieve-grid');
+    grid.innerHTML = '';
+    stats.achievements.forEach(a => {
+      const unlocked = stats.achievements_unlocked.includes(a.id);
+      const count = a.action ? (stats.action_counts[a.action] || 0) : stats.total_points;
+      const target = a.count || a.points;
+      const pct = Math.min(100, Math.round((count / target) * 100));
+      const card = document.createElement('div');
+      card.className = 'achieve-card ' + (unlocked ? 'unlocked' : 'locked');
+      card.innerHTML =
+        '<div class="ac-icon">' + (ACHIEVE_ICONS[a.icon] || ACHIEVE_ICONS.laurel) + '</div>' +
+        '<div class="ac-name">' + a.name + '</div>' +
+        '<div class="ac-desc">' + a.desc + '</div>' +
+        '<div class="ac-progress">' + (unlocked ? 'unlocked' : count + ' / ' + target) + '</div>' +
+        '<div class="ac-bar"><div class="ac-bar-fill" style="width:' + pct + '%"></div></div>';
+      grid.appendChild(card);
+    });
+  }
+
+  // load stats on page load and when achievements tab is opened
+  loadStats();
+  document.querySelectorAll('nav button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (btn.dataset.tab === 'achieve-tab') loadStats();
+    });
   });
 </script>
 </body>

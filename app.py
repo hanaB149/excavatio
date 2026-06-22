@@ -46,6 +46,65 @@ class User(db.Model):
         return check_password_hash(self.password_hash, password)
 
 
+class Activity(db.Model):
+    __tablename__ = "activities"
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    action = db.Column(db.String(40), nullable=False)
+    points = db.Column(db.Integer, nullable=False, default=0)
+    detail = db.Column(db.String(200), default="")
+    created_at = db.Column(db.DateTime, server_default=db.func.now())
+
+
+POINTS = {
+    "view_site": 2,
+    "trace_journey": 5,
+    "identify_text": 10,
+    "view_event": 5,
+    "ai_search": 3,
+}
+
+ACHIEVEMENTS = [
+    {"id": "cartographer", "name": "Cartographer", "desc": "View 10 excavation sites", "icon": "map", "action": "view_site", "count": 10, "points": 20},
+    {"id": "wayfarer", "name": "Wayfarer", "desc": "Trace 5 ancient journeys", "icon": "route", "action": "trace_journey", "count": 5, "points": 25},
+    {"id": "philologist", "name": "Philologist", "desc": "Identify 3 classical texts", "icon": "scroll", "action": "identify_text", "count": 3, "points": 30},
+    {"id": "historian", "name": "Historian", "desc": "Explore 5 source connections", "icon": "book", "action": "view_event", "count": 5, "points": 25},
+    {"id": "polymath", "name": "Polymath", "desc": "Earn 100 total drachmae", "icon": "laurel", "action": None, "count": None, "points": 100},
+]
+
+
+def award_points(user_id, action, detail=""):
+    pts = POINTS.get(action, 0)
+    if pts <= 0:
+        return None
+    entry = Activity(user_id=user_id, action=action, points=pts, detail=detail)
+    db.session.add(entry)
+    db.session.commit()
+    return entry
+
+
+def get_user_stats(user_id):
+    rows = Activity.query.filter_by(user_id=user_id).all()
+    total = sum(r.points for r in rows)
+    by_action = {}
+    for r in rows:
+        by_action[r.action] = by_action.get(r.action, 0) + 1
+    unlocked = []
+    for a in ACHIEVEMENTS:
+        if a["action"] is None:
+            if total >= a["points"]:
+                unlocked.append(a["id"])
+        else:
+            if by_action.get(a["action"], 0) >= a["count"]:
+                unlocked.append(a["id"])
+    return {
+        "total_points": total,
+        "action_counts": by_action,
+        "achievements_unlocked": unlocked,
+        "achievements": ACHIEVEMENTS,
+    }
+
+
 with app.app_context():
     db.create_all()
 
@@ -1317,6 +1376,7 @@ def api_search_events():
     if ai_key:
         try:
             matches = query_ai_event_search(query, ai_key)
+            award_points(session["user_id"], "ai_search", query)
             return jsonify({"matches": matches, "source": "ai"})
         except Exception as e:
             logger.error(f"AI event search error: {e}")
@@ -1338,15 +1398,42 @@ def api_identify():
         try:
             result = query_ai(text, ai_key)
             if result:
+                award_points(session["user_id"], "identify_text", result.get("work", ""))
                 return jsonify({"matched": True, "source": "ai", **result})
         except Exception as e:
             logger.error(f"AI API error: {e}")
 
     match = find_text_match(text)
     if match:
+        award_points(session["user_id"], "identify_text", match.get("work", ""))
         return jsonify({"matched": True, "source": "library", **match})
 
     return jsonify({"matched": False, "message": "No classical text match found."})
+
+@app.route("/api/stats")
+@login_required
+def api_stats():
+    return jsonify(get_user_stats(session["user_id"]))
+
+@app.route("/api/award", methods=["POST"])
+@login_required
+def api_award():
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "No data"}), 400
+    action = data.get("action", "")
+    detail = data.get("detail", "")[:200]
+    if action not in POINTS:
+        return jsonify({"error": "Invalid action"}), 400
+    entry = award_points(session["user_id"], action, detail)
+    stats = get_user_stats(session["user_id"])
+    return jsonify({
+        "awarded": entry is not None,
+        "points": entry.points if entry else 0,
+        "total_points": stats["total_points"],
+        "achievements_unlocked": stats["achievements_unlocked"],
+        "all_achievements": stats["achievements"],
+    })
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
