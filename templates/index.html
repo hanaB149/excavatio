@@ -556,6 +556,210 @@
     }
 
     .identify-box { max-width: 800px; margin: 0 auto; }
+
+    /* source connections tab */
+    .source-box { max-width: 1100px; margin: 0 auto; }
+    .source-intro { text-align: center; margin-bottom: 1.5rem; }
+    .source-intro h2 { font-size: 1.4rem; color: #c94f7c; margin-bottom: 0.4rem; }
+    .source-intro p { font-size: 0.9rem; color: #7a5a6a; line-height: 1.5; }
+
+    .source-events {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 0.7rem;
+      margin-bottom: 1.5rem;
+    }
+    .source-event-chip {
+      background: rgba(255,255,255,0.82);
+      backdrop-filter: blur(10px);
+      border: 2px solid rgba(244, 143, 177, 0.2);
+      border-radius: 14px;
+      padding: 0.85rem 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-family: inherit;
+      text-align: left;
+      color: #5a3c4a;
+    }
+    .source-event-chip:hover {
+      border-color: #f48fb1;
+      background: rgba(255,255,255,0.95);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 22px rgba(244,143,177,0.12);
+    }
+    .source-event-chip.active {
+      border-color: #c94f7c;
+      background: white;
+      box-shadow: 0 4px 18px rgba(244,143,177,0.16);
+    }
+    .source-event-chip .ev-name {
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: #c94f7c;
+      margin-bottom: 0.2rem;
+    }
+    .source-event-chip .ev-date {
+      font-size: 0.78rem;
+      color: #9a7a8a;
+      font-weight: 500;
+    }
+    .source-event-chip .ev-loc {
+      font-size: 0.75rem;
+      color: #b08a9a;
+      margin-top: 0.15rem;
+    }
+
+    .source-detail {
+      display: none;
+      background: rgba(255,255,255,0.85);
+      backdrop-filter: blur(12px);
+      border-radius: 18px;
+      border: 2px solid rgba(244, 143, 177, 0.22);
+      box-shadow: 0 6px 30px rgba(244, 143, 177, 0.1);
+      padding: 1.5rem;
+      animation: fadeSlideUp 0.4s ease;
+    }
+    .source-detail.visible { display: block; }
+    .source-detail h3 {
+      font-size: 1.25rem;
+      color: #c94f7c;
+      margin-bottom: 0.25rem;
+    }
+    .source-detail .sd-meta {
+      font-size: 0.82rem;
+      color: #9a7a8a;
+      margin-bottom: 0.85rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem 1rem;
+    }
+    .source-detail .sd-meta span { display: inline-flex; align-items: center; gap: 0.3rem; }
+    .source-detail .sd-summary {
+      font-size: 0.93rem;
+      line-height: 1.7;
+      color: #4a2c3a;
+      margin-bottom: 1rem;
+      font-family: 'Source Serif 4', serif;
+    }
+    .source-detail .sd-figs {
+      font-size: 0.83rem;
+      color: #6a4a5a;
+      margin-bottom: 0.4rem;
+    }
+    .source-detail .sd-figs strong { color: #c94f7c; }
+    .source-detail .sd-conseq {
+      font-size: 0.85rem;
+      color: #5a3c4a;
+      background: rgba(244,143,177,0.06);
+      border-left: 3px solid #f48fb1;
+      padding: 0.6rem 0.9rem;
+      border-radius: 0 8px 8px 0;
+      margin-bottom: 1.3rem;
+      line-height: 1.6;
+    }
+    .source-detail .sd-conseq strong { color: #c94f7c; }
+
+    .sd-sources-label {
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #9a6a8a;
+      margin-bottom: 0.7rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .sd-sources {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0.8rem;
+    }
+    .sd-source-card {
+      background: rgba(254, 246, 248, 0.7);
+      border: 1px solid rgba(244, 143, 177, 0.18);
+      border-radius: 14px;
+      padding: 1rem 1.1rem;
+      transition: all 0.25s ease;
+      animation: slideInStagger 0.4s ease backwards;
+    }
+    .sd-source-card:hover {
+      border-color: rgba(244,143,177,0.4);
+      box-shadow: 0 4px 16px rgba(244,143,177,0.08);
+    }
+    .sd-source-card .sc-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 0.7rem;
+      margin-bottom: 0.45rem;
+      flex-wrap: wrap;
+    }
+    .sd-source-card .sc-author {
+      font-weight: 700;
+      font-size: 0.98rem;
+      color: #c94f7c;
+    }
+    .sd-source-card .sc-work {
+      font-style: italic;
+      font-size: 0.9rem;
+      color: #7a4a6a;
+      font-family: 'Source Serif 4', serif;
+    }
+    .sd-source-card .sc-type {
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 0.2rem 0.55rem;
+      border-radius: 10px;
+      white-space: nowrap;
+    }
+    .sd-source-card .sc-type.literature {
+      background: rgba(129, 199, 132, 0.18);
+      color: #2e7d32;
+    }
+    .sd-source-card .sc-type.material {
+      background: rgba(255, 183, 77, 0.18);
+      color: #c67400;
+    }
+    .sd-source-card .sc-type.inscription {
+      background: rgba(121, 134, 203, 0.18);
+      color: #283593;
+    }
+    .sd-source-card .sc-citation {
+      font-size: 0.8rem;
+      color: #8a5a7a;
+      margin-bottom: 0.55rem;
+      font-weight: 600;
+    }
+    .sd-source-card .sc-ref {
+      font-size: 0.88rem;
+      line-height: 1.65;
+      color: #4a2c3a;
+      margin-bottom: 0.7rem;
+      font-family: 'Source Serif 4', serif;
+    }
+    .sd-source-card .sc-why {
+      font-size: 0.82rem;
+      line-height: 1.65;
+      color: #5a3c4a;
+      background: rgba(255,255,255,0.55);
+      border-radius: 8px;
+      padding: 0.6rem 0.8rem;
+      border-left: 2px solid #f48fb1;
+    }
+    .sd-source-card .sc-why-label {
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #c94f7c;
+      display: block;
+      margin-bottom: 0.25rem;
+    }
+
+    .identify-box { max-width: 800px; margin: 0 auto; }
     .identify-box textarea {
       width: 100%; min-height: 200px; padding: 1.2rem;
       border: 2px solid rgba(244, 143, 177, 0.2);
@@ -722,6 +926,7 @@
 <nav>
   <button class="active" data-tab="map-tab">excavation map</button>
   <button data-tab="text-tab">text identifier</button>
+  <button data-tab="source-tab">source connections</button>
 </nav>
 
 <div id="map-tab" class="tab-content active">
@@ -817,6 +1022,19 @@
           <div id="result-trans"></div>
         </div>
       </div>
+    </div>
+  </div>
+</div>
+
+<div id="source-tab" class="tab-content">
+  <div class="container">
+    <div class="source-box">
+      <div class="source-intro">
+        <h2>ancient source connections</h2>
+        <p>select a historical event to see where it appears in ancient literature and material culture — and why each source mentions it.</p>
+      </div>
+      <div class="source-events" id="source-events"></div>
+      <div class="source-detail" id="source-detail"></div>
     </div>
   </div>
 </div>
@@ -1247,6 +1465,99 @@
       document.head.appendChild(script);
     };
     reader.readAsDataURL(file);
+  });
+
+  // --- source connections tab ---
+  let allEvents = [];
+  let activeEventId = null;
+
+  function loadEvents() {
+    if (allEvents.length) { renderEventChips(); return; }
+    fetch('/api/sources')
+      .then(r => r.json())
+      .then(events => {
+        allEvents = events;
+        renderEventChips();
+      });
+  }
+
+  function renderEventChips() {
+    const container = document.getElementById('source-events');
+    container.innerHTML = '';
+    allEvents.forEach(ev => {
+      const chip = document.createElement('button');
+      chip.className = 'source-event-chip';
+      chip.dataset.id = ev.id;
+      chip.innerHTML =
+        '<div class="ev-name">' + ev.name + '</div>' +
+        '<div class="ev-date">' + ev.date + '</div>' +
+        '<div class="ev-loc">' + ev.location + '</div>';
+      chip.addEventListener('click', () => selectEvent(ev.id));
+      container.appendChild(chip);
+    });
+  }
+
+  function selectEvent(eventId) {
+    if (activeEventId === eventId) {
+      activeEventId = null;
+      document.querySelectorAll('.source-event-chip').forEach(c => c.classList.remove('active'));
+      document.getElementById('source-detail').classList.remove('visible');
+      return;
+    }
+    activeEventId = eventId;
+    document.querySelectorAll('.source-event-chip').forEach(c => {
+      c.classList.toggle('active', c.dataset.id === eventId);
+    });
+    const ev = allEvents.find(e => e.id === eventId);
+    if (!ev) return;
+    renderEventDetail(ev);
+  }
+
+  function renderEventDetail(ev) {
+    const panel = document.getElementById('source-detail');
+    let html =
+      '<h3>' + ev.name + '</h3>' +
+      '<div class="sd-meta">' +
+        '<span><strong>date:</strong> ' + ev.date + '</span>' +
+        '<span><strong>location:</strong> ' + ev.location + '</span>' +
+      '</div>' +
+      '<p class="sd-summary">' + ev.summary + '</p>' +
+      '<div class="sd-figs"><strong>key figures:</strong> ' + (ev.keyFigures || []).join(', ') + '</div>' +
+      '<div class="sd-conseq"><strong>consequences:</strong> ' + ev.consequences + '</div>' +
+      '<div class="sd-sources-label">' +
+        '<svg viewBox="0 0 24 24" width="14" height="14"><path d="M4 4h16v12H5.17L4 17.17V4z" fill="none" stroke="currentColor" stroke-width="2"/></svg>' +
+        ev.sources.length + ' ancient sources reference this event' +
+      '</div>' +
+      '<div class="sd-sources">';
+    ev.sources.forEach((s, i) => {
+      const type = s.type || 'literature';
+      html +=
+        '<div class="sd-source-card" style="animation-delay:' + (i * 0.08) + 's">' +
+          '<div class="sc-head">' +
+            '<div>' +
+              '<div class="sc-author">' + s.author + '</div>' +
+              '<div class="sc-work">' + s.work + '</div>' +
+            '</div>' +
+            '<span class="sc-type ' + type + '">' + type + '</span>' +
+          '</div>' +
+          '<div class="sc-citation">' + s.citation + '</div>' +
+          '<div class="sc-ref">' + s.reference + '</div>' +
+          '<div class="sc-why">' +
+            '<span class="sc-why-label">why this source mentions it</span>' +
+            s.why +
+          '</div>' +
+        '</div>';
+    });
+    html += '</div>';
+    panel.innerHTML = html;
+    panel.classList.add('visible');
+  }
+
+  // load events when the source tab is first activated
+  document.querySelectorAll('nav button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (btn.dataset.tab === 'source-tab') loadEvents();
+    });
   });
 </script>
 </body>
