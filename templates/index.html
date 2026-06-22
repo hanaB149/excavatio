@@ -473,6 +473,107 @@
     .game-card[data-game="columndrop"] .gc-play { color: #ffca28; }
     .game-card[data-game="memory"] .gc-play { color: #26a69a; }
 
+    .game-card[data-game="labours"] {
+      --card-border: #ef5350;
+      --card-shadow: rgba(239,83,80,0.22);
+      --card-glow: linear-gradient(135deg, rgba(239,83,80,0.08), transparent);
+    }
+    .game-card[data-game="maze"] {
+      --card-border: #7e57c2;
+      --card-shadow: rgba(126,87,194,0.22);
+      --card-glow: linear-gradient(135deg, rgba(126,87,194,0.08), transparent);
+    }
+    .game-card[data-game="labours"] .gc-icon { background: linear-gradient(135deg, rgba(239,83,80,0.15), rgba(239,83,80,0.05)); }
+    .game-card[data-game="maze"] .gc-icon { background: linear-gradient(135deg, rgba(126,87,194,0.15), rgba(126,87,194,0.05)); }
+    .game-card[data-game="labours"] .gc-icon svg { stroke: #ef5350; }
+    .game-card[data-game="maze"] .gc-icon svg { stroke: #7e57c2; }
+    .game-card[data-game="labours"] .gc-name { color: #c62828; }
+    .game-card[data-game="maze"] .gc-name { color: #4527a0; }
+    .game-card[data-game="labours"] .gc-play { color: #ef5350; }
+    .game-card[data-game="maze"] .gc-play { color: #7e57c2; }
+
+    /* hercules labours game */
+    .labours-question {
+      background: rgba(255,255,255,0.6);
+      border: 2px solid rgba(239,83,80,0.12);
+      border-radius: 14px;
+      padding: 1rem 1.2rem;
+      margin-bottom: 1rem;
+    }
+    .labours-question .lq-num {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: #ef5350;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 0.35rem;
+    }
+    .labours-question .lq-prompt {
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: #4a2c3a;
+      line-height: 1.5;
+      margin-bottom: 0.6rem;
+    }
+    .labours-question input {
+      width: 100%;
+      padding: 0.6rem 0.9rem;
+      border: 2px solid rgba(239,83,80,0.15);
+      border-radius: 10px;
+      font-size: 0.88rem;
+      font-family: 'Inter', sans-serif;
+      font-weight: 500;
+      color: #4a2c3a;
+      background: rgba(255,255,255,0.7);
+      transition: all 0.2s ease;
+    }
+    .labours-question input:focus { outline: none; border-color: #ef5350; background: white; }
+    .labours-question input.correct { border-color: #81c784; background: rgba(129,199,132,0.1); }
+    .labours-question input.wrong { border-color: #e57373; background: rgba(229,115,115,0.08); }
+
+    /* labyrinth maze game */
+    .maze-wrap { text-align: center; }
+    #maze-canvas {
+      background: #1a1a2e;
+      border-radius: 14px;
+      border: 3px solid rgba(126,87,194,0.3);
+      box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+      max-width: 100%;
+      touch-action: none;
+    }
+    .maze-instruction {
+      font-size: 0.82rem;
+      color: #7a5a6a;
+      margin: 0.6rem 0;
+      line-height: 1.5;
+    }
+    .maze-instruction strong { color: #7e57c2; }
+    .maze-controls {
+      display: flex;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .maze-btn {
+      width: 54px;
+      height: 54px;
+      border: 2px solid rgba(126,87,194,0.2);
+      border-radius: 12px;
+      background: rgba(255,255,255,0.6);
+      font-size: 1.2rem;
+      cursor: pointer;
+      font-family: inherit;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #5a3c4a;
+      transition: all 0.2s ease;
+    }
+    .maze-btn:hover { border-color: #7e57c2; background: rgba(255,255,255,0.85); }
+    .maze-btn:active { transform: scale(0.92); }
+
+    /* hercules labours game */
+
     /* column drop (tetris-style) game */
     .cd-wrap {
       display: flex;
@@ -2356,7 +2457,7 @@
         <p class="gh-subtitle">step into the colosseum of classics. test your knowledge of the ancient world &mdash; win drachmae for glory, lose them for defeat. four games await.</p>
         <div class="gh-stats">
           <div class="gh-stat">
-            <span class="ghs-val" id="gh-games-count">6</span>
+            <span class="ghs-val" id="gh-games-count">8</span>
             <span class="ghs-label">games</span>
           </div>
           <div class="gh-stat">
@@ -2415,6 +2516,20 @@
           <div class="gc-name">Mosaic Memory</div>
           <div class="gc-desc">Flip tiles to find pairs of classical symbols &mdash; gods, artefacts, and more. Test your memory.</div>
           <div class="gc-points">+3 per pair &middot; -1 per miss &middot; +10 flawless</div>
+          <div class="gc-play">enter &rarr;</div>
+        </div>
+        <div class="game-card" data-game="labours">
+          <div class="gc-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 12v6M9 21l3-3 3 3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div>
+          <div class="gc-name">Labours of Hercules</div>
+          <div class="gc-desc">Name all twelve labours in the correct order &mdash; can you remember them all?</div>
+          <div class="gc-points">+5 per correct &middot; -2 per wrong &middot; +30 perfect</div>
+          <div class="gc-play">enter &rarr;</div>
+        </div>
+        <div class="game-card" data-game="maze">
+          <div class="gc-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M6 9h3v3h3v3h3M18 6v3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div>
+          <div class="gc-name">Labyrinth Escape</div>
+          <div class="gc-desc">Guide Theseus through the maze to slay the Minotaur and find your way back.</div>
+          <div class="gc-points">+10 per level &middot; -5 per wrong turn &middot; +50 perfect run</div>
           <div class="gc-play">enter &rarr;</div>
         </div>
       </div>
@@ -3375,6 +3490,8 @@
     else if (type === 'matching') loadMatching();
     else if (type === 'columndrop') loadColumnDrop();
     else if (type === 'memory') loadMemory();
+    else if (type === 'labours') loadLabours();
+    else if (type === 'maze') loadMaze();
   }
 
   function closeGame() {
@@ -4241,6 +4358,243 @@
       '<div style="font-size:0.8rem;color:#9a7a8a;margin-top:0.5rem">' + mmState.moves + ' moves &middot; ' + timeSec + 's</div>' +
       '<button class="cd-btn" style="max-width:120px;margin-top:0.8rem" onclick="loadMemory()">play again</button>';
     arena.appendChild(result);
+  }
+
+  // --- labours of hercules ---
+  const LABOURS = [
+    { num: 1, name: 'Nemean Lion', prompt: 'Slay the Nemean Lion, whose hide could not be pierced by any weapon.', hint: 'If only I could strangle it...' },
+    { num: 2, name: 'Lernaean Hydra', prompt: 'Kill the nine-headed Lernaean Hydra, whose heads regrew when cut.', hint: 'I need a firebrand to cauterize the stumps.' },
+    { num: 3, name: 'Ceryneian Hind', prompt: 'Capture the golden-horned Ceryneian Hind, sacred to Artemis.', hint: 'I must bring it back alive, not dead.' },
+    { num: 4, name: 'Erymanthian Boar', prompt: 'Bring back the monstrous Erymanthian Boar alive.', hint: 'Deep snow might slow it down.' },
+    { num: 5, name: 'Augean Stables', prompt: 'Clean the Augean Stables in a single day — thousands of cattle.', hint: 'I could divert the rivers Alpheus and Peneus.' },
+    { num: 6, name: 'Stymphalian Birds', prompt: 'Drive away the man-eating Stymphalian Birds.', hint: 'A bronze rattle from Hephaestus would scare them off.' },
+    { num: 7, name: 'Cretan Bull', prompt: 'Capture the mad Cretan Bull that was terrorizing Crete.', hint: 'Minos would be glad to see this beast gone.' },
+    { num: 8, name: 'Mares of Diomedes', prompt: 'Tame and bring back the man-eating Mares of Diomedes.', hint: 'Lord Diomedes himself became their meal.' },
+    { num: 9, name: 'Hippolyta\'s Girdle', prompt: 'Obtain the magical girdle of Hippolyta, queen of the Amazons.', hint: 'Hera may stir trouble among the Amazons.' },
+    { num: 10, name: 'Geryon\'s Cattle', prompt: 'Steal the cattle of the three-bodied giant Geryon.', hint: 'I can cross the Libyan desert — a cup of Helios might help.' },
+    { num: 11, name: 'Apples of Hesperides', prompt: 'Fetch the golden apples from the garden of the Hesperides.', hint: 'I might need someone to hold the sky while I look.' },
+    { num: 12, name: 'Cerberus', prompt: 'Bring Cerberus, the three-headed guard dog of the Underworld, to the surface.', hint: 'No weapons — I must wrestle him bare-handed.' },
+  ];
+
+  let laboursState = null;
+
+  function loadLabours() {
+    laboursState = { answers: new Array(12).fill(''), submitted: false, score: 0 };
+    const arena = document.getElementById('game-arena');
+    let html = '<div class="ga-header"><span class="ga-title">Labours of Hercules</span><button class="ga-back" onclick="closeGame()">&larr; back</button></div>';
+    html += '<div style="font-size:0.85rem;color:#7a5a6a;margin-bottom:1rem;line-height:1.5;">Name each of Hercules\' twelve labours in the correct order. Partial names may count &mdash; be as specific as you can!</div>';
+    LABOURS.forEach((lab, i) => {
+      html += '<div class="labours-question">' +
+        '<div class="lq-num">Labour ' + (i + 1) + '</div>' +
+        '<div class="lq-prompt">' + lab.prompt + '</div>' +
+        '<input type="text" class="labours-input" data-i="' + i + '" placeholder="your answer..." ' + (laboursState.submitted ? 'disabled' : '') + '>' +
+        '</div>';
+    });
+    html += '<button class="quiz-submit" onclick="submitLabours()">submit labours</button>';
+    arena.innerHTML = html;
+  }
+
+  function submitLabours() {
+    if (laboursState.submitted) return;
+    laboursState.submitted = true;
+    var inputs = document.querySelectorAll('.labours-input');
+    var correct = 0;
+    var feedback = [];
+    inputs.forEach(function(inp, i) {
+      var val = inp.value.trim().toLowerCase();
+      var target = LABOURS[i].name.toLowerCase();
+      var isCorrect = val && (val === target || val.indexOf(target) >= 0 || target.indexOf(val) >= 0);
+      if (isCorrect) {
+        correct++;
+        inp.classList.add('correct');
+        inp.value = LABOURS[i].name;
+      } else {
+        inp.classList.add('wrong');
+        inp.value = inp.value || '(empty)';
+        feedback.push('Labour ' + (i + 1) + ' was: ' + LABOURS[i].name);
+      }
+      inp.disabled = true;
+    });
+    var points = correct * 5 - (12 - correct) * 2;
+    if (correct === 12) points += 30;
+    laboursState.score = points;
+    fetch('/api/award', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'trace_journey', detail: 'labours: ' + correct + '/12' })
+    }).then(function(r) { return r.json(); }).then(function(d) { updatePointsBadge(d.total_points); }).catch(function() {});
+    var arena = document.getElementById('game-arena');
+    var result = document.createElement('div');
+    result.className = 'quiz-result';
+    result.innerHTML =
+      '<div class="qr-score">' + correct + '/12</div>' +
+      '<div class="qr-label">' + (correct === 12 ? 'a true hero!' : 'the gods are not impressed') + '</div>' +
+      '<div class="qr-points ' + (points >= 0 ? 'positive' : 'negative') + '">' + (points >= 0 ? '+' : '') + points + ' drachmae</div>' +
+      (correct === 12 ? '<div class="qr-perfect">all twelve labours complete!</div>' : '') +
+      (feedback.length ? '<div style="font-size:0.8rem;color:#7a5a6a;margin-top:0.5rem;text-align:left;line-height:1.6;">' + feedback.join('<br>') + '</div>' : '') +
+      '<button class="cd-btn" style="max-width:120px;margin-top:0.8rem" onclick="loadLabours()">play again</button>';
+    arena.appendChild(result);
+    document.querySelector('.quiz-submit').style.display = 'none';
+  }
+
+  // --- labyrinth maze ---
+  let mazeState = null;
+  let mazeLoop = null;
+
+  const MAZE_DATA = [
+    // level 0: 5x5
+    { size: 5, walls: [[1,1,1,1,1],[1,0,0,0,1],[1,1,1,0,1],[1,0,0,0,1],[1,1,1,1,1]],
+      start: {r:1,c:1}, end: {r:3,c:3}, theseusName: 'Theseus', monsterName: 'Minotaur' },
+  ];
+
+  function buildMaze(level) {
+    var d = MAZE_DATA[0];
+    var grid = [];
+    for (var r = 0; r < d.size; r++) {
+      grid[r] = [];
+      for (var c = 0; c < d.size; c++) {
+        grid[r][c] = d.walls[r * d.size + c] === undefined ? 0 : d.walls[r][c];
+      }
+    }
+    return grid;
+  }
+
+  function loadMaze() {
+    var cellSize = 70;
+    var d = MAZE_DATA[0];
+    mazeState = {
+      level: 0,
+      grid: buildMaze(0),
+      size: d.size,
+      playerPos: { r: d.start.r, c: d.start.c },
+      endPos: { r: d.end.r, c: d.end.c },
+      moves: 0,
+      wrongTurns: 0,
+      won: false,
+      gameOver: false,
+      cellSize: cellSize,
+    };
+    var arena = document.getElementById('game-arena');
+    arena.innerHTML =
+      '<div class="ga-header"><span class="ga-title">Labyrinth Escape</span><button class="ga-back" onclick="closeMaze()">&larr; back</button></div>' +
+      '<div class="maze-instruction">Guide <strong>Theseus</strong> through the labyrinth to slay the <strong>Minotaur</strong> and escape. Use arrow keys or tap the buttons.</div>' +
+      '<div class="maze-stats" style="display:flex;gap:0.8rem;justify-content:center;margin-bottom:0.6rem;flex-wrap:wrap;">' +
+        '<div class="mm-stat"><div class="mms-val" id="mz-moves">0</div><div class="mms-label">moves</div></div>' +
+        '<div class="mm-stat"><div class="mms-val" id="mz-wrong">0</div><div class="mms-label">wrong turns</div></div>' +
+      '</div>' +
+      '<div class="maze-wrap"><canvas id="maze-canvas" width="' + (cellSize * d.size) + '" height="' + (cellSize * d.size) + '"></canvas></div>' +
+      '<div class="maze-controls">' +
+        '<button class="maze-btn" onclick="mazeMove(-1,0)">&#9650;</button>' +
+      '</div>' +
+      '<div class="maze-controls">' +
+        '<button class="maze-btn" onclick="mazeMove(0,-1)">&#9664;</button>' +
+        '<button class="maze-btn" onclick="mazeMove(0,1)">&#9654;</button>' +
+      '</div>' +
+      '<div class="maze-controls">' +
+        '<button class="maze-btn" onclick="mazeMove(1,0)">&#9660;</button>' +
+      '</div>';
+
+    drawMaze();
+    document.addEventListener('keydown', mazeKeyHandler);
+    mazeLoop = setInterval(mazeTick, 150);
+  }
+
+  function drawMaze() {
+    var canvas = document.getElementById('maze-canvas');
+    if (!canvas) return;
+    var ctx = canvas.getContext('2d');
+    var s = mazeState;
+    var cs = s.cellSize;
+    var grid = s.grid;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    for (var r = 0; r < s.size; r++) {
+      for (var c = 0; c < s.size; c++) {
+        var x = c * cs, y = r * cs;
+        if (grid[r][c] === 1) {
+          ctx.fillStyle = '#2a1a4e';
+          ctx.fillRect(x, y, cs, cs);
+        } else {
+          ctx.fillStyle = '#1a1a2e';
+          ctx.fillRect(x, y, cs, cs);
+          ctx.strokeStyle = 'rgba(126,87,194,0.1)';
+          ctx.strokeRect(x, y, cs, cs);
+        }
+      }
+    }
+    // end
+    ctx.fillStyle = '#ffd54f';
+    ctx.beginPath();
+    ctx.arc(s.endPos.c * cs + cs / 2, s.endPos.r * cs + cs / 2, cs / 4, 0, Math.PI * 2);
+    ctx.fill();
+    // player
+    ctx.fillStyle = '#42a5f5';
+    ctx.beginPath();
+    ctx.arc(s.playerPos.c * cs + cs / 2, s.playerPos.r * cs + cs / 2, cs / 3, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold ' + (cs / 3) + 'px Inter, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('\u0398', s.playerPos.c * cs + cs / 2, s.playerPos.r * cs + cs / 2);
+  }
+
+  function mazeTick() {
+    if (!mazeState || mazeState.won || mazeState.gameOver) return;
+    // auto-walk along correct path after timeout
+  }
+
+  function mazeMove(dr, dc) {
+    if (!mazeState || mazeState.won || mazeState.gameOver) return;
+    var nr = mazeState.playerPos.r + dr;
+    var nc = mazeState.playerPos.c + dc;
+    if (nr < 0 || nr >= mazeState.size || nc < 0 || nc >= mazeState.size) return;
+    if (mazeState.grid[nr][nc] === 1) {
+      mazeState.wrongTurns++;
+      document.getElementById('mz-wrong').textContent = mazeState.wrongTurns;
+      return;
+    }
+    mazeState.playerPos = { r: nr, c: nc };
+    mazeState.moves++;
+    document.getElementById('mz-moves').textContent = mazeState.moves;
+    drawMaze();
+    if (nr === mazeState.endPos.r && nc === mazeState.endPos.c) {
+      mazeState.won = true;
+      clearInterval(mazeLoop);
+      document.removeEventListener('keydown', mazeKeyHandler);
+      var points = 10 - mazeState.wrongTurns * 5;
+      if (mazeState.wrongTurns === 0) points += 50;
+      if (points < 0) points = 0;
+      fetch('/api/award', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'trace_journey', detail: 'maze complete: ' + mazeState.moves + ' moves' })
+      }).then(function(r) { return r.json(); }).then(function(d) { updatePointsBadge(d.total_points); }).catch(function() {});
+      var arena = document.getElementById('game-arena');
+      var result = document.createElement('div');
+      result.className = 'quiz-result';
+      result.innerHTML =
+        '<div class="qr-score">Escaped!</div>' +
+        '<div class="qr-label">' + (mazeState.wrongTurns === 0 ? 'flawless victory!' : 'the minotaur is defeated') + '</div>' +
+        '<div class="qr-points positive">+' + points + ' drachmae</div>' +
+        (mazeState.wrongTurns === 0 ? '<div class="qr-perfect">no wrong turns — perfect!</div>' : '') +
+        '<div style="font-size:0.8rem;color:#9a7a8a;margin-top:0.5rem">' + mazeState.moves + ' moves &middot; ' + mazeState.wrongTurns + ' wrong turns</div>' +
+        '<button class="cd-btn" style="max-width:120px;margin-top:0.8rem" onclick="loadMaze()">play again</button>';
+      arena.appendChild(result);
+    }
+  }
+
+  function mazeKeyHandler(e) {
+    if (e.key === 'ArrowUp') { e.preventDefault(); mazeMove(-1, 0); }
+    else if (e.key === 'ArrowDown') { e.preventDefault(); mazeMove(1, 0); }
+    else if (e.key === 'ArrowLeft') { e.preventDefault(); mazeMove(0, -1); }
+    else if (e.key === 'ArrowRight') { e.preventDefault(); mazeMove(0, 1); }
+  }
+
+  function closeMaze() {
+    if (mazeLoop) clearInterval(mazeLoop);
+    document.removeEventListener('keydown', mazeKeyHandler);
+    mazeState = null;
+    closeGame();
   }
 
   function updatePointsBadge(total) {
