@@ -1522,6 +1522,57 @@
       margin-right: 0.3rem;
       color: white;
     }
+    .journey-stop-popup {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 360px;
+      max-width: calc(100vw - 2rem);
+      background: rgba(255,255,255,0.96);
+      backdrop-filter: blur(16px);
+      border-radius: 18px;
+      border: 2px solid rgba(244, 143, 177, 0.25);
+      box-shadow: 0 12px 48px rgba(0,0,0,0.15);
+      z-index: 2000;
+      padding: 1.5rem 1.5rem 1.2rem;
+      animation: popBounce 0.35s ease;
+    }
+    .journey-stop-popup.visible { display: block; }
+    .journey-stop-popup .jsp-close {
+      position: absolute;
+      top: 0.6rem;
+      right: 0.8rem;
+      width: 28px;
+      height: 28px;
+      border: none;
+      border-radius: 50%;
+      background: rgba(244,143,177,0.12);
+      color: #c94f7c;
+      font-size: 1.2rem;
+      line-height: 1;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: inherit;
+      transition: all 0.2s ease;
+    }
+    .journey-stop-popup .jsp-close:hover { background: rgba(244,143,177,0.25); transform: scale(1.1); }
+    .journey-stop-popup .jsp-title {
+      font-weight: 800;
+      font-size: 1.1rem;
+      color: #c94f7c;
+      margin-bottom: 0.3rem;
+      padding-right: 1.5rem;
+    }
+    .journey-stop-popup .jsp-desc {
+      font-size: 0.88rem;
+      line-height: 1.65;
+      color: #5a3c4a;
+      font-family: 'Source Serif 4', serif;
+    }
     .journey-legend {
       display: flex;
       gap: 0.4rem;
@@ -2222,6 +2273,11 @@
           <div class="jp-stops" id="jp-stops"></div>
         </div>
         <div class="journey-legend" id="journey-legend"></div>
+        <div class="journey-stop-popup" id="journey-stop-popup">
+          <button class="jsp-close" onclick="document.getElementById('journey-stop-popup').classList.remove('visible')">&times;</button>
+          <div class="jsp-title" id="jsp-title"></div>
+          <p class="jsp-desc" id="jsp-desc"></p>
+        </div>
       </div>
 
       <div class="analytics-bar">
@@ -2828,6 +2884,7 @@
           m.openPopup();
           map.setView([stop.lat, stop.lng], 6, { animate: true });
         }
+        showStopPopup(stop.name, stop.desc);
       });
       stopsDiv.appendChild(el);
     });
@@ -2844,6 +2901,14 @@
       delete journeyLayers[id];
     }
     delete journeyStopMarkers[id];
+    document.getElementById('journey-stop-popup').classList.remove('visible');
+  }
+
+  function showStopPopup(name, desc) {
+    const popup = document.getElementById('journey-stop-popup');
+    document.getElementById('jsp-title').textContent = name;
+    document.getElementById('jsp-desc').textContent = desc;
+    popup.classList.add('visible');
   }
 
   function hideExcavationMarkers() {
