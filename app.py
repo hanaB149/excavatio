@@ -3,6 +3,8 @@ import json
 import re
 import html
 import logging
+import threading
+from datetime import datetime
 from functools import wraps
 
 logging.basicConfig(level=logging.INFO)
@@ -13,7 +15,6 @@ from flask import (
     Flask, render_template, request, jsonify, redirect, url_for, session
 )
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask_sqlalchemy import SQLAlchemy
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -21,39 +22,83 @@ load_dotenv()
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-key-change-in-prod")
 
-database_url = os.environ.get("DATABASE_URL", "")
-if database_url:
-    app.config["SQLALCHEMY_DATABASE_URI"] = database_url
-else:
-    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///excavatio.db"
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+# ---------------------------------------------------------------------------
+# USER STORE — backed by build.io config vars (persists across restarts)
+# Points/achievements stored in Flask session cookie (also persists)
+# ---------------------------------------------------------------------------
 
-db = SQLAlchemy(app)
-
-
-class User(db.Model):
-    __tablename__ = "users"
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(80), unique=True, nullable=False)
-    email = db.Column(db.String(120), unique=True, nullable=False)
-    password_hash = db.Column(db.Text, nullable=False)
-    created_at = db.Column(db.DateTime, server_default=db.func.now())
-
-    def set_password(self, password):
-        self.password_hash = generate_password_hash(password)
-
-    def check_password(self, password):
-        return check_password_hash(self.password_hash, password)
+_users_cache = None
+_persist_lock = threading.Lock()
 
 
-class Activity(db.Model):
-    __tablename__ = "activities"
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
-    action = db.Column(db.String(40), nullable=False)
-    points = db.Column(db.Integer, nullable=False, default=0)
-    detail = db.Column(db.String(200), default="")
-    created_at = db.Column(db.DateTime, server_default=db.func.now())
+def _load_users():
+    global _users_cache
+    if _users_cache is not None:
+        return _users_cache
+    raw = os.environ.get("USER_STORE", "")
+    if raw:
+        try:
+            _users_cache = json.loads(raw)
+        except (json.JSONDecodeError, TypeError):
+            _users_cache = []
+    else:
+        _users_cache = []
+    return _users_cache
+
+
+def _persist_users():
+    token = os.environ.get("BLD_API_TOKEN", "")
+    app_name = os.environ.get("BLD_APP_NAME", "excavatio")
+    if not token:
+        logger.warning("BLD_API_TOKEN not set — user data will not persist")
+        return False
+    try:
+        sess = requests.Session()
+        sess.trust_env = False
+        resp = sess.patch(
+            f"https://app.build.io/api/v1/apps/{app_name}/config-vars",
+            headers={
+                "Authorization": f"Bearer {token}",
+                "Accept": "application/json",
+                "Content-Type": "application/json",
+            },
+            json={"USER_STORE": json.dumps(_users_cache)},
+            timeout=10,
+        )
+        resp.raise_for_status()
+        return True
+    except Exception as e:
+        logger.error(f"Failed to persist users to config var: {e}")
+        return False
+
+
+def find_user_by_username(username):
+    for u in _load_users():
+        if u.get("username") == username:
+            return u
+    return None
+
+
+def find_user_by_email(email):
+    for u in _load_users():
+        if u.get("email") == email:
+            return u
+    return None
+
+
+def create_user(username, email, password):
+    users = _load_users()
+    user = {
+        "id": len(users) + 1,
+        "username": username,
+        "email": email,
+        "password_hash": generate_password_hash(password),
+        "created_at": datetime.now().isoformat(),
+    }
+    users.append(user)
+    with _persist_lock:
+        _persist_users()
+    return user
 
 
 POINTS = {
@@ -73,40 +118,36 @@ ACHIEVEMENTS = [
 ]
 
 
-def award_points(user_id, action, detail=""):
+def award_points(action, detail=""):
     pts = POINTS.get(action, 0)
     if pts <= 0:
         return None
-    entry = Activity(user_id=user_id, action=action, points=pts, detail=detail)
-    db.session.add(entry)
-    db.session.commit()
-    return entry
+    total = session.get("total_points", 0) + pts
+    counts = session.get("action_counts", {})
+    counts[action] = counts.get(action, 0) + 1
+    session["total_points"] = total
+    session["action_counts"] = counts
+    session.modified = True
+    return {"action": action, "points": pts, "detail": detail}
 
 
-def get_user_stats(user_id):
-    rows = Activity.query.filter_by(user_id=user_id).all()
-    total = sum(r.points for r in rows)
-    by_action = {}
-    for r in rows:
-        by_action[r.action] = by_action.get(r.action, 0) + 1
+def get_user_stats():
+    total = session.get("total_points", 0)
+    counts = session.get("action_counts", {})
     unlocked = []
     for a in ACHIEVEMENTS:
         if a["action"] is None:
             if total >= a["points"]:
                 unlocked.append(a["id"])
         else:
-            if by_action.get(a["action"], 0) >= a["count"]:
+            if counts.get(a["action"], 0) >= a["count"]:
                 unlocked.append(a["id"])
     return {
         "total_points": total,
-        "action_counts": by_action,
+        "action_counts": counts,
         "achievements_unlocked": unlocked,
         "achievements": ACHIEVEMENTS,
     }
-
-
-with app.app_context():
-    db.create_all()
 
 EXCAVATIONS = [
     {"id": "pompeii", "title": "Pompeii", "lat": 40.7497, "lng": 14.4856, "description": "Roman city buried by Vesuvius in 79 CE. Excavations since 1748.", "period": "Roman (79 CE)", "startYear": 1748, "endYear": None, "ongoing": True, "featureTypes": ["city", "roman", "volcanic"], "era": "ancient"},
@@ -1184,18 +1225,17 @@ def signup():
     if len(password) < 6:
         return render_template("welcome.html", mode="signup", error="Password must be at least 6 characters.", username=username, email=email)
 
-    if User.query.filter_by(username=username).first():
+    if find_user_by_username(username):
         return render_template("welcome.html", mode="signup", error="That username is already taken.", email=email)
-    if User.query.filter_by(email=email).first():
+    if find_user_by_email(email):
         return render_template("welcome.html", mode="signup", error="An account with that email already exists.", username=username)
 
-    user = User(username=username, email=email)
-    user.set_password(password)
-    db.session.add(user)
-    db.session.commit()
+    user = create_user(username, email, password)
 
-    session["user_id"] = user.id
-    session["username"] = user.username
+    session["user_id"] = user["id"]
+    session["username"] = user["username"]
+    session["total_points"] = 0
+    session["action_counts"] = {}
     return redirect(url_for("index"))
 
 
@@ -1207,12 +1247,16 @@ def login():
     if not username or not password:
         return render_template("welcome.html", mode="login", error="Please enter your username and password.")
 
-    user = User.query.filter_by(username=username).first()
-    if not user or not user.check_password(password):
+    user = find_user_by_username(username)
+    if not user or not check_password_hash(user["password_hash"], password):
         return render_template("welcome.html", mode="login", error="Invalid username or password.")
 
-    session["user_id"] = user.id
-    session["username"] = user.username
+    session["user_id"] = user["id"]
+    session["username"] = user["username"]
+    if "total_points" not in session:
+        session["total_points"] = 0
+    if "action_counts" not in session:
+        session["action_counts"] = {}
     return redirect(url_for("index"))
 
 
@@ -1376,7 +1420,7 @@ def api_search_events():
     if ai_key:
         try:
             matches = query_ai_event_search(query, ai_key)
-            award_points(session["user_id"], "ai_search", query)
+            award_points("ai_search", query)
             return jsonify({"matches": matches, "source": "ai"})
         except Exception as e:
             logger.error(f"AI event search error: {e}")
@@ -1398,14 +1442,14 @@ def api_identify():
         try:
             result = query_ai(text, ai_key)
             if result:
-                award_points(session["user_id"], "identify_text", result.get("work", ""))
+                award_points("identify_text", result.get("work", ""))
                 return jsonify({"matched": True, "source": "ai", **result})
         except Exception as e:
             logger.error(f"AI API error: {e}")
 
     match = find_text_match(text)
     if match:
-        award_points(session["user_id"], "identify_text", match.get("work", ""))
+        award_points("identify_text", match.get("work", ""))
         return jsonify({"matched": True, "source": "library", **match})
 
     return jsonify({"matched": False, "message": "No classical text match found."})
@@ -1413,7 +1457,7 @@ def api_identify():
 @app.route("/api/stats")
 @login_required
 def api_stats():
-    return jsonify(get_user_stats(session["user_id"]))
+    return jsonify(get_user_stats())
 
 @app.route("/api/award", methods=["POST"])
 @login_required
@@ -1425,11 +1469,11 @@ def api_award():
     detail = data.get("detail", "")[:200]
     if action not in POINTS:
         return jsonify({"error": "Invalid action"}), 400
-    entry = award_points(session["user_id"], action, detail)
-    stats = get_user_stats(session["user_id"])
+    entry = award_points(action, detail)
+    stats = get_user_stats()
     return jsonify({
         "awarded": entry is not None,
-        "points": entry.points if entry else 0,
+        "points": entry["points"] if entry else 0,
         "total_points": stats["total_points"],
         "achievements_unlocked": stats["achievements_unlocked"],
         "all_achievements": stats["achievements"],
