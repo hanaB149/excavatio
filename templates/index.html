@@ -1492,6 +1492,28 @@
     }
     .si-card-delete:hover { color: #d32f2f; }
 
+    .crop-modal {
+      background: #fff; border-radius: 16px; padding: 2rem;
+      max-width: 500px; width: 90%; max-height: 90vh; overflow-y: auto;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.3); position: relative; animation: slideUp 0.25s ease;
+    }
+    .crop-hint { font-size: 0.82rem; color: #888; margin: -0.5rem 0 1rem; }
+    .crop-container {
+      width: 100%; max-height: 50vh; overflow: hidden; border-radius: 12px;
+      background: #f5f5f5; position: relative;
+    }
+    .crop-wrapper { position: relative; display: inline-block; width: 100%; }
+    .crop-wrapper img { display: block; width: 100%; height: auto; user-select: none; }
+    .crop-overlay {
+      position: absolute; inset: 0; cursor: move; touch-action: none;
+    }
+    .crop-box {
+      position: absolute; width: 200px; height: 200px;
+      border: 2px solid #fff; box-shadow: 0 0 0 9999px rgba(0,0,0,0.5);
+      border-radius: 50%; pointer-events: none;
+    }
+    .crop-actions { margin-top: 1rem; display: flex; align-items: center; }
+
     .container {
       max-width: 1400px;
       margin: 0 auto;
@@ -2707,6 +2729,26 @@
     </div>
     <button class="profile-save-btn" onclick="saveNoteItem()">Save</button>
     <span id="sn-saved-msg" style="display:none;color:#4caf50;font-size:0.85rem;margin-left:0.5rem">Saved!</span>
+  </div>
+</div>
+
+<div id="crop-modal" class="profile-modal-overlay" style="display:none" onclick="if(event.target===this)closeCropModal()">
+  <div class="crop-modal" onclick="event.stopPropagation()">
+    <button class="profile-close" onclick="closeCropModal()">&times;</button>
+    <h2 class="profile-title">Crop Avatar</h2>
+    <p class="crop-hint">drag to position your square profile picture</p>
+    <div class="crop-container">
+      <div class="crop-wrapper">
+        <img id="crop-image" src="" alt="crop preview">
+        <div class="crop-overlay" id="crop-overlay">
+          <div class="crop-box" id="crop-box"></div>
+        </div>
+      </div>
+    </div>
+    <div class="crop-actions">
+      <button class="profile-save-btn" onclick="applyCrop()">Crop &amp; Save</button>
+      <span id="crop-msg" style="display:none;color:#4caf50;font-size:0.85rem;margin-left:0.5rem">Saved!</span>
+    </div>
   </div>
 </div>
 
@@ -5360,23 +5402,133 @@
   document.addEventListener('input', function(e) {
     if (e.target.id === 'profile-bio' || e.target.id === 'profile-interests') updateCharCounts();
   });
+  var cropFile = null;
+
   document.getElementById('avatar-upload').addEventListener('change', function(e) {
-    var file = e.target.files[0];
-    if (!file) return;
-    var fd = new FormData();
-    fd.append('file', file);
-    fetch('/api/upload-avatar', { method: 'POST', body: fd })
-      .then(function(r) { return r.json(); })
-      .then(function(data) {
-        if (data.url) {
-          document.getElementById('profile-avatar-preview').innerHTML = '<img src="' + data.url + '" style="width:100%;height:100%;border-radius:50%;object-fit:cover">';
-          document.getElementById('header-avatar').innerHTML = '<img src="' + data.url + '" style="width:100%;height:100%;border-radius:50%;object-fit:cover">';
-          document.getElementById('profile-page-avatar').innerHTML = '<img src="' + data.url + '" style="width:100%;height:100%;border-radius:50%;object-fit:cover">';
-          document.getElementById('profile-saved-msg').style.display = 'inline';
-          setTimeout(function() { document.getElementById('profile-saved-msg').style.display = 'none'; }, 2000);
-        }
-      }).catch(function() {});
+    cropFile = e.target.files[0];
+    if (!cropFile) return;
+    var reader = new FileReader();
+    reader.onload = function(ev) {
+      var img = document.getElementById('crop-image');
+      img.src = ev.target.result;
+      img.onload = function() {
+        document.getElementById('crop-modal').style.display = 'flex';
+        initCrop();
+      };
+    };
+    reader.readAsDataURL(cropFile);
+    e.target.value = '';
   });
+
+  var cropX = 0, cropY = 0, cropSize = 200;
+  var isDragging = false, dragStartX = 0, dragStartY = 0, dragOrigX = 0, dragOrigY = 0;
+
+  function initCrop() {
+    var img = document.getElementById('crop-image');
+    var box = document.getElementById('crop-box');
+    var container = img.parentElement;
+    var scale = img.offsetWidth / img.naturalWidth;
+    var w = img.naturalWidth * scale, h = img.naturalHeight * scale;
+    cropSize = Math.min(w, h, 300);
+    cropX = (w - cropSize) / 2;
+    cropY = (h - cropSize) / 2;
+    updateCropBox();
+    var overlay = document.getElementById('crop-overlay');
+    overlay.addEventListener('mousedown', startCropDrag);
+    overlay.addEventListener('touchstart', startCropDragTouch, { passive: false });
+  }
+
+  function startCropDrag(e) {
+    isDragging = true;
+    dragStartX = e.clientX;
+    dragStartY = e.clientY;
+    dragOrigX = cropX;
+    dragOrigY = cropY;
+    document.addEventListener('mousemove', onCropDrag);
+    document.addEventListener('mouseup', stopCropDrag);
+  }
+
+  function startCropDragTouch(e) {
+    e.preventDefault();
+    var t = e.touches[0];
+    isDragging = true;
+    dragStartX = t.clientX;
+    dragStartY = t.clientY;
+    dragOrigX = cropX;
+    dragOrigY = cropY;
+    document.addEventListener('touchmove', onCropDragTouch, { passive: false });
+    document.addEventListener('touchend', stopCropDrag);
+  }
+
+  function onCropDrag(e) {
+    if (!isDragging) return;
+    var img = document.getElementById('crop-image');
+    var scale = img.offsetWidth / img.naturalWidth;
+    var dx = (e.clientX - dragStartX) / scale;
+    var dy = (e.clientY - dragStartY) / scale;
+    cropX = Math.max(0, Math.min(img.naturalWidth * scale - cropSize, dragOrigX + e.clientX - dragStartX));
+    cropY = Math.max(0, Math.min(img.naturalHeight * scale - cropSize, dragOrigY + e.clientY - dragStartY));
+    updateCropBox();
+  }
+
+  function onCropDragTouch(e) {
+    e.preventDefault();
+    if (!isDragging) return;
+    var t = e.touches[0];
+    cropX = Math.max(0, dragOrigX + t.clientX - dragStartX);
+    cropY = Math.max(0, dragOrigY + t.clientY - dragStartY);
+    updateCropBox();
+  }
+
+  function stopCropDrag() {
+    isDragging = false;
+    document.removeEventListener('mousemove', onCropDrag);
+    document.removeEventListener('mouseup', stopCropDrag);
+    document.removeEventListener('touchmove', onCropDragTouch);
+    document.removeEventListener('touchend', stopCropDrag);
+  }
+
+  function updateCropBox() {
+    var box = document.getElementById('crop-box');
+    box.style.left = cropX + 'px';
+    box.style.top = cropY + 'px';
+    box.style.width = cropSize + 'px';
+    box.style.height = cropSize + 'px';
+  }
+
+  function closeCropModal() {
+    document.getElementById('crop-modal').style.display = 'none';
+    stopCropDrag();
+  }
+
+  function applyCrop() {
+    var img = document.getElementById('crop-image');
+    var canvas = document.createElement('canvas');
+    canvas.width = 300;
+    canvas.height = 300;
+    var ctx = canvas.getContext('2d');
+    var scale = img.naturalWidth / img.offsetWidth;
+    ctx.drawImage(img, cropX * scale, cropY * scale, cropSize * scale, cropSize * scale, 0, 0, 300, 300);
+    canvas.toBlob(function(blob) {
+      var fd = new FormData();
+      fd.append('file', blob, 'avatar.png');
+      fetch('/api/upload-avatar', { method: 'POST', body: fd })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          if (data.url) {
+            var html = '<img src="' + data.url + '" style="width:100%;height:100%;border-radius:50%;object-fit:cover">';
+            document.getElementById('profile-avatar-preview').innerHTML = html;
+            document.getElementById('header-avatar').innerHTML = html;
+            document.getElementById('profile-page-avatar').innerHTML = html;
+            document.getElementById('crop-msg').style.display = 'inline';
+            setTimeout(function() {
+              document.getElementById('crop-msg').style.display = 'none';
+              closeCropModal();
+            }, 1000);
+          }
+        }).catch(function() {});
+    }, 'image/png');
+  }
   function saveProfile() {
     var bio = document.getElementById('profile-bio').value.slice(0, 500);
     var interests = document.getElementById('profile-interests').value.slice(0, 300);
