@@ -4,8 +4,10 @@ import re
 import html
 import logging
 import threading
+import base64
+import uuid
 import xml.etree.ElementTree as ET
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 from functools import wraps
 
 logging.basicConfig(level=logging.INFO)
@@ -22,6 +24,12 @@ load_dotenv()
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-key-change-in-prod")
+app.config["MAX_CONTENT_LENGTH"] = 5 * 1024 * 1024
+
+UPLOAD_FOLDER = os.path.join(app.root_path, "static", "uploads")
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "webp"}
 
 # ---------------------------------------------------------------------------
 # USER STORE — backed by build.io config vars (persists across restarts)
@@ -100,6 +108,7 @@ def create_user(username, email, password):
         "bio": "",
         "interests": "",
         "avatar": "",
+        "saved_items": [],
     }
     users.append(user)
     with _persist_lock:
@@ -114,6 +123,10 @@ def save_user_progress(user_id):
         if u.get("id") == user_id:
             u["total_points"] = session.get("total_points", 0)
             u["action_counts"] = session.get("action_counts", {})
+            u["bio"] = session.get("bio", "")
+            u["interests"] = session.get("interests", "")
+            u["avatar"] = session.get("avatar", "")
+            u["saved_items"] = session.get("saved_items", [])
             break
     with _persist_lock:
         _persist_users()
@@ -1458,6 +1471,7 @@ def signup():
     session["bio"] = ""
     session["interests"] = ""
     session["avatar"] = ""
+    session["saved_items"] = []
     return redirect(url_for("index"))
 
 
@@ -1480,6 +1494,7 @@ def login():
     session["bio"] = user.get("bio", "")
     session["interests"] = user.get("interests", "")
     session["avatar"] = user.get("avatar", "")
+    session["saved_items"] = user.get("saved_items", [])
     return redirect(url_for("index"))
 
 
@@ -1565,14 +1580,21 @@ def api_excavations():
     })
 
 _NEWS_CACHE = None
-_NEWS_CACHE_TIME = 0
+_NEWS_CACHE_DATE = ""
 
 @app.route("/api/news")
 @login_required
 def api_news():
-    global _NEWS_CACHE, _NEWS_CACHE_TIME
-    now = datetime.now().timestamp()
-    if _NEWS_CACHE and now - _NEWS_CACHE_TIME < 1800:
+    global _NEWS_CACHE, _NEWS_CACHE_DATE
+    now = datetime.now(timezone.utc)
+    today_str = now.strftime("%Y-%m-%d")
+    six_am_today = now.replace(hour=6, minute=0, second=0, microsecond=0)
+    should_refresh = (
+        _NEWS_CACHE is None
+        or _NEWS_CACHE_DATE != today_str
+        or (_NEWS_CACHE_DATE == today_str and now >= six_am_today and now.hour == 6 and now.minute < 5)
+    )
+    if not should_refresh:
         return jsonify({"articles": _NEWS_CACHE})
     feeds = [
         "https://news.google.com/rss/search?q=archaeology+excavation+ancient&hl=en-US&gl=US&ceid=US:en",
@@ -1606,7 +1628,7 @@ def api_news():
         if len(articles) >= 15:
             break
     _NEWS_CACHE = articles[:20]
-    _NEWS_CACHE_TIME = now
+    _NEWS_CACHE_DATE = today_str
     return jsonify({"articles": articles[:20]})
 
 @app.route("/api/journeys")
@@ -1736,6 +1758,7 @@ def api_profile():
                 "bio": u.get("bio", ""),
                 "interests": u.get("interests", ""),
                 "avatar": u.get("avatar", ""),
+                "saved_items": u.get("saved_items", []),
             })
     return jsonify({"error": "User not found"}), 404
 
@@ -1750,7 +1773,86 @@ def api_profile_update():
         if u.get("id") == session.get("user_id"):
             u["bio"] = data.get("bio", u.get("bio", ""))[:500]
             u["interests"] = data.get("interests", u.get("interests", ""))[:300]
-            u["avatar"] = data.get("avatar", u.get("avatar", ""))[:20]
+            if "avatar" in data:
+                av = data["avatar"]
+                u["avatar"] = av[:200] if av.startswith("/static/") else av[:20]
+                session["avatar"] = u["avatar"]
+            with _persist_lock:
+                _persist_users()
+            return jsonify({"saved": True})
+    return jsonify({"error": "User not found"}), 404
+
+@app.route("/api/upload-avatar", methods=["POST"])
+@login_required
+def api_upload_avatar():
+    if "file" not in request.files:
+        return jsonify({"error": "No file"}), 400
+    file = request.files["file"]
+    if not file.filename:
+        return jsonify({"error": "No file"}), 400
+    ext = file.filename.rsplit(".", 1)[-1].lower() if "." in file.filename else ""
+    if ext not in ALLOWED_EXTENSIONS:
+        return jsonify({"error": "Allowed: png, jpg, jpeg, gif, webp"}), 400
+    filename = f"avatar_{session.get('user_id')}_{uuid.uuid4().hex[:8]}.{ext}"
+    filepath = os.path.join(UPLOAD_FOLDER, filename)
+    file.save(filepath)
+    url = f"/static/uploads/{filename}"
+    users = _load_users()
+    for u in users:
+        if u.get("id") == session.get("user_id"):
+            u["avatar"] = url
+            session["avatar"] = url
+            with _persist_lock:
+                _persist_users()
+            return jsonify({"url": url})
+    return jsonify({"error": "User not found"}), 404
+
+@app.route("/api/saved-items", methods=["GET"])
+@login_required
+def api_get_saved_items():
+    users = _load_users()
+    for u in users:
+        if u.get("id") == session.get("user_id"):
+            return jsonify({"items": u.get("saved_items", [])})
+    return jsonify({"error": "User not found"}), 404
+
+@app.route("/api/saved-items", methods=["POST"])
+@login_required
+def api_add_saved_item():
+    data = request.get_json()
+    if not data or "type" not in data or "content" not in data:
+        return jsonify({"error": "type and content required"}), 400
+    item_type = data["type"]
+    if item_type not in ("article", "image", "note"):
+        return jsonify({"error": "Invalid type"}), 400
+    users = _load_users()
+    for u in users:
+        if u.get("id") == session.get("user_id"):
+            items = u.get("saved_items", [])
+            item = {
+                "id": uuid.uuid4().hex[:12],
+                "type": item_type,
+                "content": data["content"][:1000],
+                "title": data.get("title", "")[:100],
+                "created_at": datetime.now(timezone.utc).isoformat(),
+            }
+            items.append(item)
+            u["saved_items"] = items
+            session["saved_items"] = items
+            with _persist_lock:
+                _persist_users()
+            return jsonify({"saved": True, "item": item})
+    return jsonify({"error": "User not found"}), 404
+
+@app.route("/api/saved-items/<item_id>", methods=["DELETE"])
+@login_required
+def api_delete_saved_item(item_id):
+    users = _load_users()
+    for u in users:
+        if u.get("id") == session.get("user_id"):
+            items = u.get("saved_items", [])
+            u["saved_items"] = [i for i in items if i.get("id") != item_id]
+            session["saved_items"] = u["saved_items"]
             with _persist_lock:
                 _persist_users()
             return jsonify({"saved": True})
