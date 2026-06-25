@@ -4,6 +4,7 @@ import re
 import html
 import logging
 import threading
+import xml.etree.ElementTree as ET
 from datetime import datetime
 from functools import wraps
 
@@ -1553,6 +1554,51 @@ def api_excavations():
         "yearMin": YEAR_MIN,
         "yearMax": YEAR_MAX,
     })
+
+_NEWS_CACHE = None
+_NEWS_CACHE_TIME = 0
+
+@app.route("/api/news")
+@login_required
+def api_news():
+    global _NEWS_CACHE, _NEWS_CACHE_TIME
+    now = datetime.now().timestamp()
+    if _NEWS_CACHE and now - _NEWS_CACHE_TIME < 1800:
+        return jsonify({"articles": _NEWS_CACHE})
+    feeds = [
+        "https://news.google.com/rss/search?q=archaeology+excavation+ancient&hl=en-US&gl=US&ceid=US:en",
+        "https://news.google.com/rss/search?q=archaeological+discovery&hl=en-US&gl=US&ceid=US:en",
+    ]
+    seen = set()
+    articles = []
+    for feed_url in feeds:
+        try:
+            r = requests.get(feed_url, headers={"User-Agent": "Mozilla/5.0"}, timeout=12)
+            root = ET.fromstring(r.text)
+            for item in root.findall(".//item"):
+                title = item.findtext("title", "")
+                link = item.findtext("link", "")
+                pub = item.findtext("pubDate", "")
+                src = item.findtext("source", "")
+                desc = item.findtext("description", "")
+                if not title or not link or link in seen:
+                    continue
+                seen.add(link)
+                desc_clean = re.sub(r"<[^>]+>", "", desc or "").strip()
+                articles.append({
+                    "title": title,
+                    "url": link,
+                    "source": src or "Google News",
+                    "date": pub[:16] if pub else "",
+                    "snippet": desc_clean[:300] if desc_clean else "",
+                })
+        except Exception:
+            continue
+        if len(articles) >= 15:
+            break
+    _NEWS_CACHE = articles[:20]
+    _NEWS_CACHE_TIME = now
+    return jsonify({"articles": articles[:20]})
 
 @app.route("/api/journeys")
 @login_required

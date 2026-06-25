@@ -1861,6 +1861,104 @@
     }
     .analytics-fact strong { color: #c94f7c; font-style: normal; }
 
+    .news-bar {
+      background: rgba(255,255,255,0.82);
+      backdrop-filter: blur(10px);
+      border-radius: 18px;
+      padding: 1.1rem 1.5rem;
+      border: 2px solid rgba(244, 143, 177, 0.18);
+      box-shadow: 0 4px 20px rgba(244, 143, 177, 0.08);
+      transition: box-shadow 0.3s;
+    }
+    .news-bar:hover { box-shadow: 0 6px 28px rgba(244, 143, 177, 0.14); }
+    .news-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.8rem;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .news-header .label {
+      font-weight: 700;
+      font-size: 0.85rem;
+      color: #7a4a6a;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+    .news-header .label svg { width: 16px; height: 16px; fill: none; stroke: #c94f7c; stroke-width: 2; }
+    .news-summary {
+      font-size: 0.78rem;
+      color: #9a7a8a;
+      font-weight: 600;
+    }
+    .news-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+    .news-card {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.8rem;
+      padding: 0.7rem 0.9rem;
+      background: rgba(254, 246, 248, 0.6);
+      border: 1.5px solid rgba(244, 143, 177, 0.12);
+      border-radius: 12px;
+      transition: background 0.2s;
+      text-decoration: none;
+      color: inherit;
+    }
+    .news-card:hover { background: rgba(244, 143, 177, 0.06); border-color: rgba(244, 143, 177, 0.25); }
+    .news-card-icon {
+      flex-shrink: 0;
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: rgba(244, 143, 177, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+    }
+    .news-card-body { flex: 1; min-width: 0; }
+    .news-card-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #4a2c3a;
+      line-height: 1.4;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .news-card-meta {
+      font-size: 0.72rem;
+      color: #9a7a8a;
+      margin-top: 0.2rem;
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+    }
+    .news-card-meta .ncm-source { font-weight: 600; color: #c94f7c; }
+    .news-card-snippet {
+      font-size: 0.76rem;
+      color: #6a4c5a;
+      margin-top: 0.25rem;
+      line-height: 1.5;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .news-error {
+      font-size: 0.8rem;
+      color: #9a7a8a;
+      text-align: center;
+      padding: 1rem;
+    }
+
     .identify-box { max-width: 800px; margin: 0 auto; }
 
     /* source connections tab */
@@ -2447,6 +2545,17 @@
         <div class="analytics-grid" id="analytics-grid"></div>
       </div>
 
+      <div class="news-bar">
+        <div class="news-header">
+          <span class="label">
+            <svg viewBox="0 0 24 24"><path d="M4 4h16v16H4z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 8h8v2H8zm0 4h6v2H8zm0 4h8v2H8z" fill="currentColor"/></svg>
+            excavation news
+          </span>
+          <span class="news-summary" id="news-summary">loading&hellip;</span>
+        </div>
+        <div class="news-grid" id="news-grid"></div>
+      </div>
+
     </div>
   </div>
 </div>
@@ -2649,6 +2758,43 @@
         renderTimeline(data.yearMin, data.yearMax);
         renderSites();
         renderAnalytics();
+        loadNews();
+      });
+  }
+
+  function loadNews() {
+    var grid = document.getElementById('news-grid');
+    var summary = document.getElementById('news-summary');
+    grid.innerHTML = '';
+    summary.textContent = 'loading\u2026';
+    fetch('/api/news')
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (!data.articles || !data.articles.length) {
+          summary.textContent = 'no articles available';
+          return;
+        }
+        summary.textContent = data.articles.length + ' articles';
+        var icons = ['\uD83C\uDFF0', '\uD83C\uDFF7', '\uD83C\uDFFA', '\uD83D\uDCDC', '\uD83C\uDF0D', '\uD83E\uDEAA'];
+        data.articles.forEach(function(a, i) {
+          var card = document.createElement('a');
+          card.className = 'news-card';
+          card.href = a.url;
+          card.target = '_blank';
+          card.rel = 'noopener';
+          card.innerHTML =
+            '<div class="news-card-icon">' + icons[i % icons.length] + '</div>' +
+            '<div class="news-card-body">' +
+              '<div class="news-card-title">' + a.title + '</div>' +
+              '<div class="news-card-meta"><span class="ncm-source">' + a.source + '</span>' + (a.date ? '<span>' + a.date + '</span>' : '') + '</div>' +
+              (a.snippet ? '<div class="news-card-snippet">' + a.snippet + '</div>' : '') +
+            '</div>';
+          grid.appendChild(card);
+        });
+      })
+      .catch(function() {
+        summary.textContent = 'could not load news';
+        grid.innerHTML = '<div class="news-error">Failed to load excavation news. Try again later.</div>';
       });
   }
 
@@ -2932,7 +3078,7 @@
       document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
       btn.classList.add('active');
       document.getElementById(btn.dataset.tab).classList.add('active');
-      if (btn.dataset.tab === 'map-tab') setTimeout(() => map.invalidateSize(), 100);
+      if (btn.dataset.tab === 'map-tab') { setTimeout(() => map.invalidateSize(), 100); loadNews(); }
     });
   });
 
@@ -3342,6 +3488,7 @@
   document.querySelectorAll('nav button').forEach(btn => {
     btn.addEventListener('click', () => {
       if (btn.dataset.tab === 'source-tab') loadEvents();
+      if (btn.dataset.tab === 'map-tab') loadNews();
     });
   });
 
