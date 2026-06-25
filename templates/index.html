@@ -2716,12 +2716,116 @@
     .popup-site .popup-status.ongoing { background: #c8e6c9; color: #2e7d32; }
     .popup-site .popup-status.completed { background: #e0e0e0; color: #616161; }
 
-    @media (max-width: 600px) {
-      header { flex-direction: column; text-align: center; padding: 1rem; gap: 0.4rem; }
-      header .user-box { margin-left: 0; }
-      .timeline-labels { font-size: 0.6rem; }
-      .filter-chip { font-size: 0.7rem; padding: 0.25rem 0.7rem; }
+      @media (max-width: 600px) {
+        header { flex-direction: column; text-align: center; padding: 1rem; gap: 0.4rem; }
+        header .user-box { margin-left: 0; }
+        .timeline-labels { font-size: 0.6rem; }
+        .filter-chip { font-size: 0.7rem; padding: 0.25rem 0.7rem; }
+      }
+
+    .chat-toggle {
+      position: fixed; bottom: 1.2rem; right: 1.2rem; z-index: 9999;
+      width: 52px; height: 52px; border-radius: 50%;
+      background: linear-gradient(135deg, #f48fb1, #ce93d8);
+      border: none; cursor: pointer;
+      box-shadow: 0 4px 20px rgba(244,143,177,0.35);
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.3s ease;
+      font-size: 1.4rem; color: #fff;
     }
+    .chat-toggle:hover { transform: scale(1.1); box-shadow: 0 6px 28px rgba(244,143,177,0.5); }
+    .chat-toggle.open { transform: scale(0.9); opacity: 0.8; }
+
+    .chat-box {
+      position: fixed; bottom: 5rem; right: 1.2rem; z-index: 9998;
+      width: 340px; max-width: calc(100vw - 2rem);
+      background: rgba(255,255,255,0.96);
+      backdrop-filter: blur(16px);
+      border-radius: 18px;
+      border: 2px solid rgba(244,143,177,0.2);
+      box-shadow: 0 8px 40px rgba(0,0,0,0.12);
+      display: none;
+      flex-direction: column;
+      animation: fadeSlideUp 0.3s ease;
+      overflow: hidden;
+    }
+    .chat-box.open { display: flex; }
+    .chat-header {
+      background: linear-gradient(135deg, #f8bbd0, #e8b6d6);
+      color: #fff; padding: 0.8rem 1rem;
+      display: flex; align-items: center; gap: 0.5rem;
+      font-weight: 700; font-size: 0.85rem;
+    }
+    .chat-header .ch-icon { font-size: 1.1rem; }
+    .chat-header .ch-close {
+      margin-left: auto; background: rgba(255,255,255,0.2);
+      border: none; color: #fff; cursor: pointer;
+      width: 26px; height: 26px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; line-height: 1;
+      transition: background 0.2s;
+    }
+    .chat-header .ch-close:hover { background: rgba(255,255,255,0.35); }
+    .chat-messages {
+      flex: 1; padding: 0.8rem; overflow-y: auto;
+      max-height: 320px; min-height: 160px;
+      display: flex; flex-direction: column; gap: 0.5rem;
+    }
+    .chat-msg {
+      max-width: 85%; padding: 0.5rem 0.75rem;
+      border-radius: 14px; font-size: 0.82rem; line-height: 1.5;
+      animation: fadeSlideUp 0.25s ease;
+    }
+    .chat-msg.bot {
+      align-self: flex-start;
+      background: rgba(244,143,177,0.08);
+      border: 1px solid rgba(244,143,177,0.12);
+      color: #4a2c3a;
+      border-bottom-left-radius: 4px;
+    }
+    .chat-msg.user {
+      align-self: flex-end;
+      background: linear-gradient(135deg, #f48fb1, #ce93d8);
+      color: #fff;
+      border-bottom-right-radius: 4px;
+    }
+    .chat-input-wrap {
+      display: flex; gap: 0.4rem; padding: 0.6rem 0.8rem;
+      border-top: 1px solid rgba(244,143,177,0.1);
+    }
+    .chat-input-wrap input {
+      flex: 1; padding: 0.5rem 0.7rem;
+      border: 2px solid rgba(244,143,177,0.18);
+      border-radius: 12px; font-size: 0.82rem;
+      font-family: 'Inter', sans-serif;
+      color: #4a2c3a; background: rgba(255,255,255,0.7);
+      transition: border-color 0.2s;
+      outline: none;
+    }
+    .chat-input-wrap input:focus { border-color: #f48fb1; }
+    .chat-input-wrap button {
+      background: linear-gradient(135deg, #f48fb1, #ce93d8);
+      border: none; border-radius: 12px; cursor: pointer;
+      padding: 0.5rem 0.9rem; color: #fff; font-weight: 700;
+      font-size: 0.82rem; font-family: inherit;
+      transition: transform 0.15s;
+      white-space: nowrap;
+    }
+    .chat-input-wrap button:hover { transform: scale(1.04); }
+    .chat-input-wrap button:active { transform: scale(0.96); }
+    .chat-typing {
+      align-self: flex-start;
+      display: flex; gap: 0.2rem; padding: 0.5rem 0.85rem;
+      background: rgba(244,143,177,0.08);
+      border-radius: 14px; border: 1px solid rgba(244,143,177,0.12);
+      border-bottom-left-radius: 4px;
+    }
+    .chat-typing span {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: #ce93d8; animation: dotPulse 1.2s ease-in-out infinite;
+    }
+    .chat-typing span:nth-child(2) { animation-delay: 0.2s; }
+    .chat-typing span:nth-child(3) { animation-delay: 0.4s; }
   </style>
 </head>
 <body>
@@ -2743,7 +2847,7 @@
     <div class="user-box">
       <span class="points-badge" id="points-badge" title="your drachmae">0</span>
       <div class="user-avatar" id="header-avatar" onclick="goToProfile()"
-           title="click for your profile">{{ session.get('avatar', '') or '&#x1F9B6;' }}</div>
+           title="click for your profile">{% set av = session.get('avatar', '') %}{% if av and (av.startswith('/static/') or av.startswith('http')) %}<img src="{{ av }}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">{% else %}{{ av or '&#x1F9B6;' }}{% endif %}</div>
       <span class="user-name" onclick="goToProfile()" style="cursor:pointer" title="click for your profile">{{ session.get('username', '') }}</span>
       <a href="/logout" class="logout-btn">sign out</a>
     </div>
@@ -2764,7 +2868,7 @@
     <h2 class="profile-title">Edit Profile</h2>
 
     <div class="profile-avatar-section">
-      <div class="profile-avatar-preview" id="profile-avatar-preview">{{ session.get('avatar', '') or '&#x1F9B6;' }}</div>
+      <div class="profile-avatar-preview" id="profile-avatar-preview">{% set av = session.get('avatar', '') %}{% if av and (av.startswith('/static/') or av.startswith('http')) %}<img src="{{ av }}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">{% else %}{{ av or '&#x1F9B6;' }}{% endif %}</div>
       <div class="profile-upload-row">
         <label class="profile-upload-btn" for="avatar-upload">upload image</label>
         <input type="file" id="avatar-upload" accept="image/*" style="display:none">
@@ -3122,7 +3226,7 @@
   <div class="container">
     <div class="profile-page">
       <div class="profile-page-header">
-        <div class="profile-avatar-large" id="profile-page-avatar">{{ session.get('avatar', '') or '&#x1F9B6;' }}</div>
+        <div class="profile-avatar-large" id="profile-page-avatar">{% set av = session.get('avatar', '') %}{% if av and (av.startswith('/static/') or av.startswith('http')) %}<img src="{{ av }}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">{% else %}{{ av or '&#x1F9B6;' }}{% endif %}</div>
         <div class="profile-page-info">
           <h2 class="profile-page-username">{{ session.get('username', '') }}</h2>
           <p class="profile-page-bio" id="profile-page-bio">{{ session.get('bio', '') or 'No bio yet.' }}</p>
@@ -5812,7 +5916,7 @@
       var card = document.createElement('div');
       card.className = 'explore-card';
       card.style.animationDelay = (i * 0.04) + 's';
-      var avatarHtml = u.avatar && u.avatar.startsWith('/static/')
+      var avatarHtml = u.avatar && (u.avatar.startsWith('/static/') || u.avatar.startsWith('http'))
         ? '<img src="' + u.avatar + '" alt="avatar">'
         : (u.avatar || '\uD83E\uDDB6');
       var bio = u.bio || 'No bio yet.';
@@ -5840,7 +5944,7 @@
     fetch('/api/users/' + userId)
       .then(function(r) { return r.json(); })
       .then(function(u) {
-        var avatarHtml = u.avatar && u.avatar.startsWith('/static/')
+        var avatarHtml = u.avatar && (u.avatar.startsWith('/static/') || u.avatar.startsWith('http'))
           ? '<img src="' + u.avatar + '" style="width:64px;height:64px;border-radius:50%;object-fit:cover;">'
           : '<div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#f8bbd0,#ce93d8);display:flex;align-items:center;justify-content:center;font-size:2rem;">' + (u.avatar || '\uD83E\uDDB6') + '</div>';
         var savedHtml = '';
@@ -5903,6 +6007,73 @@
     document.getElementById('profile-tab').classList.add('active');
     loadSavedItems();
   }
+
+  /* Chatbot */
+  function toggleChat() {
+    var box = document.getElementById('chat-box');
+    var btn = document.getElementById('chat-toggle');
+    box.classList.toggle('open');
+    btn.classList.toggle('open');
+    if (box.classList.contains('open')) {
+      document.getElementById('chat-input').focus();
+    }
+  }
+
+  function sendChat() {
+    var input = document.getElementById('chat-input');
+    var msg = input.value.trim();
+    if (!msg) return;
+    input.value = '';
+    var msgs = document.getElementById('chat-messages');
+    msgs.appendChild(createMsg(msg, 'user'));
+    msgs.scrollTop = msgs.scrollHeight;
+    var typing = document.createElement('div');
+    typing.className = 'chat-typing';
+    typing.innerHTML = '<span></span><span></span><span></span>';
+    typing.id = 'chat-typing';
+    msgs.appendChild(typing);
+    msgs.scrollTop = msgs.scrollHeight;
+    fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: msg })
+    })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        var t = document.getElementById('chat-typing');
+        if (t) t.remove();
+        msgs.appendChild(createMsg(data.reply || 'No response.', 'bot'));
+        msgs.scrollTop = msgs.scrollHeight;
+      })
+      .catch(function() {
+        var t = document.getElementById('chat-typing');
+        if (t) t.remove();
+        msgs.appendChild(createMsg('Something went wrong. Try again.', 'bot'));
+        msgs.scrollTop = msgs.scrollHeight;
+      });
+  }
+
+  function createMsg(text, sender) {
+    var div = document.createElement('div');
+    div.className = 'chat-msg ' + sender;
+    div.textContent = text;
+    return div;
+  }
 </script>
+<button class="chat-toggle" id="chat-toggle" onclick="toggleChat()" title="ask a question">&#x1F4AC;</button>
+<div class="chat-box" id="chat-box">
+  <div class="chat-header">
+    <span class="ch-icon">&#x1F9D0;</span>
+    <span>Ask Excavatio AI</span>
+    <button class="ch-close" onclick="toggleChat()">&times;</button>
+  </div>
+  <div class="chat-messages" id="chat-messages">
+    <div class="chat-msg bot">Hello! I&#x2019;m the Excavatio assistant. Ask me about ancient history, archaeology, mythology, or how to use the app.</div>
+  </div>
+  <div class="chat-input-wrap">
+    <input type="text" id="chat-input" placeholder="ask something..." onkeydown="if(event.key==='Enter')sendChat()">
+    <button onclick="sendChat()">send</button>
+  </div>
+</div>
 </body>
 </html>

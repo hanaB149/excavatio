@@ -2068,6 +2068,45 @@ def api_quiz_matching():
         })
     return jsonify({"sets": result})
 
+
+@app.route("/api/chat", methods=["POST"])
+@login_required
+def api_chat():
+    data = request.get_json()
+    if not data or not data.get("message", "").strip():
+        return jsonify({"reply": "Please say something!"})
+    message = data["message"].strip()[:1000]
+    ai_key = os.environ.get("AIAND_API_KEY", "")
+    if not ai_key:
+        return jsonify({"reply": "The AI assistant is not available right now."})
+    try:
+        prompt = (
+            "You are a helpful assistant for an ancient world exploration app called Excavatio. "
+            "You can answer questions about ancient history, archaeology, classical literature, mythology, "
+            "and the app's features. Be concise, informative, and friendly. If you don't know something, say so.\n\n"
+            f"User: {message}"
+        )
+        url = "https://api.aiand.com/v1/chat/completions"
+        headers = {
+            "Authorization": f"Bearer {ai_key}",
+            "Content-Type": "application/json",
+        }
+        body = {
+            "model": "deepseek-ai/deepseek-v4-pro",
+            "messages": [{"role": "user", "content": prompt}],
+            "temperature": 0.3,
+            "max_tokens": 600,
+        }
+        r = requests.post(url, json=body, headers=headers, timeout=30)
+        r.raise_for_status()
+        resp = r.json()
+        reply = resp["choices"][0]["message"]["content"].strip()
+        return jsonify({"reply": reply})
+    except Exception as e:
+        logger.error(f"Chat error: {e}")
+        return jsonify({"reply": "Sorry, I couldn't process that right now. Try again later."})
+
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=True)
