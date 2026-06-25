@@ -9,6 +9,7 @@ import uuid
 import xml.etree.ElementTree as ET
 from datetime import datetime, timezone, timedelta
 from functools import wraps
+from urllib.parse import urlparse
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -52,6 +53,11 @@ def _load_users():
             _users_cache = []
     else:
         _users_cache = []
+    # clean up truncated avatars from old bug
+    for u in _users_cache:
+        av = u.get("avatar", "")
+        if av and not av.startswith("/static/") and not av.startswith("http") and not av.startswith("<img") and len(av) < 30:
+            u["avatar"] = ""
     return _users_cache
 
 
@@ -86,6 +92,24 @@ def find_user_by_username(username):
         if u.get("username") == username:
             return u
     return None
+
+
+def _clean_avatar(av):
+    """Return a clean avatar value: emoji string, /static/ path, or empty."""
+    if not av:
+        return ""
+    # already a clean image path
+    if av.startswith("/static/") or av.startswith("http"):
+        return av[:200]
+    # already an img tag (old saved format)
+    if av.startswith("<img"):
+        m = re.search(r'src="([^"]+)"', av)
+        if m:
+            return m.group(1)
+    # short string that's not an emoji entity — probably trash
+    if len(av) < 30 and not av.startswith("&#x"):
+        return ""
+    return av[:200]
 
 
 def find_user_by_email(email):
@@ -1761,7 +1785,7 @@ def api_users():
             "username": u.get("username", ""),
             "bio": u.get("bio", ""),
             "interests": u.get("interests", ""),
-            "avatar": u.get("avatar", ""),
+            "avatar": _clean_avatar(u.get("avatar", "")),
             "total_points": u.get("total_points", 0),
             "saved_items_count": len(u.get("saved_items", [])),
             "created_at": u.get("created_at", ""),
@@ -1779,7 +1803,7 @@ def api_user_detail(user_id):
                 "username": u.get("username", ""),
                 "bio": u.get("bio", ""),
                 "interests": u.get("interests", ""),
-                "avatar": u.get("avatar", ""),
+                "avatar": _clean_avatar(u.get("avatar", "")),
                 "total_points": u.get("total_points", 0),
                 "saved_items": u.get("saved_items", []),
                 "created_at": u.get("created_at", ""),
@@ -1798,10 +1822,11 @@ def api_profile():
                 "email": u.get("email", ""),
                 "bio": u.get("bio", ""),
                 "interests": u.get("interests", ""),
-                "avatar": u.get("avatar", ""),
+                "avatar": _clean_avatar(u.get("avatar", "")),
                 "saved_items": u.get("saved_items", []),
             })
     return jsonify({"error": "User not found"}), 404
+
 
 @app.route("/api/profile", methods=["POST"])
 @login_required
@@ -1822,7 +1847,6 @@ def api_profile_update():
                     av = img_match.group(1)
                 # strip protocol+host to get relative path if full URL
                 if av.startswith("http"):
-                    from urllib.parse import urlparse
                     parsed = urlparse(av)
                     if parsed.path:
                         av = parsed.path
