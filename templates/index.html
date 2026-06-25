@@ -4603,7 +4603,7 @@
   var MAZE_MAX_LEVEL = 15;
 
   function mazeSpeed() {
-    return Math.max(100, 300 - mazeLevel * 14);
+    return Math.max(180, 420 - mazeLevel * 16);
   }
 
   function loadMaze() {
@@ -4623,6 +4623,7 @@
       gameOver: false,
       flashTimer: 0,
       cellSize: Math.max(22, Math.min(42, Math.floor(380 / size))),
+      minoDelay: 3,
     };
     var canvasSize = size * mazeState.cellSize;
     var arena = document.getElementById('game-arena');
@@ -4680,16 +4681,35 @@
       var mr = s.minotaurPos.r, mc = s.minotaurPos.c;
       var dist = Math.abs(mr - s.playerPos.r) + Math.abs(mc - s.playerPos.c);
       var danger = dist < 5;
+      var cx = mc * cs + cs / 2, cy = mr * cs + cs / 2, r = cs / 2.2;
       ctx.shadowColor = danger ? '#ff1744' : '#b71c1c';
       ctx.shadowBlur = danger ? 28 : 10;
-      ctx.fillStyle = danger ? '#ef5350' : '#c62828';
+      ctx.fillStyle = danger ? '#7b1fa2' : '#4a148c';
       ctx.beginPath();
-      ctx.arc(mc * cs + cs / 2, mr * cs + cs / 2, cs / 2.2, 0, Math.PI * 2);
+      ctx.arc(cx, cy, r, 0, Math.PI * 2);
       ctx.fill();
       ctx.shadowBlur = 0;
-      ctx.fillStyle = '#fff';
-      ctx.font = 'bold ' + Math.round(cs / 2.3) + 'px Inter, sans-serif';
-      ctx.fillText('\u039c', mc * cs + cs / 2, mr * cs + cs / 2 + 1);
+      ctx.fillStyle = danger ? '#ce93d8' : '#9c27b0';
+      ctx.font = 'bold ' + Math.round(cs / 1.7) + 'px Inter, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('\u039c', cx, cy - 1);
+      var hr = r * 0.5;
+      ctx.fillStyle = '#ffd54f';
+      ctx.beginPath();
+      ctx.arc(cx - hr - 1, cy - hr, hr * 0.45, 0, Math.PI * 2);
+      ctx.arc(cx + hr + 1, cy - hr, hr * 0.45, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#000';
+      ctx.beginPath();
+      ctx.arc(cx - hr - 1, cy - hr, hr * 0.18, 0, Math.PI * 2);
+      ctx.arc(cx + hr + 1, cy - hr, hr * 0.18, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#ef5350';
+      ctx.beginPath();
+      ctx.arc(cx - hr * 0.9, cy + hr * 0.1, hr * 0.1, 0, Math.PI * 2);
+      ctx.arc(cx + hr * 0.9, cy + hr * 0.1, hr * 0.1, 0, Math.PI * 2);
+      ctx.fill();
     }
     ctx.shadowColor = '#42a5f5';
     ctx.shadowBlur = 14;
@@ -4705,6 +4725,7 @@
 
   function mazeTick() {
     if (!mazeState || mazeState.won || mazeState.gameOver) return;
+    if (mazeState.minoDelay > 0) { mazeState.minoDelay--; drawMaze(); return; }
     var mr = mazeState.minotaurPos.r, mc = mazeState.minotaurPos.c;
     var pr = mazeState.playerPos.r, pc = mazeState.playerPos.c;
     var dr = Math.sign(pr - mr), dc = Math.sign(pc - mc);
@@ -4712,12 +4733,16 @@
     if (dr && mazeState.grid[mr + dr] && mazeState.grid[mr + dr][mc] === 0) choices.push({r: mr + dr, c: mc});
     if (dc && mazeState.grid[mr][mc + dc] === 0) choices.push({r: mr, c: mc + dc});
     if (choices.length) {
-      var best = choices.reduce(function(a, b) {
-        var da = Math.abs(a.r - pr) + Math.abs(a.c - pc);
-        var db = Math.abs(b.r - pr) + Math.abs(b.c - pc);
-        return da < db ? a : b;
-      });
-      mazeState.minotaurPos = best;
+      if (Math.random() < 0.25) {
+        mazeState.minotaurPos = choices[Math.floor(Math.random() * choices.length)];
+      } else {
+        var best = choices.reduce(function(a, b) {
+          var da = Math.abs(a.r - pr) + Math.abs(a.c - pc);
+          var db = Math.abs(b.r - pr) + Math.abs(b.c - pc);
+          return da < db ? a : b;
+        });
+        mazeState.minotaurPos = best;
+      }
     }
     if (mazeState.minotaurPos.r === pr && mazeState.minotaurPos.c === pc) {
       mazeState.gameOver = true;
