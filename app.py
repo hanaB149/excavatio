@@ -121,6 +121,8 @@ def find_user_by_email(email):
 
 def create_user(username, email, password):
     users = _load_users()
+    import random
+    default_avatars = ["\u26EA", "\U0001F3F7"]
     user = {
         "id": len(users) + 1,
         "username": username,
@@ -131,9 +133,11 @@ def create_user(username, email, password):
         "action_counts": {},
         "bio": "",
         "interests": "",
-        "avatar": "",
+        "avatar": random.choice(default_avatars),
         "saved_items": [],
         "game_levels": {},
+        "followers": [],
+        "following": [],
     }
     users.append(user)
     with _persist_lock:
@@ -153,6 +157,8 @@ def save_user_progress(user_id):
             u["avatar"] = session.get("avatar", "")
             u["saved_items"] = session.get("saved_items", [])
             u["game_levels"] = session.get("game_levels", {})
+            u["followers"] = session.get("followers", [])
+            u["following"] = session.get("following", [])
             break
     with _persist_lock:
         _persist_users()
@@ -1499,6 +1505,8 @@ def signup():
     session["avatar"] = ""
     session["saved_items"] = []
     session["game_levels"] = {}
+    session["followers"] = []
+    session["following"] = []
     return redirect(url_for("index"))
 
 
@@ -1523,6 +1531,8 @@ def login():
     session["avatar"] = user.get("avatar", "")
     session["saved_items"] = user.get("saved_items", [])
     session["game_levels"] = user.get("game_levels", {})
+    session["followers"] = user.get("followers", [])
+    session["following"] = user.get("following", [])
     return redirect(url_for("index"))
 
 
@@ -1778,8 +1788,11 @@ def api_identify():
 @login_required
 def api_users():
     users = _load_users()
+    my_id = session["user_id"]
+    my_following = session.get("following", [])
     result = []
     for u in users:
+        u_followers = u.get("followers", [])
         result.append({
             "id": u.get("id"),
             "username": u.get("username", ""),
@@ -1789,6 +1802,8 @@ def api_users():
             "total_points": u.get("total_points", 0),
             "saved_items_count": len(u.get("saved_items", [])),
             "created_at": u.get("created_at", ""),
+            "follower_count": len(u_followers),
+            "is_following": u.get("id") in my_following,
         })
     return jsonify({"users": result})
 
@@ -1796,8 +1811,10 @@ def api_users():
 @login_required
 def api_user_detail(user_id):
     users = _load_users()
+    my_following = session.get("following", [])
     for u in users:
         if u.get("id") == user_id:
+            u_followers = u.get("followers", [])
             return jsonify({
                 "id": u.get("id"),
                 "username": u.get("username", ""),
@@ -1807,6 +1824,8 @@ def api_user_detail(user_id):
                 "total_points": u.get("total_points", 0),
                 "saved_items": u.get("saved_items", []),
                 "created_at": u.get("created_at", ""),
+                "follower_count": len(u_followers),
+                "is_following": user_id in my_following,
             })
     return jsonify({"error": "User not found"}), 404
 
@@ -1954,6 +1973,38 @@ def api_set_game_levels():
     session["game_levels"] = data["game_levels"]
     session.modified = True
     return jsonify({"saved": True})
+
+
+@app.route("/api/follow/<int:target_id>", methods=["POST"])
+@login_required
+def api_follow(target_id):
+    user_id = session["user_id"]
+    if user_id == target_id:
+        return jsonify({"error": "Cannot follow yourself"}), 400
+    users = _load_users()
+    current = next((u for u in users if u.get("id") == user_id), None)
+    target = next((u for u in users if u.get("id") == target_id), None)
+    if not current or not target:
+        return jsonify({"error": "User not found"}), 404
+    following = current.setdefault("following", [])
+    if target_id in following:
+        following.remove(target_id)
+        session["following"] = following
+        target_followers = target.setdefault("followers", [])
+        if user_id in target_followers:
+            target_followers.remove(user_id)
+        with _persist_lock:
+            _persist_users()
+        return jsonify({"following": False, "follower_count": len(target_followers)})
+    else:
+        following.append(target_id)
+        session["following"] = following
+        target_followers = target.setdefault("followers", [])
+        if user_id not in target_followers:
+            target_followers.append(user_id)
+        with _persist_lock:
+            _persist_users()
+        return jsonify({"following": True, "follower_count": len(target_followers)})
 
 
 @app.route("/api/save-progress", methods=["POST"])
