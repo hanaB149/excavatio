@@ -6090,7 +6090,7 @@
       card.style.animationDelay = (i * 0.04) + 's';
       var avatarHtml = u.avatar && (u.avatar.startsWith('/static/') || u.avatar.startsWith('http') || u.avatar.startsWith('<img'))
         ? '<img src="' + (u.avatar.startsWith('<img') ? u.avatar.replace(/.*src="([^"]+)".*/, '$1') : u.avatar) + '" alt="avatar">'
-        : (u.avatar || '\uD83C\uDFF7');
+        : (u.avatar || '\uD83C\uDFFA');
       var bio = u.bio || 'No bio yet.';
       var interests = u.interests || 'No interests listed.';
       var followText = u.is_following ? 'following' : 'follow';
@@ -6146,7 +6146,7 @@
       .then(function(u) {
         var avatarHtml = u.avatar && (u.avatar.startsWith('/static/') || u.avatar.startsWith('http') || u.avatar.startsWith('<img'))
           ? '<img src="' + (u.avatar.startsWith('<img') ? u.avatar.replace(/.*src="([^"]+)".*/, '$1') : u.avatar) + '" style="width:64px;height:64px;border-radius:50%;object-fit:cover;">'
-          : '<div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#f8bbd0,#ce93d8);display:flex;align-items:center;justify-content:center;font-size:2rem;">' + (u.avatar || '\uD83C\uDFF7') + '</div>';
+          : '<div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#f8bbd0,#ce93d8);display:flex;align-items:center;justify-content:center;font-size:2rem;">' + (u.avatar || '\uD83C\uDFFA') + '</div>';
         var savedHtml = '';
         if (u.saved_items && u.saved_items.length) {
           savedHtml = '<h4 style="font-size:0.9rem;color:#c94f7c;margin:1rem 0 0.5rem;">saved items</h4>';

@@ -95,9 +95,10 @@ def find_user_by_username(username):
 
 
 def _clean_avatar(av):
-    """Return a clean avatar value: emoji string, /static/ path, or empty."""
+    """Return a clean avatar value or a random default Greek emoji."""
     if not av:
-        return ""
+        import random
+        return random.choice(["\u26EA", "\U0001F3FA"])
     # already a clean image path
     if av.startswith("/static/") or av.startswith("http"):
         return av[:200]
@@ -108,7 +109,8 @@ def _clean_avatar(av):
             return m.group(1)
     # short string that's not an emoji entity — probably trash
     if len(av) < 30 and not av.startswith("&#x"):
-        return ""
+        import random
+        return random.choice(["\u26EA", "\U0001F3FA"])
     return av[:200]
 
 
@@ -122,7 +124,7 @@ def find_user_by_email(email):
 def create_user(username, email, password):
     users = _load_users()
     import random
-    default_avatars = ["\u26EA", "\U0001F3F7"]
+    default_avatars = ["\u26EA", "\U0001F3FA"]
     user = {
         "id": len(users) + 1,
         "username": username,
