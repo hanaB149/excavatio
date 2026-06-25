@@ -4774,10 +4774,10 @@
   }
 
   function mazeKeyHandler(e) {
-    if (e.key === 'ArrowUp') { e.preventDefault(); mazeMove(-1, 0); }
-    else if (e.key === 'ArrowDown') { e.preventDefault(); mazeMove(1, 0); }
-    else if (e.key === 'ArrowLeft') { e.preventDefault(); mazeMove(0, -1); }
-    else if (e.key === 'ArrowRight') { e.preventDefault(); mazeMove(0, 1); }
+    if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') { e.preventDefault(); mazeMove(-1, 0); }
+    else if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') { e.preventDefault(); mazeMove(1, 0); }
+    else if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') { e.preventDefault(); mazeMove(0, -1); }
+    else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') { e.preventDefault(); mazeMove(0, 1); }
   }
 
   function closeMaze() {
