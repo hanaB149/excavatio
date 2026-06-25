@@ -1504,7 +1504,7 @@ def signup():
     session["action_counts"] = {}
     session["bio"] = ""
     session["interests"] = ""
-    session["avatar"] = ""
+    session["avatar"] = user.get("avatar", "")
     session["saved_items"] = []
     session["game_levels"] = {}
     session["followers"] = []
@@ -1553,6 +1553,16 @@ def logout():
 @app.route("/")
 @login_required
 def index():
+    # ensure session avatar is populated from user store if missing
+    if "user_id" in session and not session.get("avatar"):
+        users = _load_users()
+        for u in users:
+            if u.get("id") == session["user_id"]:
+                av = u.get("avatar", "")
+                if av:
+                    session["avatar"] = av
+                    session.modified = True
+                break
     return render_template("index.html")
 
 def query_ai(passage, api_key):

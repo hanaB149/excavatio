@@ -5460,7 +5460,7 @@
       flashTimer: 0,
       cellSize: Math.max(18, Math.min(38, Math.floor(380 / size))),
       minoMoveTimer: 0,
-      minoMoveInterval: 6 + Math.max(0, 8 - mazeLevel),
+      minoMoveInterval: Math.max(2, 7 - mazeLevel),
     };
     var canvasSize = size * mazeState.cellSize;
     var arena = document.getElementById('game-arena');
