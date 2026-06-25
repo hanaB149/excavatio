@@ -1561,6 +1561,8 @@ def index():
                 av = u.get("avatar", "")
                 if av:
                     session["avatar"] = av
+                    session["followers"] = u.get("followers", [])
+                    session["following"] = u.get("following", [])
                     session.modified = True
                 break
     return render_template("index.html")
@@ -2017,6 +2019,34 @@ def api_follow(target_id):
         with _persist_lock:
             _persist_users()
         return jsonify({"following": True, "follower_count": len(target_followers)})
+
+
+@app.route("/api/follow/lists", methods=["GET"])
+@login_required
+def api_follow_lists():
+    user_id = session["user_id"]
+    users = _load_users()
+    my_following_ids = session.get("following", [])
+    my_followers_ids = []
+    for u in users:
+        if u.get("id") == user_id:
+            my_followers_ids = u.get("followers", [])
+            break
+
+    def user_brief(uid):
+        for u in users:
+            if u.get("id") == uid:
+                return {
+                    "id": u["id"],
+                    "username": u.get("username", ""),
+                    "avatar": _clean_avatar(u.get("avatar", "")),
+                }
+        return None
+
+    followers = [user_brief(fid) for fid in my_followers_ids if user_brief(fid)]
+    following = [user_brief(fid) for fid in my_following_ids if user_brief(fid)]
+
+    return jsonify({"followers": followers, "following": following})
 
 
 @app.route("/api/save-progress", methods=["POST"])

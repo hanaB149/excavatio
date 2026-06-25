@@ -1538,10 +1538,15 @@
       letter-spacing: 0.04em;
     }
     .explore-card .ec-meta span { display: inline-flex; align-items: center; gap: 0.25rem; }
+    .explore-card .ec-follow-row {
+      display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; margin-top: 0.5rem;
+    }
+    .explore-card .ec-follow-stat { font-size: 0.78rem; color: #9a7a8a; font-weight: 500; }
+    .explore-card .ec-follow-stat strong { color: #c94f7c; }
     .explore-card .ec-follow-btn {
-      margin-top: 0.5rem; padding: 0.35rem 1rem; border-radius: 50px; border: 1.5px solid #ce93d8;
+      padding: 0.35rem 1rem; border-radius: 50px; border: 1.5px solid #ce93d8;
       font-size: 0.78rem; font-weight: 700; cursor: pointer; font-family: inherit;
-      background: transparent; color: #7b1fa2; transition: all 0.2s; width: 100%;
+      background: transparent; color: #7b1fa2; transition: all 0.2s;
     }
     .explore-card .ec-follow-btn:hover { background: #f3e5f5; transform: scale(1.02); }
     .explore-card .ec-follow-btn.following { border-color: #81c784; color: #2e7d32; background: rgba(129,199,132,0.1); }
@@ -1576,6 +1581,33 @@
       font-size: 0.82rem; font-weight: 600; cursor: pointer; font-family: inherit;
     }
     .profile-edit-btn:hover { transform: scale(1.03); }
+
+    .follow-section { margin-top: 0.8rem; }
+    .follow-tabs { display: flex; gap: 0.4rem; margin-bottom: 0.5rem; }
+    .follow-tab {
+      flex: 1; padding: 0.5rem; border: 2px solid rgba(244,143,177,0.15);
+      border-radius: 10px; background: rgba(255,255,255,0.6); cursor: pointer;
+      font-size: 0.82rem; font-weight: 700; font-family: inherit; color: #7a5a6a;
+      transition: all 0.2s; text-align: center;
+    }
+    .follow-tab:hover { border-color: #f48fb1; background: white; }
+    .follow-tab.active { border-color: #f48fb1; background: rgba(244,143,177,0.08); color: #c94f7c; }
+    .follow-tab span { background: rgba(244,143,177,0.12); padding: 0.05rem 0.45rem; border-radius: 50px; font-size: 0.75rem; margin-left: 0.25rem; }
+    .follow-list { max-height: 220px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.3rem; }
+    .follow-list .fl-empty { font-size: 0.85rem; color: #9a7a8a; font-style: italic; padding: 0.5rem 0; text-align: center; }
+    .follow-item {
+      display: flex; align-items: center; gap: 0.5rem; padding: 0.35rem 0.5rem;
+      background: rgba(255,255,255,0.7); border-radius: 8px; cursor: pointer;
+      transition: background 0.15s; border: 1px solid rgba(244,143,177,0.06);
+    }
+    .follow-item:hover { background: rgba(244,143,177,0.06); }
+    .follow-item .fi-avatar {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: linear-gradient(135deg, #f8bbd0, #ce93d8);
+      display: flex; align-items: center; justify-content: center; font-size: 0.9rem; flex-shrink: 0;
+    }
+    .follow-item .fi-avatar img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+    .follow-item .fi-name { font-weight: 600; font-size: 0.82rem; color: #5a3c4a; flex: 1; }
 
     .saved-items-section { margin-top: 0.5rem; }
     .saved-items-header {
@@ -2855,7 +2887,7 @@
     <div class="user-box">
       <span class="points-badge" id="points-badge" title="your drachmae">0</span>
       <div class="user-avatar" id="header-avatar" onclick="goToProfile()"
-           title="click for your profile">{% set av = session.get('avatar', '') %}{% if av and (av.startswith('/static/') or av.startswith('http') or av.startswith('<img')) %}{% if av.startswith('<img') %}{{ av|safe }}{% else %}<img src="{{ av }}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">{% endif %}{% else %}{{ av or '&#x26EA;' }}{% endif %}</div>
+           title="click for your profile">{% set av = session.get('avatar', '') %}{% if av and (av.startswith('/static/') or av.startswith('http') or av.startswith('<img')) %}{% if av.startswith('<img') %}{{ av|safe }}{% else %}<img src="{{ av }}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">{% endif %}{% else %}{{ av or '&#x1F3DB;' }}{% endif %}</div>
       <span class="user-name" onclick="goToProfile()" style="cursor:pointer" title="click for your profile">{{ session.get('username', '') }}</span>
       <a href="/logout" class="logout-btn">sign out</a>
     </div>
@@ -2876,14 +2908,14 @@
     <h2 class="profile-title">Edit Profile</h2>
 
     <div class="profile-avatar-section">
-      <div class="profile-avatar-preview" id="profile-avatar-preview">{% set av = session.get('avatar', '') %}{% if av and (av.startswith('/static/') or av.startswith('http') or av.startswith('<img')) %}{% if av.startswith('<img') %}{{ av|safe }}{% else %}<img src="{{ av }}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">{% endif %}{% else %}{{ av or '&#x26EA;' }}{% endif %}</div>
+      <div class="profile-avatar-preview" id="profile-avatar-preview">{% set av = session.get('avatar', '') %}{% if av and (av.startswith('/static/') or av.startswith('http') or av.startswith('<img')) %}{% if av.startswith('<img') %}{{ av|safe }}{% else %}<img src="{{ av }}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">{% endif %}{% else %}{{ av or '&#x1F3DB;' }}{% endif %}</div>
       <div class="profile-upload-row">
         <label class="profile-upload-btn" for="avatar-upload">upload image</label>
         <input type="file" id="avatar-upload" accept="image/*" style="display:none">
         <button class="profile-emoji-btn" onclick="showEmojiPicker()">choose emoji</button>
       </div>
       <div id="emoji-picker" class="profile-avatar-picker" style="display:none">
-        <span onclick="pickAvatar('&#x26EA;')" class="av-opt" title="temple">&#x26EA;</span>
+        <span onclick="pickAvatar('&#x1F3DB;')" class="av-opt" title="temple">&#x1F3DB;</span>
         <span onclick="pickAvatar('&#x1F3F7;')" class="av-opt" title="amphora">&#x1F3F7;</span>
         <span onclick="pickAvatar('&#x1F3F4;&#x200D;&#x2620;&#xFE0F;')" class="av-opt" title="pirate">&#x1F3F4;&#x200D;&#x2620;&#xFE0F;</span>
         <span onclick="pickAvatar('&#x1F409;')" class="av-opt" title="dragon">&#x1F409;</span>
@@ -3235,13 +3267,21 @@
   <div class="container">
     <div class="profile-page">
       <div class="profile-page-header">
-        <div class="profile-avatar-large" id="profile-page-avatar">{% set av = session.get('avatar', '') %}{% if av and (av.startswith('/static/') or av.startswith('http') or av.startswith('<img')) %}{% if av.startswith('<img') %}{{ av|safe }}{% else %}<img src="{{ av }}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">{% endif %}{% else %}{{ av or '&#x26EA;' }}{% endif %}</div>
+        <div class="profile-avatar-large" id="profile-page-avatar">{% set av = session.get('avatar', '') %}{% if av and (av.startswith('/static/') or av.startswith('http') or av.startswith('<img')) %}{% if av.startswith('<img') %}{{ av|safe }}{% else %}<img src="{{ av }}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">{% endif %}{% else %}{{ av or '&#x1F3DB;' }}{% endif %}</div>
         <div class="profile-page-info">
           <h2 class="profile-page-username">{{ session.get('username', '') }}</h2>
           <p class="profile-page-bio" id="profile-page-bio">{{ session.get('bio', '') or 'No bio yet.' }}</p>
           <p class="profile-page-interests" id="profile-page-interests">{{ session.get('interests', '') or 'No interests listed.' }}</p>
           <button class="profile-edit-btn" onclick="openProfile()">edit profile</button>
         </div>
+      </div>
+
+      <div class="follow-section">
+        <div class="follow-tabs">
+          <button class="follow-tab active" onclick="showFollowList('followers', this)">followers <span id="follower-count">0</span></button>
+          <button class="follow-tab" onclick="showFollowList('following', this)">following <span id="following-count">0</span></button>
+        </div>
+        <div id="follow-list" class="follow-list"></div>
       </div>
 
       <div class="saved-items-section">
@@ -6107,10 +6147,12 @@
         '<div class="ec-interests">' + escapeHtml(interests) + '</div>' +
         '<div class="ec-meta">' +
           '<span>' + u.saved_items_count + ' saved items</span>' +
-          '<span>' + (u.follower_count || 0) + ' followers</span>' +
           '<span>joined ' + new Date(u.created_at).toLocaleDateString() + '</span>' +
         '</div>' +
-        '<button class="ec-follow-btn' + followClass + '" data-id="' + u.id + '" onclick="event.stopPropagation();toggleFollow(this)">' + followText + '</button>';
+        '<div class="ec-follow-row">' +
+          '<span class="ec-follow-stat"><strong>' + (u.follower_count || 0) + '</strong> followers</span>' +
+          '<button class="ec-follow-btn' + followClass + '" data-id="' + u.id + '" onclick="event.stopPropagation();toggleFollow(this)">' + followText + '</button>' +
+        '</div>';
       card.addEventListener('click', function() { showUserDetail(u.id); });
       grid.appendChild(card);
     });
@@ -6129,13 +6171,8 @@
           btn.classList.remove('following');
         }
         // update follower count on the card
-        var meta = btn.closest('.explore-card').querySelector('.ec-meta');
-        if (meta) {
-          var spans = meta.querySelectorAll('span');
-          if (spans.length >= 2) {
-            spans[1].textContent = data.follower_count + ' followers';
-          }
-        }
+        var stat = btn.closest('.explore-card').querySelector('.ec-follow-stat');
+        if (stat) stat.innerHTML = '<strong>' + data.follower_count + '</strong> followers';
       })
       .catch(function() {});
   }
@@ -6207,6 +6244,54 @@
     document.querySelectorAll('.tab-content').forEach(function(t) { t.classList.remove('active'); });
     document.getElementById('profile-tab').classList.add('active');
     loadSavedItems();
+    loadFollowLists();
+  }
+
+  /* Follow lists on profile page */
+  function loadFollowLists() {
+    fetch('/api/follow/lists')
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        var fl = document.getElementById('follower-count');
+        var fl2 = document.getElementById('following-count');
+        if (fl) fl.textContent = (data.followers || []).length;
+        if (fl2) fl2.textContent = (data.following || []).length;
+        var list = document.getElementById('follow-list');
+        if (!list) return;
+        // default to showing followers
+        showFollowList('followers');
+      })
+      .catch(function() {});
+  }
+
+  function showFollowList(type, btn) {
+    var list = document.getElementById('follow-list');
+    if (!list) return;
+    if (btn) {
+      document.querySelectorAll('.follow-tab').forEach(function(t) { t.classList.remove('active'); });
+      btn.classList.add('active');
+    }
+    fetch('/api/follow/lists')
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        var users = type === 'followers' ? (data.followers || []) : (data.following || []);
+        if (!users.length) {
+          list.innerHTML = '<div class="fl-empty">No ' + type + ' yet.</div>';
+          return;
+        }
+        list.innerHTML = '';
+        users.forEach(function(u) {
+          var item = document.createElement('div');
+          item.className = 'follow-item';
+          item.onclick = function() { showUserDetail(u.id); };
+          var avHtml = u.avatar && (u.avatar.startsWith('/static/') || u.avatar.startsWith('http') || u.avatar.startsWith('<img'))
+            ? '<img src="' + (u.avatar.startsWith('<img') ? u.avatar.replace(/.*src="([^"]+)".*/, '$1') : u.avatar) + '">'
+            : (u.avatar || '');
+          item.innerHTML = '<div class="fi-avatar">' + avHtml + '</div><div class="fi-name">' + escapeHtml(u.username) + '</div>';
+          list.appendChild(item);
+        });
+      })
+      .catch(function() {});
   }
 
   /* Chatbot */
