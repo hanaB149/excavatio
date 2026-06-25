@@ -4600,8 +4600,14 @@
     return grid;
   }
 
+  var MAZE_MAX_LEVEL = 15;
+
+  function mazeSpeed() {
+    return Math.max(100, 300 - mazeLevel * 14);
+  }
+
   function loadMaze() {
-    var size = Math.min(7 + mazeLevel * 2, 15);
+    var size = Math.min(7 + mazeLevel * 2, 21);
     var grid = mazeGenerate(size);
     var start = {r: 1, c: 1};
     var end = {r: size - 2, c: size - 2};
@@ -4616,13 +4622,14 @@
       won: false,
       gameOver: false,
       flashTimer: 0,
-      cellSize: Math.max(28, Math.min(42, Math.floor(380 / size))),
+      cellSize: Math.max(22, Math.min(42, Math.floor(380 / size))),
     };
     var canvasSize = size * mazeState.cellSize;
     var arena = document.getElementById('game-arena');
     arena.innerHTML =
       '<div class="ga-header"><span class="ga-title">Labyrinth Escape</span><button class="ga-back" onclick="closeMaze()">&larr; back</button></div>' +
-      '<div class="maze-instruction">Guide <strong>Theseus</strong> (\u0398) past the <strong>Minotaur</strong> (\u039c) who hunts you. Reach the golden glow to escape. Arrow keys or buttons.</div>' +
+      '<div class="maze-instruction">Guide \u0398 past \u039c to the golden glow. Arrow keys / WASD / buttons. ' +
+        '<strong style="color:#ef5350">speed ' + Math.round(100 / mazeSpeed() * 100) + '%</strong></div>' +
       '<div style="display:flex;gap:0.8rem;justify-content:center;margin-bottom:0.6rem;flex-wrap:wrap;">' +
         '<div class="mm-stat"><div class="mms-val" id="mz-level">' + mazeLevel + '</div><div class="mms-label">level</div></div>' +
         '<div class="mm-stat"><div class="mms-val" id="mz-moves">0</div><div class="mms-label">moves</div></div>' +
@@ -4635,7 +4642,7 @@
 
     drawMaze();
     document.addEventListener('keydown', mazeKeyHandler);
-    mazeLoop = setInterval(mazeTick, 280);
+    mazeLoop = setInterval(mazeTick, mazeSpeed());
   }
 
   function drawMaze() {
@@ -4721,7 +4728,8 @@
       result.className = 'quiz-result';
       result.innerHTML =
         '<div style="font-size:2rem;font-weight:800;color:#ef5350;">Caught!</div>' +
-        '<div class="qr-label">The Minotaur devoured Theseus. Try again.</div>' +
+        '<div class="qr-label">The Minotaur devoured Theseus.</div>' +
+        '<div style="font-size:0.8rem;color:#9a7a8a;margin:0.5rem 0">' + mazeState.moves + ' moves &middot; ' + mazeState.wrongTurns + ' wall hits</div>' +
         '<button class="cd-btn" style="max-width:140px;margin-top:0.8rem" onclick="loadMaze()">try again</button>';
       arena.appendChild(result);
       return;
@@ -4756,20 +4764,26 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'trace_journey', detail: 'maze level ' + mazeLevel + ': ' + mazeState.moves + ' moves' })
       }).then(function(r) { return r.json(); }).then(function(d) { updatePointsBadge(d.total_points); }).catch(function() {});
-      mazeLevel++;
       var arena = document.getElementById('game-arena');
       var result = document.createElement('div');
       result.className = 'quiz-result';
+      var isFinal = mazeLevel >= MAZE_MAX_LEVEL;
+      var nextHtml = isFinal
+        ? '<div style="margin-top:0.8rem"><button class="cd-btn" onclick="closeMaze()">claim victory</button></div>'
+        : '<div style="display:flex;gap:0.5rem;justify-content:center;margin-top:0.8rem">' +
+            '<button class="cd-btn" onclick="loadMaze()">next level</button>' +
+          '</div>';
       result.innerHTML =
-        '<div class="qr-score">Escape!</div>' +
+        '<div class="qr-score">' + (isFinal ? 'Labyrinth Conquered!' : 'Escape!') + '</div>' +
         '<div class="qr-label">' + (mazeState.wrongTurns === 0 ? 'flawless — the legend lives!' : 'Theseus escapes the labyrinth') + '</div>' +
         '<div class="qr-points positive">+' + points + ' drachmae</div>' +
         (mazeState.wrongTurns === 0 ? '<div class="qr-perfect">no wall hits — perfect run!</div>' : '') +
-        '<div style="font-size:0.8rem;color:#9a7a8a;margin-top:0.5rem">' + mazeState.moves + ' moves &middot; ' + mazeState.wrongTurns + ' wall hits &middot; next level: ' + mazeLevel + '</div>' +
-        '<div style="display:flex;gap:0.5rem;justify-content:center;margin-top:0.8rem">' +
-          '<button class="cd-btn" onclick="loadMaze()">next level</button>' +
-        '</div>';
+        '<div style="font-size:0.8rem;color:#9a7a8a;margin-top:0.5rem">' + mazeState.moves + ' moves &middot; ' + mazeState.wrongTurns + ' wall hits' +
+          (isFinal ? '' : ' &middot; next level: ' + (mazeLevel + 1)) + '</div>' +
+        nextHtml;
       arena.appendChild(result);
+      if (isFinal) return;
+      mazeLevel++;
     }
   }
 
