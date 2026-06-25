@@ -2847,7 +2847,7 @@
     <div class="user-box">
       <span class="points-badge" id="points-badge" title="your drachmae">0</span>
       <div class="user-avatar" id="header-avatar" onclick="goToProfile()"
-           title="click for your profile">{% set av = session.get('avatar', '') %}{% if av and (av.startswith('/static/') or av.startswith('http') or av.startswith('<img')) %}{% if av.startswith('<img') %}{{ av|safe }}{% else %}<img src="{{ av }}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">{% endif %}{% else %}{{ av or '&#x1F9B6;' }}{% endif %}</div>
+           title="click for your profile">{% set av = session.get('avatar', '') %}{% if av and (av.startswith('/static/') or av.startswith('http') or av.startswith('<img')) %}{% if av.startswith('<img') %}{{ av|safe }}{% else %}<img src="{{ av }}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">{% endif %}{% else %}{{ av or '&#x26EA;' }}{% endif %}</div>
       <span class="user-name" onclick="goToProfile()" style="cursor:pointer" title="click for your profile">{{ session.get('username', '') }}</span>
       <a href="/logout" class="logout-btn">sign out</a>
     </div>
@@ -2868,14 +2868,15 @@
     <h2 class="profile-title">Edit Profile</h2>
 
     <div class="profile-avatar-section">
-      <div class="profile-avatar-preview" id="profile-avatar-preview">{% set av = session.get('avatar', '') %}{% if av and (av.startswith('/static/') or av.startswith('http') or av.startswith('<img')) %}{% if av.startswith('<img') %}{{ av|safe }}{% else %}<img src="{{ av }}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">{% endif %}{% else %}{{ av or '&#x1F9B6;' }}{% endif %}</div>
+      <div class="profile-avatar-preview" id="profile-avatar-preview">{% set av = session.get('avatar', '') %}{% if av and (av.startswith('/static/') or av.startswith('http') or av.startswith('<img')) %}{% if av.startswith('<img') %}{{ av|safe }}{% else %}<img src="{{ av }}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">{% endif %}{% else %}{{ av or '&#x26EA;' }}{% endif %}</div>
       <div class="profile-upload-row">
         <label class="profile-upload-btn" for="avatar-upload">upload image</label>
         <input type="file" id="avatar-upload" accept="image/*" style="display:none">
         <button class="profile-emoji-btn" onclick="showEmojiPicker()">choose emoji</button>
       </div>
       <div id="emoji-picker" class="profile-avatar-picker" style="display:none">
-        <span onclick="pickAvatar('&#x1F9B6;')" class="av-opt" title="person">&#x1F9B6;</span>
+        <span onclick="pickAvatar('&#x26EA;')" class="av-opt" title="temple">&#x26EA;</span>
+        <span onclick="pickAvatar('&#x1F3F7;')" class="av-opt" title="amphora">&#x1F3F7;</span>
         <span onclick="pickAvatar('&#x1F3F4;&#x200D;&#x2620;&#xFE0F;')" class="av-opt" title="pirate">&#x1F3F4;&#x200D;&#x2620;&#xFE0F;</span>
         <span onclick="pickAvatar('&#x1F409;')" class="av-opt" title="dragon">&#x1F409;</span>
         <span onclick="pickAvatar('&#x1F98A;')" class="av-opt" title="fox">&#x1F98A;</span>
@@ -3226,7 +3227,7 @@
   <div class="container">
     <div class="profile-page">
       <div class="profile-page-header">
-        <div class="profile-avatar-large" id="profile-page-avatar">{% set av = session.get('avatar', '') %}{% if av and (av.startswith('/static/') or av.startswith('http') or av.startswith('<img')) %}{% if av.startswith('<img') %}{{ av|safe }}{% else %}<img src="{{ av }}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">{% endif %}{% else %}{{ av or '&#x1F9B6;' }}{% endif %}</div>
+        <div class="profile-avatar-large" id="profile-page-avatar">{% set av = session.get('avatar', '') %}{% if av and (av.startswith('/static/') or av.startswith('http') or av.startswith('<img')) %}{% if av.startswith('<img') %}{{ av|safe }}{% else %}<img src="{{ av }}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">{% endif %}{% else %}{{ av or '&#x26EA;' }}{% endif %}</div>
         <div class="profile-page-info">
           <h2 class="profile-page-username">{{ session.get('username', '') }}</h2>
           <p class="profile-page-bio" id="profile-page-bio">{{ session.get('bio', '') or 'No bio yet.' }}</p>
@@ -5346,7 +5347,7 @@
     arena.appendChild(result);
   }
 
-  // --- labyrinth maze ---
+  // --- labyrinth maze: Pac-Man style ---
   let mazeState = null;
   let mazeLoop = null;
   let mazeLevel = 1;
@@ -5361,7 +5362,6 @@
         }
       }
     }
-    // carve passages using recursive backtracker
     var dirs = [[-1,0],[1,0],[0,-1],[0,1]];
     function shuffle(a) { for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
     function carve(r, c) {
@@ -5377,9 +5377,6 @@
       }
     }
     carve(1, 1);
-    // ensure start and end are open
-    grid[1][1] = 0;
-    grid[size - 2][size - 2] = 0;
     return grid;
   }
 
@@ -5403,11 +5400,25 @@
     return false;
   }
 
-  var MAZE_MAX_LEVEL = 15;
-
-  function mazeSpeed() {
-    return Math.max(180, 420 - mazeLevel * 16);
+  function mazePlaceCoins(grid, size, count) {
+    var coins = [];
+    var attempts = 0;
+    while (coins.length < count && attempts < 500) {
+      attempts++;
+      var r = 1 + Math.floor(Math.random() * (size - 2));
+      var c = 1 + Math.floor(Math.random() * (size - 2));
+      if (grid[r][c] === 0 && !(r === 1 && c === 1)) {
+        var overlap = false;
+        for (var i = 0; i < coins.length; i++) {
+          if (coins[i].r === r && coins[i].c === c) { overlap = true; break; }
+        }
+        if (!overlap) coins.push({r: r, c: c});
+      }
+    }
+    return coins;
   }
+
+  var MAZE_MAX_LEVEL = 15;
 
   function loadMaze() {
     var size = Math.min(7 + mazeLevel * 2, 21);
@@ -5416,35 +5427,33 @@
       grid = mazeGenerate(size);
       attempts++;
     } while (!mazeHasPath(grid, size, 1, 1, size - 2, size - 2) && attempts < maxAttempts);
+    var coinCount = Math.min(3 + mazeLevel * 2, 30);
+    var coins = mazePlaceCoins(grid, size, coinCount);
     var start = {r: 1, c: 1};
-    var end = {r: size - 2, c: size - 2};
     mazeState = {
       size: size,
       grid: grid,
       playerPos: {r: start.r, c: start.c},
-      endPos: {r: end.r, c: end.c},
-      minotaurPos: {r: end.r - 1, c: end.c},
-      moves: 0,
-      wrongTurns: 0,
+      coins: coins,
+      coinsCollected: 0,
+      minotaurPos: {r: size - 2, c: size - 2},
+      score: 0,
       won: false,
       gameOver: false,
       flashTimer: 0,
-      cellSize: Math.max(22, Math.min(42, Math.floor(380 / size))),
-      minoDelay: 3,
-      lastKnownPlayerPos: {r: start.r, c: start.c},
-      lastMovedTick: 0,
-      tickCount: 0,
+      cellSize: Math.max(18, Math.min(38, Math.floor(380 / size))),
+      minoMoveTimer: 0,
+      minoMoveInterval: 6 + Math.max(0, 8 - mazeLevel),
     };
     var canvasSize = size * mazeState.cellSize;
     var arena = document.getElementById('game-arena');
     arena.innerHTML =
-      '<div class="ga-header"><span class="ga-title">Labyrinth Escape</span><button class="ga-back" onclick="closeMaze()">&larr; back</button></div>' +
-      '<div class="maze-instruction">Guide \u0398 past \u039c to the golden glow. Arrow keys / WASD / buttons. ' +
-        '<strong style="color:#ef5350">speed ' + Math.round(100 / mazeSpeed() * 100) + '%</strong></div>' +
+      '<div class="ga-header"><span class="ga-title">Labyrinth Escape &mdash; Level ' + mazeLevel + '</span><button class="ga-back" onclick="closeMaze()">&larr; back</button></div>' +
+      '<div class="maze-instruction">Collect all coins \u25CF while avoiding the Minotaur \u039c. Arrow keys / WASD to move.</div>' +
       '<div style="display:flex;gap:0.8rem;justify-content:center;margin-bottom:0.6rem;flex-wrap:wrap;">' +
         '<div class="mm-stat"><div class="mms-val" id="mz-level">' + mazeLevel + '</div><div class="mms-label">level</div></div>' +
-        '<div class="mm-stat"><div class="mms-val" id="mz-moves">0</div><div class="mms-label">moves</div></div>' +
-        '<div class="mm-stat"><div class="mms-val" style="color:#ef5350" id="mz-wrong">0</div><div class="mms-label">wall hits</div></div>' +
+        '<div class="mm-stat"><div class="mms-val" id="mz-coins">0/' + mazeState.coins.length + '</div><div class="mms-label">coins</div></div>' +
+        '<div class="mm-stat"><div class="mms-val" style="color:#ffb74d" id="mz-score">0</div><div class="mms-label">score</div></div>' +
       '</div>' +
       '<div class="maze-wrap"><canvas id="maze-canvas" width="' + canvasSize + '" height="' + canvasSize + '"></canvas></div>' +
       '<div class="maze-controls"><button class="maze-btn" onclick="mazeMove(-1,0)">\u25B2</button></div>' +
@@ -5453,7 +5462,24 @@
 
     drawMaze();
     document.addEventListener('keydown', mazeKeyHandler);
-    mazeLoop = setInterval(mazeTick, mazeSpeed());
+    mazeLoop = setInterval(mazeTick, 100);
+  }
+
+  function mazeBestDir(size, grid, fromR, fromC, toR, toC) {
+    var dirs = [[-1,0],[1,0],[0,-1],[0,1]];
+    var bestDir = null;
+    var bestDist = 999;
+    for (var d = 0; d < dirs.length; d++) {
+      var nr = fromR + dirs[d][0], nc = fromC + dirs[d][1];
+      if (nr >= 0 && nr < size && nc >= 0 && nc < size && grid[nr][nc] === 0) {
+        var dist = Math.abs(nr - toR) + Math.abs(nc - toC);
+        if (dist < bestDist) {
+          bestDist = dist;
+          bestDir = dirs[d];
+        }
+      }
+    }
+    return bestDir;
   }
 
   function drawMaze() {
@@ -5466,154 +5492,111 @@
       for (var c = 0; c < sz; c++) {
         var x = c * cs, y = r * cs;
         if (s.grid[r][c] === 1) {
-          ctx.fillStyle = '#2a1a4e';
+          ctx.fillStyle = '#1a1a2e';
           ctx.fillRect(x, y, cs, cs);
-          ctx.strokeStyle = 'rgba(126,87,194,0.06)';
-          ctx.strokeRect(x, y, cs, cs);
+          ctx.fillStyle = 'rgba(126,87,194,0.08)';
+          ctx.fillRect(x + 1, y + 1, cs - 2, cs - 2);
         }
       }
     }
-    s.flashTimer++;
-    var flash = Math.sin(s.flashTimer * 0.15) * 0.25 + 0.75;
-    ctx.shadowColor = '#ffd54f';
-    ctx.shadowBlur = 22 * flash;
-    ctx.fillStyle = 'rgba(255,213,79,' + flash + ')';
-    ctx.beginPath();
-    ctx.arc(s.endPos.c * cs + cs / 2, s.endPos.r * cs + cs / 2, cs / 2.5, 0, Math.PI * 2);
-    ctx.fill();
+    for (var i = 0; i < s.coins.length; i++) {
+      var coin = s.coins[i];
+      if (coin.collected) continue;
+      var cx = coin.c * cs + cs / 2, cy = coin.r * cs + cs / 2;
+      s.flashTimer++;
+      var pulse = Math.sin(s.flashTimer * 0.12 + i) * 0.2 + 0.8;
+      ctx.shadowColor = '#ffd54f';
+      ctx.shadowBlur = 10 * pulse;
+      ctx.fillStyle = 'rgba(255,213,79,' + pulse + ')';
+      ctx.beginPath();
+      ctx.arc(cx, cy, cs / 5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = 'rgba(255,255,255,0.5)';
+      ctx.beginPath();
+      ctx.arc(cx - cs / 12, cy - cs / 12, cs / 14, 0, Math.PI * 2);
+      ctx.fill();
+    }
     ctx.shadowBlur = 0;
-    ctx.fillStyle = '#fff';
-    ctx.font = 'bold ' + Math.round(cs / 3.2) + 'px Inter, sans-serif';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText('ESCAPE', s.endPos.c * cs + cs / 2, s.endPos.r * cs + cs / 2 + 1);
     if (!s.won && !s.gameOver) {
       var mr = s.minotaurPos.r, mc = s.minotaurPos.c;
       var dist = Math.abs(mr - s.playerPos.r) + Math.abs(mc - s.playerPos.c);
       var danger = dist < 5;
-      var cx = mc * cs + cs / 2, cy = mr * cs + cs / 2, r = cs / 2.2;
-      ctx.shadowColor = danger ? '#ff1744' : '#b71c1c';
-      ctx.shadowBlur = danger ? 28 : 10;
-      ctx.fillStyle = '#5d4037';
+      var mx = mc * cs + cs / 2, my = mr * cs + cs / 2, mrad = cs / 2.3;
+      ctx.shadowColor = danger ? '#ff1744' : '#7e57c2';
+      ctx.shadowBlur = danger ? 25 : 12;
+      ctx.fillStyle = danger ? '#d32f2f' : '#5d4037';
       ctx.beginPath();
-      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      ctx.arc(mx, my, mrad, 0, Math.PI * 2);
       ctx.fill();
       ctx.shadowBlur = 0;
-      ctx.fillStyle = '#8d6e63';
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold ' + Math.round(cs / 1.5) + 'px Inter';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('\u039C', mx, my + 1);
+      if (danger) {
+        ctx.fillStyle = 'rgba(255,23,68,0.15)';
+        ctx.beginPath();
+        ctx.arc(mx, my, mrad * 1.6, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+    if (s.coinsCollected >= s.coins.length) {
+      s.flashTimer++;
+      var flash = Math.sin(s.flashTimer * 0.1) * 0.25 + 0.75;
+      ctx.shadowColor = '#76ff03';
+      ctx.shadowBlur = 24 * flash;
+      ctx.fillStyle = 'rgba(118,255,3,' + flash + ')';
       ctx.beginPath();
-      ctx.arc(cx, cy, r * 0.75, 0, Math.PI * 2);
+      ctx.arc((sz - 2) * cs + cs / 2, (sz - 2) * cs + cs / 2, cs / 2, 0, Math.PI * 2);
       ctx.fill();
-      ctx.beginPath();
-      ctx.moveTo(cx - r * 0.85, cy - r * 1.1);
-      ctx.lineTo(cx - r * 0.3, cy - r * 0.7);
-      ctx.lineTo(cx - r * 0.5, cy - r * 0.3);
-      ctx.closePath();
-      ctx.fillStyle = '#4e342e';
-      ctx.fill();
-      ctx.beginPath();
-      ctx.moveTo(cx + r * 0.85, cy - r * 1.1);
-      ctx.lineTo(cx + r * 0.3, cy - r * 0.7);
-      ctx.lineTo(cx + r * 0.5, cy - r * 0.3);
-      ctx.closePath();
-      ctx.fillStyle = '#4e342e';
-      ctx.fill();
-      ctx.fillStyle = danger ? '#ff5252' : '#ffab40';
-      ctx.beginPath();
-      ctx.arc(cx - r * 0.3, cy - r * 0.2, r * 0.18, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.beginPath();
-      ctx.arc(cx + r * 0.3, cy - r * 0.2, r * 0.18, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.fillStyle = '#000';
-      ctx.beginPath();
-      ctx.arc(cx - r * 0.3, cy - r * 0.15, r * 0.08, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.beginPath();
-      ctx.arc(cx + r * 0.3, cy - r * 0.15, r * 0.08, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.fillStyle = '#3e2723';
-      ctx.beginPath();
-      ctx.ellipse(cx, cy + r * 0.15, r * 0.18, r * 0.12, 0, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.fillStyle = '#ef5350';
-      ctx.beginPath();
-      ctx.ellipse(cx, cy + r * 0.1, r * 0.08, r * 0.06, 0, 0, Math.PI * 2);
-      ctx.fill();
+      ctx.shadowBlur = 0;
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold ' + Math.round(cs / 2.5) + 'px Inter';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('EXIT', (sz - 2) * cs + cs / 2, (sz - 2) * cs + cs / 2 + 1);
     }
     ctx.shadowColor = '#42a5f5';
-    ctx.shadowBlur = 14;
+    ctx.shadowBlur = 16;
     ctx.fillStyle = '#42a5f5';
     ctx.beginPath();
-    ctx.arc(s.playerPos.c * cs + cs / 2, s.playerPos.r * cs + cs / 2, cs / 2.6, 0, Math.PI * 2);
+    ctx.arc(s.playerPos.c * cs + cs / 2, s.playerPos.r * cs + cs / 2, cs / 2.4, 0, Math.PI * 2);
     ctx.fill();
     ctx.shadowBlur = 0;
     ctx.fillStyle = '#fff';
-    ctx.font = 'bold ' + Math.round(cs / 1.9) + 'px Inter, sans-serif';
-    ctx.fillText('\u0398', s.playerPos.c * cs + cs / 2, s.playerPos.r * cs + cs / 2 + 1);
+    ctx.font = 'bold ' + Math.round(cs / 1.7) + 'px Inter';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('\u0398', s.playerPos.c * cs + cs / 2 + 1, s.playerPos.r * cs + cs / 2 + 1);
   }
 
   function mazeTick() {
     if (!mazeState || mazeState.won || mazeState.gameOver) return;
-    mazeState.tickCount++;
-    if (mazeState.minoDelay > 0) { mazeState.minoDelay--; drawMaze(); return; }
-    var mr = mazeState.minotaurPos.r, mc = mazeState.minotaurPos.c;
-    var pr = mazeState.playerPos.r, pc = mazeState.playerPos.c;
-    var dist = Math.abs(mr - pr) + Math.abs(mc - pc);
-    var ticksSinceMove = mazeState.tickCount - mazeState.lastMovedTick;
-    var canHear = ticksSinceMove < 4;
-    var canSee = dist < 6;
-    var target;
-    if (canSee) {
-      target = {r: pr, c: pc};
-    } else if (canHear) {
-      target = mazeState.lastKnownPlayerPos;
-    } else {
-      target = null;
-    }
-    if (target && Math.random() < 0.15) {
-      var wanderDirs = [[-1,0],[1,0],[0,-1],[0,1]];
-      var shuffled = wanderDirs.slice();
-      for (var i = shuffled.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t2 = shuffled[i]; shuffled[i] = shuffled[j]; shuffled[j] = t2; }
-      for (var d2 = 0; d2 < shuffled.length; d2++) {
-        var nr2 = mr + shuffled[d2][0], nc2 = mc + shuffled[d2][1];
-        if (nr2 >= 0 && nr2 < mazeState.size && nc2 >= 0 && nc2 < mazeState.size && mazeState.grid[nr2][nc2] === 0) {
-          mazeState.minotaurPos = {r: nr2, c: nc2};
-          drawMaze();
-          return;
-        }
+    mazeState.minoMoveTimer++;
+    if (mazeState.minoMoveTimer >= mazeState.minoMoveInterval) {
+      mazeState.minoMoveTimer = 0;
+      var mr = mazeState.minotaurPos.r, mc = mazeState.minotaurPos.c;
+      var dir = mazeBestDir(mazeState.size, mazeState.grid, mr, mc, mazeState.playerPos.r, mazeState.playerPos.c);
+      if (dir) {
+        mazeState.minotaurPos.r += dir[0];
+        mazeState.minotaurPos.c += dir[1];
       }
-    }
-    var dr = target ? Math.sign(target.r - mr) : 0;
-    var dc = target ? Math.sign(target.c - mc) : 0;
-    var choices = [];
-    if (dr && mazeState.grid[mr + dr] && mazeState.grid[mr + dr][mc] === 0) choices.push({r: mr + dr, c: mc});
-    if (dc && mazeState.grid[mr][mc + dc] === 0) choices.push({r: mr, c: mc + dc});
-    if (choices.length) {
-      if (target) {
-        var best = choices.reduce(function(a, b) {
-          var da = Math.abs(a.r - target.r) + Math.abs(a.c - target.c);
-          var db = Math.abs(b.r - target.r) + Math.abs(b.c - target.c);
-          return da < db ? a : b;
-        });
-        mazeState.minotaurPos = best;
-      } else {
-        mazeState.minotaurPos = choices[Math.floor(Math.random() * choices.length)];
+      if (mazeState.minotaurPos.r === mazeState.playerPos.r && mazeState.minotaurPos.c === mazeState.playerPos.c) {
+        mazeState.gameOver = true;
+        clearInterval(mazeLoop);
+        document.removeEventListener('keydown', mazeKeyHandler);
+        var arena = document.getElementById('game-arena');
+        var result = document.createElement('div');
+        result.className = 'quiz-result';
+        result.innerHTML =
+          '<div style="font-size:2rem;font-weight:800;color:#ef5350;">Caught!</div>' +
+          '<div class="qr-label">The Minotaur devoured Theseus.</div>' +
+          '<div style="font-size:0.8rem;color:#9a7a8a;margin:0.5rem 0">' + mazeState.coinsCollected + '/' + mazeState.coins.length + ' coins &middot; ' + mazeState.score + ' pts</div>' +
+          '<button class="cd-btn" style="max-width:140px;margin-top:0.8rem" onclick="loadMaze()">try again</button>';
+        arena.appendChild(result);
+        return;
       }
-    }
-    if (mazeState.minotaurPos.r === pr && mazeState.minotaurPos.c === pc) {
-      mazeState.gameOver = true;
-      clearInterval(mazeLoop);
-      document.removeEventListener('keydown', mazeKeyHandler);
-      var arena = document.getElementById('game-arena');
-      var result = document.createElement('div');
-      result.className = 'quiz-result';
-      result.innerHTML =
-        '<div style="font-size:2rem;font-weight:800;color:#ef5350;">Caught!</div>' +
-        '<div class="qr-label">The Minotaur devoured Theseus.</div>' +
-        '<div style="font-size:0.8rem;color:#9a7a8a;margin:0.5rem 0">' + mazeState.moves + ' moves &middot; ' + mazeState.wrongTurns + ' wall hits</div>' +
-        '<button class="cd-btn" style="max-width:140px;margin-top:0.8rem" onclick="loadMaze()">try again</button>';
-      arena.appendChild(result);
-      return;
     }
     drawMaze();
   }
@@ -5622,57 +5605,55 @@
     if (!mazeState || mazeState.won || mazeState.gameOver) return;
     var nr = mazeState.playerPos.r + dr, nc = mazeState.playerPos.c + dc;
     if (nr < 0 || nr >= mazeState.size || nc < 0 || nc >= mazeState.size) return;
-    if (mazeState.grid[nr][nc] === 1) {
-      mazeState.wrongTurns++;
-      var wEl = document.getElementById('mz-wrong');
-      if (wEl) wEl.textContent = mazeState.wrongTurns;
-      return;
-    }
+    if (mazeState.grid[nr][nc] === 1) return;
     mazeState.playerPos = {r: nr, c: nc};
-    mazeState.moves++;
-    mazeState.lastKnownPlayerPos = {r: nr, c: nc};
-    mazeState.lastMovedTick = mazeState.tickCount;
-    var mEl = document.getElementById('mz-moves');
-    if (mEl) mEl.textContent = mazeState.moves;
-    drawMaze();
-    if (nr === mazeState.endPos.r && nc === mazeState.endPos.c) {
+    mazeState.score++;
+    var mEl = document.getElementById('mz-score');
+    if (mEl) mEl.textContent = mazeState.score;
+    for (var i = 0; i < mazeState.coins.length; i++) {
+      var coin = mazeState.coins[i];
+      if (!coin.collected && coin.r === nr && coin.c === nc) {
+        coin.collected = true;
+        mazeState.coinsCollected++;
+        mazeState.score += 10;
+        if (mEl) mEl.textContent = mazeState.score;
+        var cEl = document.getElementById('mz-coins');
+        if (cEl) cEl.textContent = mazeState.coinsCollected + '/' + mazeState.coins.length;
+        if (mazeState.coinsCollected >= mazeState.coins.length) {
+          var pts = 20 + mazeLevel * 5;
+          fetch('/api/award', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'trace_journey', detail: 'maze level ' + mazeLevel + ': ' + mazeState.score + ' pts' })
+          }).then(function(r) { return r.json(); }).then(function(d) { updatePointsBadge(d.total_points); }).catch(function() {});
+        }
+        break;
+      }
+    }
+    if (mazeState.coinsCollected >= mazeState.coins.length && nr === mazeState.size - 2 && nc === mazeState.size - 2) {
       mazeState.won = true;
       clearInterval(mazeLoop);
       document.removeEventListener('keydown', mazeKeyHandler);
-      var points = 20 - mazeState.wrongTurns * 5;
-      if (mazeState.wrongTurns === 0) points += 50;
-      if (points < 0) points = 0;
-      fetch('/api/award', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'trace_journey', detail: 'maze level ' + mazeLevel + ': ' + mazeState.moves + ' moves' })
-      }).then(function(r) { return r.json(); }).then(function(d) { updatePointsBadge(d.total_points); }).catch(function() {});
+      var bonus = mazeState.score;
+      var pts = 20 + mazeLevel * 5 + Math.floor(bonus / 2);
+      mazeLevel++;
+      saveGameLevels();
       var arena = document.getElementById('game-arena');
       var result = document.createElement('div');
       result.className = 'quiz-result';
-      var isFinal = mazeLevel >= MAZE_MAX_LEVEL;
-      var nextHtml = isFinal
-        ? '<div style="margin-top:0.8rem"><button class="cd-btn" onclick="closeMaze()">claim victory</button></div>'
-        : '<div style="display:flex;gap:0.5rem;justify-content:center;margin-top:0.8rem">' +
-            '<button class="cd-btn" onclick="advanceMazeLevel()">next level</button>' +
-          '</div>';
+      var isFinal = mazeLevel > MAZE_MAX_LEVEL;
       result.innerHTML =
         '<div class="qr-score">' + (isFinal ? 'Labyrinth Conquered!' : 'Escape!') + '</div>' +
-        '<div class="qr-label">' + (mazeState.wrongTurns === 0 ? 'flawless — the legend lives!' : 'Theseus escapes the labyrinth') + '</div>' +
-        '<div class="qr-points positive">+' + points + ' drachmae</div>' +
-        (mazeState.wrongTurns === 0 ? '<div class="qr-perfect">no wall hits — perfect run!</div>' : '') +
-        '<div style="font-size:0.8rem;color:#9a7a8a;margin-top:0.5rem">' + mazeState.moves + ' moves &middot; ' + mazeState.wrongTurns + ' wall hits' +
-          (isFinal ? '' : ' &middot; next level: ' + (mazeLevel + 1)) + '</div>' +
-        nextHtml;
+        '<div class="qr-label">' + mazeState.coinsCollected + '/' + mazeState.coins.length + ' coins collected &mdash; level ' + (mazeLevel - 1) + ' cleared!</div>' +
+        '<div class="qr-points positive">+' + pts + ' drachmae</div>' +
+        '<div style="font-size:0.8rem;color:#9a7a8a;margin-top:0.5rem">' + mazeState.score + ' steps &middot; next: level ' + mazeLevel + '</div>' +
+        (isFinal
+          ? '<div style="margin-top:0.8rem"><button class="cd-btn" onclick="closeMaze()">claim victory</button></div>'
+          : '<div style="display:flex;gap:0.5rem;justify-content:center;margin-top:0.8rem"><button class="cd-btn" onclick="loadMaze()">level ' + mazeLevel + ' &rarr;</button></div>');
       arena.appendChild(result);
-      if (isFinal) return;
-      mazeLevel++;
-      saveGameLevels();
+      return;
     }
-  }
-
-  function advanceMazeLevel() {
-    loadMaze();
+    drawMaze();
   }
 
   function mazeKeyHandler(e) {
@@ -6048,9 +6029,9 @@
       var card = document.createElement('div');
       card.className = 'explore-card';
       card.style.animationDelay = (i * 0.04) + 's';
-      var avatarHtml = u.avatar && (u.avatar.startsWith('/static/') || u.avatar.startsWith('http'))
-        ? '<img src="' + u.avatar + '" alt="avatar">'
-        : (u.avatar || '\uD83E\uDDB6');
+      var avatarHtml = u.avatar && (u.avatar.startsWith('/static/') || u.avatar.startsWith('http') || u.avatar.startsWith('<img'))
+        ? '<img src="' + (u.avatar.startsWith('<img') ? u.avatar.replace(/.*src="([^"]+)".*/, '$1') : u.avatar) + '" alt="avatar">'
+        : (u.avatar || '\uD83C\uDFF7');
       var bio = u.bio || 'No bio yet.';
       var interests = u.interests || 'No interests listed.';
       card.innerHTML =
@@ -6076,9 +6057,9 @@
     fetch('/api/users/' + userId)
       .then(function(r) { return r.json(); })
       .then(function(u) {
-        var avatarHtml = u.avatar && (u.avatar.startsWith('/static/') || u.avatar.startsWith('http'))
-          ? '<img src="' + u.avatar + '" style="width:64px;height:64px;border-radius:50%;object-fit:cover;">'
-          : '<div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#f8bbd0,#ce93d8);display:flex;align-items:center;justify-content:center;font-size:2rem;">' + (u.avatar || '\uD83E\uDDB6') + '</div>';
+        var avatarHtml = u.avatar && (u.avatar.startsWith('/static/') || u.avatar.startsWith('http') || u.avatar.startsWith('<img'))
+          ? '<img src="' + (u.avatar.startsWith('<img') ? u.avatar.replace(/.*src="([^"]+)".*/, '$1') : u.avatar) + '" style="width:64px;height:64px;border-radius:50%;object-fit:cover;">'
+          : '<div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#f8bbd0,#ce93d8);display:flex;align-items:center;justify-content:center;font-size:2rem;">' + (u.avatar || '\uD83C\uDFF7') + '</div>';
         var savedHtml = '';
         if (u.saved_items && u.saved_items.length) {
           savedHtml = '<h4 style="font-size:0.9rem;color:#c94f7c;margin:1rem 0 0.5rem;">saved items</h4>';

@@ -1816,7 +1816,17 @@ def api_profile_update():
             u["interests"] = data.get("interests", u.get("interests", ""))[:300]
             if "avatar" in data:
                 av = data["avatar"]
-                u["avatar"] = av[:200] if av.startswith("/static/") else av[:20]
+                # extract src from <img> tag if present
+                img_match = re.search(r'<img[^>]+src="([^"]+)"', av)
+                if img_match:
+                    av = img_match.group(1)
+                # strip protocol+host to get relative path if full URL
+                if av.startswith("http"):
+                    from urllib.parse import urlparse
+                    parsed = urlparse(av)
+                    if parsed.path:
+                        av = parsed.path
+                u["avatar"] = av[:200]
                 session["avatar"] = u["avatar"]
             with _persist_lock:
                 _persist_users()
