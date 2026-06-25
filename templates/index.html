@@ -4597,13 +4597,24 @@
       }
     }
     carve(1, 1);
-    for (var r = 3; r < size - 2; r += 2) {
-      for (var c = 3; c < size - 2; c += 2) {
-        if (Math.random() < 0.25) {
+    for (var r = 2; r < size - 1; r += 2) {
+      for (var c = 2; c < size - 1; c += 2) {
+        if (Math.random() < 0.35) {
           var dirs2 = [[-1,0],[1,0],[0,-1],[0,1]];
           var picked = dirs2[Math.floor(Math.random() * 4)];
           var tr = r + picked[0], tc = c + picked[1];
           if (grid[tr] && grid[tr][tc] === 1) grid[tr][tc] = 0;
+        }
+      }
+    }
+    for (var i = 0; i < Math.floor(size * 0.5); i++) {
+      var rr = 2 + Math.floor(Math.random() * (size - 4));
+      var rc = 2 + Math.floor(Math.random() * (size - 4));
+      var rad = 1 + Math.floor(Math.random() * 2);
+      for (var dr = -rad; dr <= rad; dr++) {
+        for (var dc = -rad; dc <= rad; dc++) {
+          var yr = rr + dr, xc = rc + dc;
+          if (yr > 0 && yr < size - 1 && xc > 0 && xc < size - 1) grid[yr][xc] = 0;
         }
       }
     }
@@ -4634,6 +4645,9 @@
       flashTimer: 0,
       cellSize: Math.max(22, Math.min(42, Math.floor(380 / size))),
       minoDelay: 3,
+      lastKnownPlayerPos: {r: start.r, c: start.c},
+      lastMovedTick: 0,
+      tickCount: 0,
     };
     var canvasSize = size * mazeState.cellSize;
     var arena = document.getElementById('game-arena');
@@ -4754,23 +4768,50 @@
 
   function mazeTick() {
     if (!mazeState || mazeState.won || mazeState.gameOver) return;
+    mazeState.tickCount++;
     if (mazeState.minoDelay > 0) { mazeState.minoDelay--; drawMaze(); return; }
     var mr = mazeState.minotaurPos.r, mc = mazeState.minotaurPos.c;
     var pr = mazeState.playerPos.r, pc = mazeState.playerPos.c;
-    var dr = Math.sign(pr - mr), dc = Math.sign(pc - mc);
+    var dist = Math.abs(mr - pr) + Math.abs(mc - pc);
+    var ticksSinceMove = mazeState.tickCount - mazeState.lastMovedTick;
+    var canHear = ticksSinceMove < 4;
+    var canSee = dist < 6;
+    var target;
+    if (canSee) {
+      target = {r: pr, c: pc};
+    } else if (canHear) {
+      target = mazeState.lastKnownPlayerPos;
+    } else {
+      target = null;
+    }
+    if (target && Math.random() < 0.15) {
+      var wanderDirs = [[-1,0],[1,0],[0,-1],[0,1]];
+      var shuffled = wanderDirs.slice();
+      for (var i = shuffled.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t2 = shuffled[i]; shuffled[i] = shuffled[j]; shuffled[j] = t2; }
+      for (var d2 = 0; d2 < shuffled.length; d2++) {
+        var nr2 = mr + shuffled[d2][0], nc2 = mc + shuffled[d2][1];
+        if (nr2 >= 0 && nr2 < mazeState.size && nc2 >= 0 && nc2 < mazeState.size && mazeState.grid[nr2][nc2] === 0) {
+          mazeState.minotaurPos = {r: nr2, c: nc2};
+          drawMaze();
+          return;
+        }
+      }
+    }
+    var dr = target ? Math.sign(target.r - mr) : 0;
+    var dc = target ? Math.sign(target.c - mc) : 0;
     var choices = [];
     if (dr && mazeState.grid[mr + dr] && mazeState.grid[mr + dr][mc] === 0) choices.push({r: mr + dr, c: mc});
     if (dc && mazeState.grid[mr][mc + dc] === 0) choices.push({r: mr, c: mc + dc});
     if (choices.length) {
-      if (Math.random() < 0.25) {
-        mazeState.minotaurPos = choices[Math.floor(Math.random() * choices.length)];
-      } else {
+      if (target) {
         var best = choices.reduce(function(a, b) {
-          var da = Math.abs(a.r - pr) + Math.abs(a.c - pc);
-          var db = Math.abs(b.r - pr) + Math.abs(b.c - pc);
+          var da = Math.abs(a.r - target.r) + Math.abs(a.c - target.c);
+          var db = Math.abs(b.r - target.r) + Math.abs(b.c - target.c);
           return da < db ? a : b;
         });
         mazeState.minotaurPos = best;
+      } else {
+        mazeState.minotaurPos = choices[Math.floor(Math.random() * choices.length)];
       }
     }
     if (mazeState.minotaurPos.r === pr && mazeState.minotaurPos.c === pc) {
@@ -4803,6 +4844,8 @@
     }
     mazeState.playerPos = {r: nr, c: nc};
     mazeState.moves++;
+    mazeState.lastKnownPlayerPos = {r: nr, c: nc};
+    mazeState.lastMovedTick = mazeState.tickCount;
     var mEl = document.getElementById('mz-moves');
     if (mEl) mEl.textContent = mazeState.moves;
     drawMaze();
