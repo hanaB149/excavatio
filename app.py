@@ -109,6 +109,7 @@ def create_user(username, email, password):
         "interests": "",
         "avatar": "",
         "saved_items": [],
+        "game_levels": {},
     }
     users.append(user)
     with _persist_lock:
@@ -127,6 +128,7 @@ def save_user_progress(user_id):
             u["interests"] = session.get("interests", "")
             u["avatar"] = session.get("avatar", "")
             u["saved_items"] = session.get("saved_items", [])
+            u["game_levels"] = session.get("game_levels", {})
             break
     with _persist_lock:
         _persist_users()
@@ -1472,6 +1474,7 @@ def signup():
     session["interests"] = ""
     session["avatar"] = ""
     session["saved_items"] = []
+    session["game_levels"] = {}
     return redirect(url_for("index"))
 
 
@@ -1495,6 +1498,7 @@ def login():
     session["interests"] = user.get("interests", "")
     session["avatar"] = user.get("avatar", "")
     session["saved_items"] = user.get("saved_items", [])
+    session["game_levels"] = user.get("game_levels", {})
     return redirect(url_for("index"))
 
 
@@ -1899,6 +1903,24 @@ def api_delete_saved_item(item_id):
 @login_required
 def api_stats():
     return jsonify(get_user_stats())
+
+
+@app.route("/api/game-levels", methods=["GET"])
+@login_required
+def api_get_game_levels():
+    return jsonify({"game_levels": session.get("game_levels", {})})
+
+
+@app.route("/api/game-levels", methods=["POST"])
+@login_required
+def api_set_game_levels():
+    data = request.get_json()
+    if not data or "game_levels" not in data:
+        return jsonify({"error": "No game_levels"}), 400
+    session["game_levels"] = data["game_levels"]
+    session.modified = True
+    return jsonify({"saved": True})
+
 
 @app.route("/api/save-progress", methods=["POST"])
 @login_required
