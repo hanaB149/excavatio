@@ -97,6 +97,9 @@ def create_user(username, email, password):
         "created_at": datetime.now().isoformat(),
         "total_points": 0,
         "action_counts": {},
+        "bio": "",
+        "interests": "",
+        "avatar": "",
     }
     users.append(user)
     with _persist_lock:
@@ -1452,6 +1455,9 @@ def signup():
     session["username"] = user["username"]
     session["total_points"] = 0
     session["action_counts"] = {}
+    session["bio"] = ""
+    session["interests"] = ""
+    session["avatar"] = ""
     return redirect(url_for("index"))
 
 
@@ -1471,6 +1477,9 @@ def login():
     session["username"] = user["username"]
     session["total_points"] = user.get("total_points", 0)
     session["action_counts"] = user.get("action_counts", {})
+    session["bio"] = user.get("bio", "")
+    session["interests"] = user.get("interests", "")
+    session["avatar"] = user.get("avatar", "")
     return redirect(url_for("index"))
 
 
@@ -1714,6 +1723,38 @@ def api_identify():
         return jsonify({"matched": True, "source": "library", **match})
 
     return jsonify({"matched": False, "message": "No classical text match found."})
+
+@app.route("/api/profile")
+@login_required
+def api_profile():
+    users = _load_users()
+    for u in users:
+        if u.get("id") == session.get("user_id"):
+            return jsonify({
+                "username": u.get("username", ""),
+                "email": u.get("email", ""),
+                "bio": u.get("bio", ""),
+                "interests": u.get("interests", ""),
+                "avatar": u.get("avatar", ""),
+            })
+    return jsonify({"error": "User not found"}), 404
+
+@app.route("/api/profile", methods=["POST"])
+@login_required
+def api_profile_update():
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "No data"}), 400
+    users = _load_users()
+    for u in users:
+        if u.get("id") == session.get("user_id"):
+            u["bio"] = data.get("bio", u.get("bio", ""))[:500]
+            u["interests"] = data.get("interests", u.get("interests", ""))[:300]
+            u["avatar"] = data.get("avatar", u.get("avatar", ""))[:20]
+            with _persist_lock:
+                _persist_users()
+            return jsonify({"saved": True})
+    return jsonify({"error": "User not found"}), 404
 
 @app.route("/api/stats")
 @login_required
