@@ -1746,6 +1746,43 @@ def api_identify():
 
     return jsonify({"matched": False, "message": "No classical text match found."})
 
+@app.route("/api/users")
+@login_required
+def api_users():
+    users = _load_users()
+    result = []
+    for u in users:
+        result.append({
+            "id": u.get("id"),
+            "username": u.get("username", ""),
+            "bio": u.get("bio", ""),
+            "interests": u.get("interests", ""),
+            "avatar": u.get("avatar", ""),
+            "total_points": u.get("total_points", 0),
+            "saved_items_count": len(u.get("saved_items", [])),
+            "created_at": u.get("created_at", ""),
+        })
+    return jsonify({"users": result})
+
+@app.route("/api/users/<int:user_id>")
+@login_required
+def api_user_detail(user_id):
+    users = _load_users()
+    for u in users:
+        if u.get("id") == user_id:
+            return jsonify({
+                "id": u.get("id"),
+                "username": u.get("username", ""),
+                "bio": u.get("bio", ""),
+                "interests": u.get("interests", ""),
+                "avatar": u.get("avatar", ""),
+                "total_points": u.get("total_points", 0),
+                "saved_items": u.get("saved_items", []),
+                "created_at": u.get("created_at", ""),
+            })
+    return jsonify({"error": "User not found"}), 404
+
+
 @app.route("/api/profile")
 @login_required
 def api_profile():
