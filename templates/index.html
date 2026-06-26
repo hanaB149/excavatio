@@ -516,44 +516,59 @@
     .game-card[data-game="labours"] .gc-play { color: #ef5350; }
     .game-card[data-game="maze"] .gc-play { color: #7e57c2; }
 
-    /* hercules labours game */
-    .labours-question {
-      background: rgba(255,255,255,0.6);
-      border: 2px solid rgba(239,83,80,0.12);
+    /* hercules labours: monster fighting arena */
+    .fight-wrap { text-align: center; }
+    #fight-canvas {
+      background: linear-gradient(180deg, #1a1a2e 0%, #16213e 55%, #2d1b3a 100%);
       border-radius: 14px;
-      padding: 1rem 1.2rem;
-      margin-bottom: 1rem;
+      border: 3px solid rgba(239,83,80,0.35);
+      box-shadow: 0 4px 24px rgba(0,0,0,0.25);
+      max-width: 100%;
+      touch-action: none;
     }
-    .labours-question .lq-num {
-      font-size: 0.78rem;
-      font-weight: 700;
-      color: #ef5350;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      margin-bottom: 0.35rem;
-    }
-    .labours-question .lq-prompt {
-      font-size: 0.92rem;
-      font-weight: 600;
-      color: #4a2c3a;
+    .fight-instruction {
+      font-size: 0.82rem;
+      color: #7a5a6a;
+      margin: 0.6rem 0;
       line-height: 1.5;
-      margin-bottom: 0.6rem;
     }
-    .labours-question input {
-      width: 100%;
-      padding: 0.6rem 0.9rem;
-      border: 2px solid rgba(239,83,80,0.15);
-      border-radius: 10px;
-      font-size: 0.88rem;
-      font-family: 'Inter', sans-serif;
-      font-weight: 500;
+    .fight-instruction strong { color: #ef5350; }
+    .fight-controls {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      margin-top: 0.6rem;
+    }
+    .fight-btn {
+      min-width: 64px;
+      height: 50px;
+      padding: 0 0.9rem;
+      border: 2px solid rgba(239,83,80,0.25);
+      border-radius: 12px;
+      background: rgba(255,255,255,0.65);
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.3rem;
       color: #4a2c3a;
-      background: rgba(255,255,255,0.7);
-      transition: all 0.2s ease;
+      transition: all 0.15s ease;
+      user-select: none;
+      -webkit-user-select: none;
     }
-    .labours-question input:focus { outline: none; border-color: #ef5350; background: white; }
-    .labours-question input.correct { border-color: #81c784; background: rgba(129,199,132,0.1); }
-    .labours-question input.wrong { border-color: #e57373; background: rgba(229,115,115,0.08); }
+    .fight-btn:hover { border-color: #ef5350; background: rgba(255,255,255,0.9); }
+    .fight-btn:active { transform: scale(0.93); }
+    .fight-btn.move { font-size: 1.1rem; }
+    .fight-btn.strike { border-color: rgba(239,83,80,0.4); color: #c62828; }
+    .fight-btn.strike:active { background: rgba(239,83,80,0.15); }
+    .fight-btn.block { border-color: rgba(66,165,245,0.4); color: #1565c0; }
+    .fight-btn.block.held { background: rgba(66,165,245,0.18); border-color: #42a5f5; }
+    .fight-btn:disabled { opacity: 0.45; cursor: default; }
 
     /* labyrinth maze game */
     .maze-wrap { text-align: center; }
@@ -596,62 +611,7 @@
     .maze-btn:hover { border-color: #7e57c2; background: rgba(255,255,255,0.85); }
     .maze-btn:active { transform: scale(0.92); }
 
-    /* labours of hercules */
-    .lh-slots {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 0.4rem;
-      margin-bottom: 0.8rem;
-    }
-    .lh-slot {
-      background: rgba(255,255,255,0.5);
-      border: 2px dashed rgba(239,83,80,0.15);
-      border-radius: 10px;
-      padding: 0.4rem 0.6rem;
-      min-height: 58px;
-      text-align: center;
-      cursor: pointer;
-      transition: all 0.25s ease;
-      animation: fadeSlideUp 0.35s ease backwards;
-    }
-    .lh-slot:hover { border-color: rgba(239,83,80,0.3); background: rgba(255,255,255,0.7); }
-    .lh-slot.filled { border-style: solid; border-color: rgba(239,83,80,0.2); background: rgba(255,255,255,0.7); }
-    .lh-slot.perfect { border-color: #81c784; background: rgba(129,199,132,0.12); }
-    .lh-slot.missed { border-color: #e57373; background: rgba(229,115,115,0.1); }
-    .lh-slot .lhs-num {
-      font-size: 0.65rem;
-      font-weight: 700;
-      color: #ef5350;
-      margin-bottom: 0.15rem;
-    }
-    .lh-slot .lhs-empty {
-      font-size: 0.65rem;
-      color: #b08a9a;
-    }
-    .lh-slot .lhs-img { font-size: 1.2rem; }
-    .lh-slot .lhs-name { font-size: 0.72rem; font-weight: 600; color: #5a3c4a; }
-    .lh-cards {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 0.5rem;
-    }
-    .lh-card {
-      background: rgba(255,255,255,0.6);
-      border: 2px solid rgba(239,83,80,0.15);
-      border-radius: 12px;
-      padding: 0.6rem 0.7rem;
-      cursor: pointer;
-      transition: all 0.25s ease;
-      animation: fadeSlideUp 0.35s ease backwards;
-      text-align: center;
-    }
-    .lh-card:hover { border-color: #ef5350; background: rgba(255,255,255,0.85); transform: translateY(-2px); }
-    .lh-card.selected { border-color: #ef5350; background: rgba(239,83,80,0.08); box-shadow: 0 0 0 3px rgba(239,83,80,0.1); }
-    .lh-card .lhc-img { font-size: 1.3rem; margin-bottom: 0.15rem; }
-    .lh-card .lhc-name { font-size: 0.78rem; font-weight: 700; color: #5a3c4a; }
-    .lh-card .lhc-desc { font-size: 0.68rem; color: #9a7a8a; line-height: 1.3; }
-
-    /* hercules labours game */
+    /* labours of hercules fighting arena */
 
     /* column drop (tetris-style) game */
     .cd-wrap {
@@ -3230,8 +3190,8 @@
         <div class="game-card" data-game="labours">
           <div class="gc-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 12v6M9 21l3-3 3 3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div>
           <div class="gc-name">Labours of Hercules</div>
-          <div class="gc-desc">Name all twelve labours in the correct order &mdash; can you remember them all?</div>
-          <div class="gc-points">+5 per correct &middot; -2 per wrong &middot; +30 perfect</div>
+          <div class="gc-desc">Battle the twelve monsters of Hercules' labours in chronological order. Each level a fiercer foe.</div>
+          <div class="gc-points">+10 per labour &middot; +5 per level &middot; +40 flawless victory</div>
           <div class="gc-play">enter &rarr;</div>
         </div>
         <div class="game-card" data-game="maze">
@@ -5227,172 +5187,380 @@
     arena.appendChild(result);
   }
 
-  // --- labours of hercules ---
-  const LABOURS = [
-    { name: 'Nemean Lion', desc: 'A beast with impenetrable golden fur', img: '\uD83E\uDD81' },
-    { name: 'Lernaean Hydra', desc: 'A serpent with nine regenerating heads', img: '\uD83D\uDC0D' },
-    { name: 'Ceryneian Hind', desc: 'A golden-horned deer sacred to Artemis', img: '\uD83E\uDD8C' },
-    { name: 'Erymanthian Boar', desc: 'A monstrous boar terrorizing Arcadia', img: '\uD83D\uDC17' },
-    { name: 'Augean Stables', desc: 'A thousand cattle stables never cleaned', img: '\uD83D\uDED2' },
-    { name: 'Stymphalian Birds', desc: 'Man-eating birds with bronze feathers', img: '\uD83E\uDDA6' },
-    { name: 'Cretan Bull', desc: 'A mad bull that breathes fire', img: '\uD83D\uDC02' },
-    { name: 'Mares of Diomedes', desc: 'Four man-eating mares that breathe fire', img: '\uD83D\uDC0E' },
-    { name: 'Hippolyta\'s Girdle', desc: 'The magical belt of the Amazon queen', img: '\uD83D\uDC66' },
-    { name: 'Geryon\'s Cattle', desc: 'Red cattle guarded by a three-bodied giant', img: '\uD83D\uDC04' },
-    { name: 'Apples of Hesperides', desc: 'Golden apples from a garden guarded by a dragon', img: '\uD83C\uDF4E' },
-    { name: 'Cerberus', desc: 'The three-headed hound of the Underworld', img: '\uD83D\uDC36' },
+  // --- labours of hercules: monster combat ---
+  // Twelve labours, chronological order. Each boss is tougher than the last:
+  // more HP, harder hits, faster and more aggressive attacks.
+  const LABOUR_BOSSES = [
+    { name: 'Nemean Lion',     emoji: '\uD83E\uDD81', hp: 80,  dmg: 8,  atkGap: 2600, windUp: 900, approach: 0.55, color: '#f9a825', desc: 'impenetrable golden fur' },
+    { name: 'Lernaean Hydra',  emoji: '\uD83D\uDC0D', hp: 100, dmg: 10, atkGap: 2400, windUp: 850, approach: 0.60, color: '#43a047', desc: 'nine regenerating heads' },
+    { name: 'Ceryneian Hind',  emoji: '\uD83E\uDD8C', hp: 75,  dmg: 7,  atkGap: 2100, windUp: 750, approach: 0.95, color: '#ffb74d', desc: 'golden-horned deer of Artemis' },
+    { name: 'Erymanthian Boar',emoji: '\uD83D\uDC17', hp: 115, dmg: 12, atkGap: 2000, windUp: 800, approach: 0.85, color: '#6d4c41', desc: 'a monstrous tusked boar' },
+    { name: 'Augean Stables',  emoji: '\uD83D\uDED2', hp: 105, dmg: 9,  atkGap: 2300, windUp: 900, approach: 0.75, color: '#8d6e63', desc: 'the filth-choked stables of Augeas' },
+    { name: 'Stymphalian Birds',emoji:'\uD83E\uDDA6', hp: 90,  dmg: 11, atkGap: 1800, windUp: 700, approach: 0.90, color: '#90a4ae', desc: 'bronze-feathered man-eaters' },
+    { name: 'Cretan Bull',     emoji: '\uD83D\uDC02', hp: 130, dmg: 14, atkGap: 1900, windUp: 800, approach: 0.95, color: '#c62828', desc: 'a fire-breathing mad bull' },
+    { name: 'Mares of Diomedes',emoji:'\uD83D\uDC0E', hp: 120, dmg: 13, atkGap: 1700, windUp: 720, approach: 1.00, color: '#546e7a', desc: 'man-eating fire-breathing mares' },
+    { name: 'Hippolyta',       emoji: '\uD83D\uDEE1', hp: 145, dmg: 15, atkGap: 1600, windUp: 680, approach: 1.05, color: '#ab47bc', desc: 'queen of the Amazons' },
+    { name: 'Geryon',          emoji: '\uD83D\uDC79', hp: 175, dmg: 17, atkGap: 1500, windUp: 650, approach: 0.90, color: '#e53935', desc: 'a three-bodied giant' },
+    { name: 'Ladon the Dragon',emoji:'\uD83D\uDC09',hp: 205, dmg: 19, atkGap: 1400, windUp: 600, approach: 0.95, color: '#1e88e5', desc: 'hundred-headed dragon of the Hesperides' },
+    { name: 'Cerberus',        emoji: '\uD83D\uDC36', hp: 245, dmg: 22, atkGap: 1200, windUp: 520, approach: 1.10, color: '#37474f', desc: 'three-headed hound of Hades' },
   ];
+  const LABOURS_MAX_LEVEL = LABOUR_BOSSES.length;
 
-  let laboursState = null;
+  let fightState = null;
+  let fightLoop = null;
+  let fightKeys = {};
 
   function loadLabours() {
-    var shuffled = LABOURS.slice().sort(function() { return Math.random() - 0.5; });
-    laboursState = {
-      cards: shuffled,
-      slots: new Array(12).fill(null),
-      nextCard: 0,
-      submitted: false,
-      wrongCount: 0,
-      startTime: Date.now(),
+    var idx = Math.min(laboursLevel - 1, LABOURS_MAX_LEVEL - 1);
+    var boss = LABOUR_BOSSES[idx];
+    fightState = {
+      level: laboursLevel,
+      bossIdx: idx,
+      boss: boss,
+      player: { hp: 100, maxHp: 100, x: 150, vx: 0, stamina: 100, maxStamina: 100, blocking: false, atkCd: 0, lunge: 0, recoil: 0, hitFlash: 0, strikeAnim: 0, stagger: 0 },
+      monster: { hp: boss.hp, maxHp: boss.hp, x: 580, vx: 0, state: 'approach', timer: 0, atkCd: 1400, windTimer: 0, recoil: 0, hitFlash: 0, lunge: 0, struck: false },
+      won: false, lost: false, flashTimer: 0, shake: 0, hitFx: [], startTime: Date.now(), flawless: true,
     };
     var arena = document.getElementById('game-arena');
-    var html =
-      '<div class="ga-header"><span class="ga-title">Labours of Hercules — Level ' + laboursLevel + '</span><button class="ga-back" onclick="closeGame()">&larr; back</button></div>' +
-      '<div style="font-size:0.85rem;color:#7a5a6a;margin-bottom:0.8rem;line-height:1.5;text-align:center;">Drag each labour card into the correct numbered slot to complete the story. Click a card to select it, then click a slot to place it.</div>' +
-      '<div style="display:flex;gap:0.5rem;justify-content:center;margin-bottom:0.8rem;flex-wrap:wrap;">' +
-        '<div class="mm-stat"><div class="mms-val" id="lh-placed">0</div><div class="mms-label">placed</div></div>' +
-        '<div class="mm-stat"><div class="mms-val" id="lh-wrong">0</div><div class="mms-label">mistakes</div></div>' +
-        '<div class="mm-stat"><div class="mms-val" id="lh-time">0s</div><div class="mms-label">time</div></div>' +
+    arena.innerHTML =
+      '<div class="ga-header"><span class="ga-title">Labour ' + (idx + 1) + ' &mdash; ' + boss.name + '</span><button class="ga-back" onclick="closeLabours()">&larr; back</button></div>' +
+      '<div class="maze-instruction">Defeat the <strong>' + boss.name + '</strong> &mdash; ' + boss.desc + '. Close in to strike (\u2320\u2337\u2321 / A,D to move, <strong>SPACE</strong> to strike, hold <strong>SHIFT</strong> to block).</div>' +
+      '<div style="display:flex;gap:0.8rem;justify-content:center;margin-bottom:0.6rem;flex-wrap:wrap;">' +
+        '<div class="mm-stat"><div class="mms-val" id="ft-labour" style="color:#ef5350">' + (idx + 1) + '/' + LABOURS_MAX_LEVEL + '</div><div class="mms-label">labour</div></div>' +
+        '<div class="mm-stat"><div class="mms-val" style="color:#42a5f5" id="ft-hp">100</div><div class="mms-label">your hp</div></div>' +
+        '<div class="mm-stat"><div class="mms-val" style="color:#ffb74d" id="ft-stam">100</div><div class="mms-label">stamina</div></div>' +
       '</div>' +
-      '<div class="lh-slots" id="lh-slots"></div>' +
-      '<div class="lh-cards" id="lh-cards"></div>';
-    arena.innerHTML = html;
-    // timer
-    laboursState.timer = setInterval(function() {
-      if (!laboursState || laboursState.submitted) return;
-      var elapsed = Math.floor((Date.now() - laboursState.startTime) / 1000);
-      var tEl = document.getElementById('lh-time');
-      if (tEl) tEl.textContent = elapsed + 's';
-    }, 1000);
-    renderLabours();
+      '<div class="fight-wrap"><canvas id="fight-canvas" width="720" height="340"></canvas></div>' +
+      '<div class="fight-controls">' +
+        '<button class="fight-btn move" id="ft-left">\u25C0</button>' +
+        '<button class="fight-btn move" id="ft-right">\u25B6</button>' +
+        '<button class="fight-btn strike" id="ft-strike">\u2694 strike</button>' +
+        '<button class="fight-btn block" id="ft-block">\uD83D\uDEE1 block</button>' +
+      '</div>';
+    bindFightControls();
+    drawFight();
+    document.addEventListener('keydown', fightKeyHandler);
+    document.addEventListener('keyup', fightKeyUpHandler);
+    fightLoop = setInterval(fightTick, 33);
   }
 
-  var laboursSelected = null;
+  function bindFightControls() {
+    var left = document.getElementById('ft-left');
+    var right = document.getElementById('ft-right');
+    var strike = document.getElementById('ft-strike');
+    var block = document.getElementById('ft-block');
+    function hold(btn, key) {
+      var down = function(e) { e.preventDefault(); fightKeys[key] = true; if (btn.classList) btn.classList.add('held'); };
+      var up = function(e) { e.preventDefault(); fightKeys[key] = false; if (btn.classList) btn.classList.remove('held'); };
+      btn.addEventListener('mousedown', down); btn.addEventListener('mouseup', up); btn.addEventListener('mouseleave', up);
+      btn.addEventListener('touchstart', down, { passive: false }); btn.addEventListener('touchend', up); btn.addEventListener('touchcancel', up);
+    }
+    hold(left, 'left'); hold(right, 'right'); hold(block, 'block');
+    strike.addEventListener('click', function(e) { e.preventDefault(); playerStrike(); });
+    strike.addEventListener('touchstart', function(e) { e.preventDefault(); playerStrike(); }, { passive: false });
+  }
 
-  function renderLabours() {
-    if (!laboursState) return;
-    var slotsEl = document.getElementById('lh-slots');
-    var cardsEl = document.getElementById('lh-cards');
-    if (!slotsEl || !cardsEl) return;
-    slotsEl.innerHTML = '';
-    cardsEl.innerHTML = '';
-    for (var i = 0; i < 12; i++) {
-      var slot = document.createElement('div');
-      slot.className = 'lh-slot';
-      if (laboursState.slots[i]) {
-        slot.classList.add('filled');
-        slot.innerHTML = '<div class="lhs-img">' + laboursState.slots[i].img + '</div><div class="lhs-num">' + (i + 1) + '</div><div class="lhs-name">' + laboursState.slots[i].name + '</div>';
-        slot.style.animationDelay = (i * 0.05) + 's';
-      } else {
-        slot.innerHTML = '<div class="lhs-num">' + (i + 1) + '</div><div class="lhs-empty">place labour ' + (i + 1) + '</div>';
+  function fightKeyHandler(e) {
+    if (['ArrowLeft','ArrowRight','ArrowUp','ArrowDown',' '].indexOf(e.key) >= 0) e.preventDefault();
+    if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') fightKeys.left = true;
+    else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') fightKeys.right = true;
+    else if (e.key === 'Shift') fightKeys.block = true;
+    else if (e.key === ' ' || e.key === 'j' || e.key === 'J') playerStrike();
+  }
+  function fightKeyUpHandler(e) {
+    if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') fightKeys.left = false;
+    else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') fightKeys.right = false;
+    else if (e.key === 'Shift') fightKeys.block = false;
+  }
+
+  function playerStrike() {
+    var s = fightState, p = s.player;
+    if (!s || s.won || s.lost || p.stagger > 0 || p.atkCd > 0) return;
+    p.atkCd = 480;
+    p.strikeAnim = 220;
+    p.lunge = 36;
+    var m = s.monster;
+    var gap = Math.abs(m.x - p.x);
+    if (gap < 150) {
+      var dmg = 12 + s.bossIdx * 2;
+      m.hp -= dmg;
+      m.hitFlash = 260;
+      m.recoil = 30;
+      // a clean hit interrupts the monster's wind-up
+      if (m.state === 'windup' || m.state === 'strike') {
+        m.state = 'recover'; m.timer = Math.max(360, 600 - s.bossIdx * 18);
       }
-      slot.dataset.idx = i;
-      slot.addEventListener('click', function() {
-        var idx = parseInt(this.dataset.idx);
-        if (laboursState.submitted) return;
-        if (laboursState.slots[idx]) {
-          // pick up placed card back to hand
-          laboursState.nextCard--;
-          laboursState.cards.splice(laboursState.nextCard, 0, laboursState.slots[idx]);
-          laboursState.slots[idx] = null;
-          laboursSelected = null;
-          document.getElementById('lh-placed').textContent = laboursState.slots.filter(function(s) { return s; }).length;
-          renderLabours();
-        } else if (laboursSelected !== null) {
-          // place selected card
-          var card = laboursState.cards.splice(laboursSelected, 1)[0];
-          laboursState.slots[idx] = card;
-          laboursSelected = null;
-          document.getElementById('lh-placed').textContent = laboursState.slots.filter(function(s) { return s; }).length;
-          var correct = true;
-          for (var j = 0; j < 12; j++) {
-            if (laboursState.slots[j] && laboursState.slots[j].name !== LABOURS[j].name) { correct = false; break; }
-          }
-          if (!correct && laboursState.slots[idx]) {
-            if (laboursState.slots[idx].name !== LABOURS[idx].name) {
-              laboursState.wrongCount++;
-              document.getElementById('lh-wrong').textContent = laboursState.wrongCount;
-            }
-          }
-          renderLabours();
-        }
-        if (laboursState.slots.filter(function(s) { return s; }).length === 12) {
-          setTimeout(submitLabours, 400);
-        }
-      });
-      slotsEl.appendChild(slot);
+      s.hitFx.push({ x: (m.x + p.x) / 2, y: 235, dmg: dmg, t: 600, kind: 'player' });
+      if (m.hp <= 0) { m.hp = 0; winLabour(s); }
+    } else {
+      s.hitFx.push({ x: p.x + 30, y: 235, dmg: 0, t: 260, kind: 'whiff' });
     }
-    laboursState.cards.forEach(function(card, ci) {
-      var cardEl = document.createElement('div');
-      cardEl.className = 'lh-card';
-      if (laboursSelected === ci) cardEl.classList.add('selected');
-      cardEl.innerHTML = '<div class="lhc-img">' + card.img + '</div><div class="lhc-name">' + card.name + '</div><div class="lhc-desc">' + card.desc + '</div>';
-      cardEl.addEventListener('click', function() {
-        if (laboursState.submitted) return;
-        laboursSelected = (laboursSelected === ci) ? null : ci;
-        renderLabours();
-      });
-      cardsEl.appendChild(cardEl);
-    });
   }
 
-  function submitLabours() {
-    if (laboursState.submitted) return;
-    laboursState.submitted = true;
-    clearInterval(laboursState.timer);
-    var correct = 0;
-    for (var i = 0; i < 12; i++) {
-      if (laboursState.slots[i] && laboursState.slots[i].name === LABOURS[i].name) correct++;
+  function fightTick() {
+    var s = fightState;
+    if (!s || s.won || s.lost) return;
+    var dt = 33;
+    var p = s.player, m = s.monster, b = s.boss;
+    s.flashTimer++;
+    if (s.shake > 0) s.shake = Math.max(0, s.shake - dt * 0.08);
+
+    // --- player ---
+    p.blocking = !!fightKeys.block && p.stamina > 5 && p.stagger <= 0;
+    var moveSpeed = 2.6;
+    if (p.stagger > 0) { p.stagger -= dt; moveSpeed = 0; }
+    if (p.atkCd > 0) p.atkCd -= dt;
+    if (p.strikeAnim > 0) p.strikeAnim -= dt;
+    if (p.lunge > 0) p.lunge = Math.max(0, p.lunge - dt * 0.18);
+    if (p.recoil > 0) p.recoil = Math.max(0, p.recoil - dt * 0.12);
+    if (p.hitFlash > 0) p.hitFlash -= dt;
+    if (p.blocking) { p.stamina = Math.max(0, p.stamina - dt * 0.035); }
+    else { p.stamina = Math.min(p.maxStamina, p.stamina + dt * 0.025); }
+    if (p.stamina <= 0 && p.stagger <= 0) { p.stagger = 900; } // guard broken
+    if (fightKeys.left && !fightKeys.right) { p.x -= moveSpeed; p.vx = -1; }
+    else if (fightKeys.right && !fightKeys.left) { p.x += moveSpeed; p.vx = 1; }
+    else { p.vx = 0; }
+    p.x = Math.max(45, Math.min(360, p.x));
+
+    // --- monster AI ---
+    if (m.recoil > 0) m.recoil = Math.max(0, m.recoil - dt * 0.12);
+    if (m.hitFlash > 0) m.hitFlash -= dt;
+    if (m.lunge > 0) m.lunge = Math.max(0, m.lunge - dt * 0.2);
+    var gap = m.x - p.x;
+    var atkRange = 150;
+    if (m.state === 'approach') {
+      if (gap > atkRange) {
+        m.x -= b.approach * (dt * 0.06);
+        m.vx = -1;
+      } else {
+        m.vx = 0;
+        if (m.atkCd <= 0) { m.state = 'windup'; m.windTimer = b.windUp; }
+      }
+      m.atkCd = Math.max(0, m.atkCd - dt);
+    } else if (m.state === 'windup') {
+      m.vx = 0;
+      m.windTimer -= dt;
+      if (m.windTimer <= 0) { m.state = 'strike'; m.lunge = 34; m.struck = false; }
+    } else if (m.state === 'strike') {
+      // resolve the hit exactly once, the instant the strike begins
+      if (!m.struck) {
+        m.struck = true;
+        m.timer = 170; // brief hold so the lunge/claw arc is visible
+        if (gap < 168) {
+          var blocked = p.blocking && p.stamina > 10;
+          var raw = b.dmg;
+          var taken = blocked ? Math.round(raw * 0.25) : raw;
+          p.hp -= taken;
+          p.hitFlash = 300;
+          p.recoil = 34;
+          s.shake = blocked ? 6 : 14;
+          if (blocked) p.stamina = Math.max(0, p.stamina - 22);
+          s.hitFx.push({ x: (m.x + p.x) / 2, y: 235, dmg: taken, t: 600, kind: blocked ? 'block' : 'monster' });
+          if (taken > 0) s.flawless = false;
+          if (p.hp <= 0) { p.hp = 0; loseLabour(s); }
+        } else {
+          s.hitFx.push({ x: m.x - 24, y: 235, dmg: 0, t: 260, kind: 'whiff' });
+        }
+      }
+      m.timer -= dt;
+      if (m.timer <= 0) { m.state = 'recover'; m.timer = Math.max(360, 700 - s.bossIdx * 22); }
+    } else if (m.state === 'recover') {
+      m.vx = 0;
+      m.timer -= dt;
+      if (m.timer <= 0) { m.state = 'approach'; m.atkCd = b.atkGap; }
     }
-    var elapsed = Math.floor((Date.now() - laboursState.startTime) / 1000);
-    var timeBonus = elapsed < 60 ? 20 : elapsed < 120 ? 10 : 0;
-    var points = correct * 5 - laboursState.wrongCount * 2 + timeBonus;
-    if (correct === 12) points += 30;
+    // keep the monster on-screen and never overlapping the player
+    m.x = Math.max(80, Math.min(675, m.x));
+    if (m.x < p.x + 80) m.x = p.x + 80;
+
+    // expire hit effects
+    for (var i = s.hitFx.length - 1; i >= 0; i--) {
+      s.hitFx[i].t -= dt;
+      if (s.hitFx[i].t <= 0) s.hitFx.splice(i, 1);
+    }
+
+    // update HUD
+    var hpEl = document.getElementById('ft-hp');
+    if (hpEl) hpEl.textContent = Math.max(0, Math.round(p.hp));
+    var stEl = document.getElementById('ft-stam');
+    if (stEl) stEl.textContent = Math.max(0, Math.round(p.stamina));
+
+    drawFight();
+  }
+
+  function drawFight() {
+    var canvas = document.getElementById('fight-canvas');
+    if (!canvas) return;
+    var ctx = canvas.getContext('2d');
+    var W = canvas.width, H = canvas.height;
+    var s = fightState, p = s.player, m = s.monster, b = s.boss;
+    ctx.save();
+    if (s.shake > 0) ctx.translate((Math.random() - 0.5) * s.shake, (Math.random() - 0.5) * s.shake);
+    ctx.clearRect(-20, -20, W + 40, H + 40);
+
+    // ground
+    var groundY = 262;
+    var grad = ctx.createLinearGradient(0, groundY, 0, H);
+    grad.addColorStop(0, '#3a2a40'); grad.addColorStop(1, '#1a1220');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, groundY, W, H - groundY);
+    ctx.strokeStyle = 'rgba(239,83,80,0.18)'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(0, groundY); ctx.lineTo(W, groundY); ctx.stroke();
+
+    // --- HP bars ---
+    drawHpBar(ctx, 24, 18, 300, 'Hercules', p.hp, p.maxHp, '#42a5f5', '#1a1a2e');
+    drawHpBar(ctx, W - 324, 18, 300, b.name, m.hp, m.maxHp, b.color, '#1a1a2e', b.emoji);
+    // stamina bar under player HP
+    var stamW = 300 * (p.stamina / p.maxStamina);
+    ctx.fillStyle = 'rgba(255,255,255,0.12)'; ctx.fillRect(24, 44, 300, 7);
+    ctx.fillStyle = p.stamina < 25 ? '#ef5350' : '#ffb74d'; ctx.fillRect(24, 44, stamW, 7);
+
+    // telegraph shadow when monster is winding up
+    if (m.state === 'windup') {
+      var t = 1 - (m.windTimer / b.windUp);
+      ctx.fillStyle = 'rgba(255,23,68,' + (0.06 + t * 0.10) + ')';
+      ctx.fillRect(0, 0, W, H);
+    }
+
+    // --- Hercules ---
+    var px = p.x + (p.lunge * (p.vx >= 0 ? 1 : -1)) - p.recoil;
+    drawFighter(ctx, px, groundY, 26, '#42a5f5', '\uD83C\uDFFE', p.hitFlash, p.blocking, p.strikeAnim, p.vx, true);
+    // club swing arc when striking
+    if (p.strikeAnim > 0) {
+      var sa = 1 - (p.strikeAnim / 220);
+      ctx.strokeStyle = 'rgba(255,235,59,' + (1 - sa) + ')'; ctx.lineWidth = 5; ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.arc(px + 18, groundY - 30, 40, -Math.PI * 0.6 + sa * Math.PI * 1.1, -Math.PI * 0.6 + sa * Math.PI * 1.1 + 1.1);
+      ctx.stroke();
+    }
+
+    // --- Monster ---
+    var mx = m.x - m.lunge + m.recoil;
+    var winding = m.state === 'windup';
+    drawFighter(ctx, mx, groundY, 34, b.color, b.emoji, m.hitFlash, false, m.lunge > 0 ? 1 : 0, m.vx, false, winding);
+    // monster attack telegraph arc
+    if (m.state === 'strike' && m.lunge > 10) {
+      ctx.strokeStyle = 'rgba(255,23,68,0.85)'; ctx.lineWidth = 6; ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.arc(mx - 16, groundY - 36, 46, Math.PI * 0.5, Math.PI * 0.5 + 1.2);
+      ctx.stroke();
+    }
+
+    // --- hit effects / damage numbers ---
+    for (var i = 0; i < s.hitFx.length; i++) {
+      var fx = s.hitFx[i];
+      var alpha = Math.min(1, fx.t / 200);
+      var rise = (600 - fx.t) * 0.05;
+      if (fx.kind === 'whiff') {
+        ctx.fillStyle = 'rgba(200,200,200,' + alpha + ')';
+        ctx.font = 'italic 600 14px Inter'; ctx.textAlign = 'center';
+        ctx.fillText('miss', fx.x, fx.y - 40 - rise);
+      } else {
+        var col = fx.kind === 'block' ? '#42a5f5' : (fx.kind === 'player' ? '#fff176' : '#ef5350');
+        ctx.fillStyle = col; ctx.globalAlpha = alpha;
+        ctx.font = 'bold 22px Inter'; ctx.textAlign = 'center';
+        ctx.fillText((fx.kind === 'block' ? 'blocked ' : '') + (fx.dmg > 0 ? '-' + fx.dmg : ''), fx.x, fx.y - 44 - rise);
+        ctx.globalAlpha = 1;
+      }
+    }
+    ctx.restore();
+  }
+
+  function drawHpBar(ctx, x, y, w, label, hp, maxHp, color, bg, emoji) {
+    ctx.fillStyle = 'rgba(0,0,0,0.4)';
+    ctx.fillRect(x - 2, y - 2, w + 4, 26);
+    ctx.fillStyle = bg; ctx.fillRect(x, y, w, 22);
+    var frac = Math.max(0, hp / maxHp);
+    ctx.fillStyle = color; ctx.fillRect(x, y, w * frac, 22);
+    ctx.fillStyle = '#fff'; ctx.font = 'bold 13px Inter'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+    ctx.fillText((emoji ? emoji + ' ' : '') + label, x + 8, y + 11);
+    ctx.textAlign = 'right';
+    ctx.fillText(Math.max(0, Math.ceil(hp)) + '/' + Math.ceil(maxHp), x + w - 8, y + 11);
+    ctx.textBaseline = 'alphabetic';
+  }
+
+  function drawFighter(ctx, x, groundY, r, color, face, hitFlash, blocking, strike, vx, isHero, winding) {
+    var cy = groundY - r - 4;
+    // shadow
+    ctx.fillStyle = 'rgba(0,0,0,0.35)';
+    ctx.beginPath(); ctx.ellipse(x, groundY + 2, r * 0.9, r * 0.3, 0, 0, Math.PI * 2); ctx.fill();
+    // body glow
+    ctx.shadowColor = winding ? '#ff1744' : color;
+    ctx.shadowBlur = winding ? 26 : 14;
+    ctx.fillStyle = hitFlash > 0 ? '#ffffff' : (winding ? '#d32f2f' : color);
+    ctx.beginPath(); ctx.arc(x, cy, r, 0, Math.PI * 2); ctx.fill();
+    ctx.shadowBlur = 0;
+    // shield when blocking
+    if (blocking) {
+      ctx.fillStyle = 'rgba(66,165,245,0.5)';
+      ctx.beginPath(); ctx.arc(x + r * 0.8, cy, r * 0.7, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = '#42a5f5'; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.arc(x + r * 0.8, cy, r * 0.7, 0, Math.PI * 2); ctx.stroke();
+    }
+    // face emoji
+    ctx.font = (r * 1.2) + 'px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(face, x, cy + 1);
+    ctx.textBaseline = 'alphabetic';
+    // wind-up tremor
+    if (winding) {
+      var sh = Math.sin(fightState.flashTimer * 0.8) * 2;
+      ctx.fillStyle = 'rgba(255,23,68,0.25)';
+      ctx.beginPath(); ctx.arc(x + sh, cy, r * 1.25, 0, Math.PI * 2); ctx.fill();
+    }
+  }
+
+  function winLabour(s) {
+    s.won = true;
+    clearInterval(fightLoop);
+    document.removeEventListener('keydown', fightKeyHandler);
+    document.removeEventListener('keyup', fightKeyUpHandler);
+    var elapsed = Math.floor((Date.now() - s.startTime) / 1000);
+    var pts = 10 + s.level * 5 + (s.flawless ? 40 : 0);
     fetch('/api/award', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'trace_journey', detail: 'labours: ' + correct + '/12' })
+      body: JSON.stringify({ action: 'trace_journey', detail: 'labour ' + s.level + ': ' + s.boss.name + ' slain' })
     }).then(function(r) { return r.json(); }).then(function(d) { updatePointsBadge(d.total_points); }).catch(function() {});
-    // mark slots
-    var slots = document.querySelectorAll('.lh-slot');
-    for (var j = 0; j < 12; j++) {
-      if (slots[j]) {
-        if (laboursState.slots[j] && laboursState.slots[j].name === LABOURS[j].name) {
-          slots[j].classList.add('perfect');
-        } else {
-          slots[j].classList.add('missed');
-        }
-      }
-    }
+    laboursLevel = Math.min(s.level + 1, LABOURS_MAX_LEVEL + 1);
+    saveGameLevels();
+    var isFinal = laboursLevel > LABOURS_MAX_LEVEL;
     var arena = document.getElementById('game-arena');
     var result = document.createElement('div');
     result.className = 'quiz-result';
-    if (correct === 12) {
-      laboursLevel++;
-      saveGameLevels();
-    }
-    var nextBtn = correct === 12
-      ? '<button class="cd-btn" style="max-width:150px;margin-top:0.8rem" onclick="loadLabours()">level ' + laboursLevel + ' &rarr;</button>'
-      : '<button class="cd-btn" style="max-width:140px;margin-top:0.8rem" onclick="loadLabours()">try again</button>';
     result.innerHTML =
-      '<div class="qr-score">' + correct + '/12</div>' +
-      '<div class="qr-label">' + (correct === 12 ? 'the labours are complete! level up!' : 'some labours remain') + '</div>' +
-      '<div class="qr-points positive">+' + points + ' drachmae</div>' +
-      (timeBonus > 0 ? '<div style="font-size:0.8rem;color:#9a7a8a;margin-top:0.3rem;">time bonus: +' + timeBonus + ' (' + elapsed + 's)</div>' : '') +
-      (correct === 12 ? '<div class="qr-perfect">hero of myth!</div>' : '') +
-      '<div style="font-size:0.8rem;color:#9a7a8a;margin-top:0.5rem">' + laboursState.wrongCount + ' mistakes &middot; ' + elapsed + 's</div>' +
-      nextBtn;
+      '<div class="qr-score">' + (isFinal ? 'Twelve Labours Complete!' : 'Victory!') + '</div>' +
+      '<div class="qr-label">' + s.boss.name + ' is slain. ' + (s.flawless ? 'Not a scratch on Hercules.' : 'Hercules survives the ' + s.boss.name + '.') + '</div>' +
+      '<div class="qr-points positive">+' + pts + ' drachmae</div>' +
+      (s.flawless ? '<div class="qr-perfect">flawless victory!</div>' : '') +
+      '<div style="font-size:0.8rem;color:#9a7a8a;margin-top:0.5rem">' + elapsed + 's &middot; ' + Math.round(s.player.hp) + ' hp remaining</div>' +
+      (isFinal
+        ? '<div style="margin-top:0.8rem"><button class="cd-btn" onclick="closeLabours()">claim immortality</button></div>'
+        : '<div style="display:flex;gap:0.5rem;justify-content:center;margin-top:0.8rem"><button class="cd-btn" onclick="loadLabours()">next labour &rarr;</button></div>');
     arena.appendChild(result);
+  }
+
+  function loseLabour(s) {
+    s.lost = true;
+    clearInterval(fightLoop);
+    document.removeEventListener('keydown', fightKeyHandler);
+    document.removeEventListener('keyup', fightKeyUpHandler);
+    var arena = document.getElementById('game-arena');
+    var result = document.createElement('div');
+    result.className = 'quiz-result';
+    result.innerHTML =
+      '<div style="font-size:2rem;font-weight:800;color:#ef5350;">Defeated</div>' +
+      '<div class="qr-label">The ' + s.boss.name + ' bested Hercules.</div>' +
+      '<div style="font-size:0.8rem;color:#9a7a8a;margin:0.5rem 0">' + Math.round(s.monster.hp) + '/' + Math.ceil(s.monster.maxHp) + ' monster hp left</div>' +
+      '<button class="cd-btn" style="max-width:140px;margin-top:0.8rem" onclick="loadLabours()">try again</button>';
+    arena.appendChild(result);
+  }
+
+  function closeLabours() {
+    if (fightLoop) clearInterval(fightLoop);
+    document.removeEventListener('keydown', fightKeyHandler);
+    document.removeEventListener('keyup', fightKeyUpHandler);
+    fightKeys = {}; fightState = null;
+    closeGame();
   }
 
   // --- labyrinth maze: Pac-Man style ---
