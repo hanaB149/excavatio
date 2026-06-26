@@ -580,7 +580,7 @@
     /* labyrinth maze game */
     .maze-wrap { text-align: center; }
     #maze-canvas {
-      background: #1a1a2e;
+      background: #16162e;
       border-radius: 14px;
       border: 3px solid rgba(126,87,194,0.3);
       box-shadow: 0 4px 24px rgba(0,0,0,0.2);
@@ -4247,6 +4247,35 @@
   const MEMORY_MAX = 10;
   const COLUMNDROP_MAX = 15;
 
+  var gameHighScores = {};
+
+  function recordHighScore(game, score) {
+    var prev = gameHighScores[game] || 0;
+    if (score > prev) {
+      gameHighScores[game] = score;
+      saveGameHighScores();
+      return true;
+    }
+    return false;
+  }
+
+  function getHighScore(game) {
+    return gameHighScores[game] || 0;
+  }
+
+  function saveGameHighScores() {
+    fetch('/api/game-levels', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ game_levels: {
+        mazeLevel: mazeLevel || 1, triviaLevel: triviaLevel || 1,
+        truefalseLevel: truefalseLevel || 1, scrambleLevel: scrambleLevel || 1,
+        matchingLevel: matchingLevel || 1, columndropLevel: columndropLevel || 1,
+        memoryLevel: memoryLevel || 1, laboursLevel: laboursLevel || 1,
+      }, high_scores: gameHighScores }),
+    }).catch(function() {});
+  }
+
   function loadArenaStats() {
     fetch('/api/stats')
       .then(r => r.json())
@@ -4375,10 +4404,12 @@
       : (data.correct === data.total && data.total > 0
         ? '<button class="cd-btn" style="max-width:140px;margin-top:0.8rem" onclick="loadTrivia()">level ' + triviaLevel + ' &rarr;</button>'
         : '');
+    var triviaNewBest = recordHighScore('trivia', data.points);
     resultDiv.innerHTML =
       '<div class="qr-score">' + (triviaFinal ? 'Trivia Master!' : data.correct + '/' + data.total) + '</div>' +
       '<div class="qr-label">' + (triviaFinal ? 'All ' + TRIVIA_MAX + ' levels conquered!' : (data.correct === data.total ? 'flawless! level up!' : 'well played')) + '</div>' +
       '<div class="qr-points ' + (data.points >= 0 ? 'positive' : 'negative') + '">' + (data.points >= 0 ? '+' : '') + data.points + ' drachmae</div>' +
+      (triviaNewBest ? '<div style="color:#ffca28;font-size:0.8rem;font-weight:700;">&#9733; new best score!</div>' : '<div style="font-size:0.75rem;color:#9a7a8a;">best: ' + getHighScore('trivia') + '</div>') +
       (data.correct === data.total ? '<div class="qr-perfect">perfect score bonus!</div>' : '') +
       nextBtn;
     arena.appendChild(resultDiv);
@@ -4462,10 +4493,12 @@
           : (data.correct === data.total && data.total > 0
             ? '<button class="cd-btn" style="max-width:150px;margin-top:0.8rem" onclick="loadTrueFalse()">level ' + truefalseLevel + ' &rarr;</button>'
             : '');
+        var tfNewBest = recordHighScore('truefalse', data.points);
         resultDiv.innerHTML =
           '<div class="qr-score">' + (tfFinal ? 'True or False Master!' : data.correct + '/' + data.total) + '</div>' +
           '<div class="qr-label">' + (tfFinal ? 'All ' + TRUEFALSE_MAX + ' levels conquered!' : (data.correct === data.total ? 'flawless! level up!' : 'well played')) + '</div>' +
           '<div class="qr-points ' + (data.points >= 0 ? 'positive' : 'negative') + '">' + (data.points >= 0 ? '+' : '') + data.points + ' drachmae</div>' +
+          (tfNewBest ? '<div style="color:#ffca28;font-size:0.8rem;font-weight:700;">&#9733; new best score!</div>' : '<div style="font-size:0.75rem;color:#9a7a8a;">best: ' + getHighScore('truefalse') + '</div>') +
           (data.correct === data.total ? '<div class="qr-perfect">perfect score bonus!</div>' : '') +
           nextBtn;
         arena.appendChild(resultDiv);
@@ -4547,10 +4580,12 @@
           : (data.correct === data.total && data.total > 0
             ? '<button class="cd-btn" style="max-width:150px;margin-top:0.8rem" onclick="loadScramble()">level ' + scrambleLevel + ' &rarr;</button>'
             : '');
+        var scNewBest = recordHighScore('scramble', data.points);
         resultDiv.innerHTML =
           '<div class="qr-score">' + (scFinal ? 'Word Master!' : data.correct + '/' + data.total) + '</div>' +
           '<div class="qr-label">' + (scFinal ? 'All ' + SCRAMBLE_MAX + ' levels conquered!' : (data.correct === data.total ? 'flawless! level up!' : 'well played')) + '</div>' +
           '<div class="qr-points ' + (data.points >= 0 ? 'positive' : 'negative') + '">' + (data.points >= 0 ? '+' : '') + data.points + ' drachmae</div>' +
+          (scNewBest ? '<div style="color:#ffca28;font-size:0.8rem;font-weight:700;">&#9733; new best score!</div>' : '<div style="font-size:0.75rem;color:#9a7a8a;">best: ' + getHighScore('scramble') + '</div>') +
           (data.correct === data.total ? '<div class="qr-perfect">perfect score bonus!</div>' : '') +
           nextBtn;
         arena.appendChild(resultDiv);
@@ -4692,10 +4727,12 @@
           : (data.correct === data.total && data.total > 0
             ? '<button class="cd-btn" style="max-width:150px;margin-top:0.8rem" onclick="loadMatching()">level ' + matchingLevel + ' &rarr;</button>'
             : '');
+        var mNewBest = recordHighScore('matching', data.points);
         resultDiv.innerHTML =
           '<div class="qr-score">' + (mFinal ? 'Matching Master!' : data.correct + '/' + data.total) + '</div>' +
           '<div class="qr-label">' + (mFinal ? 'All ' + MATCHING_MAX + ' levels conquered!' : (data.correct === data.total ? 'flawless! level up!' : 'well played')) + '</div>' +
           '<div class="qr-points ' + (data.points >= 0 ? 'positive' : 'negative') + '">' + (data.points >= 0 ? '+' : '') + data.points + ' drachmae</div>' +
+          (mNewBest ? '<div style="color:#ffca28;font-size:0.8rem;font-weight:700;">&#9733; new best score!</div>' : '<div style="font-size:0.75rem;color:#9a7a8a;">best: ' + getHighScore('matching') + '</div>') +
           (data.correct === data.total ? '<div class="qr-perfect">perfect score bonus!</div>' : '') +
           nextBtn;
         arena.appendChild(resultDiv);
@@ -5035,10 +5072,12 @@
     }).catch(function() {});
     var overEl = document.getElementById('cd-over');
     if (overEl) {
+      var cdNewBest = recordHighScore('columndrop', points);
       overEl.innerHTML =
         '<div class="cdo-score">' + (cdFinal ? 'Column Drop Master!' : points) + '</div>' +
         '<div class="cdo-label">' + (cdFinal ? 'All ' + COLUMNDROP_MAX + ' levels conquered!' : 'final score') + '</div>' +
         '<div class="cdo-points positive">+' + drachmae + ' drachmae earned</div>' +
+        (cdNewBest ? '<div style="color:#ffca28;font-size:0.8rem;font-weight:700;margin-bottom:0.4rem;">&#9733; new best score!</div>' : '<div style="font-size:0.75rem;color:#9a7a8a;margin-bottom:0.4rem;">best: ' + getHighScore('columndrop') + '</div>') +
         (linesCleared >= (columndropLevel - 1) * 3 ? '<div style="color:#ffca28;font-size:0.8rem;margin-bottom:0.4rem;">level ' + (columndropLevel - 1) + ' reached!</div>' : '') +
         (cdFinal
           ? '<div style="display:flex;gap:0.5rem;justify-content:center;margin-top:0.5rem"><button class="cd-btn" onclick="closeGame()">claim victory</button><button class="cd-btn" style="max-width:140px" onclick="restartColumnDrop()">restart &darr;</button></div>'
@@ -5218,10 +5257,12 @@
     var arena = document.getElementById('game-arena');
     var result = document.createElement('div');
     result.className = 'quiz-result';
+    var memNewBest = recordHighScore('memory', points);
     result.innerHTML =
       '<div class="qr-score">' + (memFinal ? 'Memory Master!' : mmState.matches + '/8') + '</div>' +
       '<div class="qr-label">' + (memFinal ? 'All ' + MEMORY_MAX + ' levels conquered!' : (flawless ? 'flawless victory! level up!' : 'well played')) + '</div>' +
       '<div class="qr-points positive">+' + points + ' drachmae</div>' +
+      (memNewBest ? '<div style="color:#ffca28;font-size:0.8rem;font-weight:700;">&#9733; new best score!</div>' : '<div style="font-size:0.75rem;color:#9a7a8a;">best: ' + getHighScore('memory') + '</div>') +
       (flawless ? '<div class="qr-perfect">no mistakes &mdash; perfect bonus!</div>' : '') +
       '<div style="font-size:0.8rem;color:#9a7a8a;margin-top:0.5rem">' + mmState.moves + ' moves &middot; ' + timeSec + 's</div>' +
       nextBtn;
@@ -6176,10 +6217,12 @@
     var arena = document.getElementById('game-arena');
     var result = document.createElement('div');
     result.className = 'quiz-result';
+    var labNewBest = recordHighScore('labours', pts);
     result.innerHTML =
       '<div class="qr-score">' + (isFinal ? 'Twelve Labours Complete!' : 'Victory!') + '</div>' +
       '<div class="qr-label">' + s.boss.name + ' is slain. ' + (s.flawless ? 'Not a scratch on Hercules.' : 'Hercules survives the ' + s.boss.name + '.') + '</div>' +
       '<div class="qr-points positive">+' + pts + ' drachmae</div>' +
+      (labNewBest ? '<div style="color:#ffca28;font-size:0.8rem;font-weight:700;">&#9733; new best score!</div>' : '<div style="font-size:0.75rem;color:#9a7a8a;">best: ' + getHighScore('labours') + '</div>') +
       (s.flawless ? '<div class="qr-perfect">flawless victory!</div>' : '') +
       '<div style="font-size:0.8rem;color:#9a7a8a;margin-top:0.5rem">' + elapsed + 's &middot; ' + Math.round(s.player.hp) + ' hp remaining' + (comboBonus > 0 ? ' &middot; ' + comboBonus + ' combo bonus' : '') + '</div>' +
       (isFinal
@@ -6375,9 +6418,9 @@
       for (var c = 0; c < sz; c++) {
         var x = c * cs, y = r * cs;
         if (s.grid[r][c] === 1) {
-          ctx.fillStyle = '#1a1a2e';
+          ctx.fillStyle = '#3d2b56';
           ctx.fillRect(x, y, cs, cs);
-          ctx.fillStyle = 'rgba(126,87,194,0.08)';
+          ctx.fillStyle = 'rgba(149,117,205,0.25)';
           ctx.fillRect(x + 1, y + 1, cs - 2, cs - 2);
         }
       }
@@ -6567,10 +6610,12 @@
       var result = document.createElement('div');
       result.className = 'quiz-result';
       var isFinal = mazeLevel > MAZE_MAX_LEVEL;
+      var mazeNewBest = recordHighScore('maze', mazeState.score);
       result.innerHTML =
         '<div class="qr-score">' + (isFinal ? 'Labyrinth Conquered!' : 'Escape!') + '</div>' +
         '<div class="qr-label">' + mazeState.coinsCollected + '/' + mazeState.coins.length + ' coins collected &mdash; level ' + (mazeLevel - 1) + ' cleared!</div>' +
         '<div class="qr-points positive">+' + pts + ' drachmae</div>' +
+        (mazeNewBest ? '<div style="color:#ffca28;font-size:0.8rem;font-weight:700;">&#9733; new best score!</div>' : '<div style="font-size:0.75rem;color:#9a7a8a;">best: ' + getHighScore('maze') + '</div>') +
         '<div style="font-size:0.8rem;color:#9a7a8a;margin-top:0.5rem">' + mazeState.score + ' steps &middot; next: level ' + mazeLevel + '</div>' +
         (isFinal
           ? '<div style="display:flex;gap:0.5rem;justify-content:center;margin-top:0.8rem"><button class="cd-btn" onclick="closeMaze()">claim victory</button><button class="cd-btn" style="max-width:140px" onclick="restartMaze()">restart &darr;</button></div>'
@@ -6625,6 +6670,7 @@
         if (gl.columndropLevel != null) columndropLevel = gl.columndropLevel;
         if (gl.memoryLevel != null) memoryLevel = gl.memoryLevel;
         if (gl.laboursLevel != null) laboursLevel = gl.laboursLevel;
+        if (data.high_scores) gameHighScores = data.high_scores;
         callback(gl);
       })
       .catch(function() { callback({}); });

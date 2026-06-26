@@ -145,6 +145,7 @@ def create_user(username, email, password):
         "avatar": random.choice(default_avatars),
         "saved_items": [],
         "game_levels": {},
+        "high_scores": {},
         "followers": [],
         "following": [],
     }
@@ -168,6 +169,7 @@ def save_user_progress(user_id):
             # overwrite the stored value from the session here
             u["saved_items"] = session.get("saved_items", [])
             u["game_levels"] = session.get("game_levels", {})
+            u["high_scores"] = session.get("high_scores", {})
             u["followers"] = session.get("followers", [])
             u["following"] = session.get("following", [])
             break
@@ -1819,6 +1821,7 @@ def signup():
     session["interests"] = ""
     session["saved_items"] = []
     session["game_levels"] = {}
+    session["high_scores"] = {}
     session["followers"] = []
     session["following"] = []
     return redirect(url_for("index"))
@@ -1844,6 +1847,7 @@ def login():
     session["interests"] = user.get("interests", "")
     session["saved_items"] = user.get("saved_items", [])
     session["game_levels"] = user.get("game_levels", {})
+    session["high_scores"] = user.get("high_scores", {})
     session["followers"] = user.get("followers", [])
     session["following"] = user.get("following", [])
     return redirect(url_for("index"))
@@ -2288,7 +2292,10 @@ def api_stats():
 @app.route("/api/game-levels", methods=["GET"])
 @login_required
 def api_get_game_levels():
-    return jsonify({"game_levels": session.get("game_levels", {})})
+    return jsonify({
+        "game_levels": session.get("game_levels", {}),
+        "high_scores": session.get("high_scores", {}),
+    })
 
 
 @app.route("/api/game-levels", methods=["POST"])
@@ -2298,6 +2305,8 @@ def api_set_game_levels():
     if not data or "game_levels" not in data:
         return jsonify({"error": "No game_levels"}), 400
     session["game_levels"] = data["game_levels"]
+    if "high_scores" in data:
+        session["high_scores"] = data["high_scores"]
     session.modified = True
     return jsonify({"saved": True})
 
