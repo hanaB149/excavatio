@@ -4240,6 +4240,12 @@
   let columndropLevel = 1;
   let memoryLevel = 1;
   let laboursLevel = 1;
+  const TRIVIA_MAX = 10;
+  const TRUEFALSE_MAX = 10;
+  const SCRAMBLE_MAX = 10;
+  const MATCHING_MAX = 10;
+  const MEMORY_MAX = 10;
+  const COLUMNDROP_MAX = 15;
 
   function loadArenaStats() {
     fetch('/api/stats')
@@ -4359,22 +4365,27 @@
     });
     const resultDiv = document.createElement('div');
     resultDiv.className = 'quiz-result';
+    var triviaFinal = false;
     if (data.correct === data.total && data.total > 0) {
-      triviaLevel++;
+      if (triviaLevel >= TRIVIA_MAX) { triviaFinal = true; } else { triviaLevel++; }
       saveGameLevels();
     }
-    var nextBtn = data.correct === data.total && data.total > 0
-      ? '<button class="cd-btn" style="max-width:140px;margin-top:0.8rem" onclick="loadTrivia()">level ' + triviaLevel + ' &rarr;</button>'
-      : '';
+    var nextBtn = triviaFinal
+      ? '<div style="display:flex;gap:0.5rem;justify-content:center;margin-top:0.8rem"><button class="cd-btn" onclick="closeGame()">claim victory</button><button class="cd-btn" style="max-width:140px" onclick="restartTrivia()">restart &darr;</button></div>'
+      : (data.correct === data.total && data.total > 0
+        ? '<button class="cd-btn" style="max-width:140px;margin-top:0.8rem" onclick="loadTrivia()">level ' + triviaLevel + ' &rarr;</button>'
+        : '');
     resultDiv.innerHTML =
-      '<div class="qr-score">' + data.correct + '/' + data.total + '</div>' +
-      '<div class="qr-label">' + (data.correct === data.total ? 'flawless! level up!' : 'well played') + '</div>' +
+      '<div class="qr-score">' + (triviaFinal ? 'Trivia Master!' : data.correct + '/' + data.total) + '</div>' +
+      '<div class="qr-label">' + (triviaFinal ? 'All ' + TRIVIA_MAX + ' levels conquered!' : (data.correct === data.total ? 'flawless! level up!' : 'well played')) + '</div>' +
       '<div class="qr-points ' + (data.points >= 0 ? 'positive' : 'negative') + '">' + (data.points >= 0 ? '+' : '') + data.points + ' drachmae</div>' +
       (data.correct === data.total ? '<div class="qr-perfect">perfect score bonus!</div>' : '') +
       nextBtn;
     arena.appendChild(resultDiv);
     document.querySelector('.quiz-submit').style.display = 'none';
   }
+
+  function restartTrivia() { triviaLevel = 1; saveGameLevels(); loadTrivia(); }
 
   function loadTrueFalse() {
     var count = Math.min(3 + truefalseLevel, 10);
@@ -4441,16 +4452,19 @@
         const arena = document.getElementById('game-arena');
         const resultDiv = document.createElement('div');
         resultDiv.className = 'quiz-result';
+        var tfFinal = false;
         if (data.correct === data.total && data.total > 0) {
-          truefalseLevel++;
+          if (truefalseLevel >= TRUEFALSE_MAX) { tfFinal = true; } else { truefalseLevel++; }
           saveGameLevels();
         }
-        var nextBtn = data.correct === data.total && data.total > 0
-          ? '<button class="cd-btn" style="max-width:150px;margin-top:0.8rem" onclick="loadTrueFalse()">level ' + truefalseLevel + ' &rarr;</button>'
-          : '';
+        var nextBtn = tfFinal
+          ? '<div style="display:flex;gap:0.5rem;justify-content:center;margin-top:0.8rem"><button class="cd-btn" onclick="closeGame()">claim victory</button><button class="cd-btn" style="max-width:140px" onclick="restartTrueFalse()">restart &darr;</button></div>'
+          : (data.correct === data.total && data.total > 0
+            ? '<button class="cd-btn" style="max-width:150px;margin-top:0.8rem" onclick="loadTrueFalse()">level ' + truefalseLevel + ' &rarr;</button>'
+            : '');
         resultDiv.innerHTML =
-          '<div class="qr-score">' + data.correct + '/' + data.total + '</div>' +
-          '<div class="qr-label">' + (data.correct === data.total ? 'flawless! level up!' : 'well played') + '</div>' +
+          '<div class="qr-score">' + (tfFinal ? 'True or False Master!' : data.correct + '/' + data.total) + '</div>' +
+          '<div class="qr-label">' + (tfFinal ? 'All ' + TRUEFALSE_MAX + ' levels conquered!' : (data.correct === data.total ? 'flawless! level up!' : 'well played')) + '</div>' +
           '<div class="qr-points ' + (data.points >= 0 ? 'positive' : 'negative') + '">' + (data.points >= 0 ? '+' : '') + data.points + ' drachmae</div>' +
           (data.correct === data.total ? '<div class="qr-perfect">perfect score bonus!</div>' : '') +
           nextBtn;
@@ -4459,6 +4473,8 @@
         updatePointsBadge(data.total_points);
       });
   }
+
+  function restartTrueFalse() { truefalseLevel = 1; saveGameLevels(); loadTrueFalse(); }
 
   function loadScramble() {
     var count = Math.min(3 + scrambleLevel, 10);
@@ -4521,16 +4537,19 @@
         const arena = document.getElementById('game-arena');
         const resultDiv = document.createElement('div');
         resultDiv.className = 'quiz-result';
+        var scFinal = false;
         if (data.correct === data.total && data.total > 0) {
-          scrambleLevel++;
+          if (scrambleLevel >= SCRAMBLE_MAX) { scFinal = true; } else { scrambleLevel++; }
           saveGameLevels();
         }
-        var nextBtn = data.correct === data.total && data.total > 0
-          ? '<button class="cd-btn" style="max-width:150px;margin-top:0.8rem" onclick="loadScramble()">level ' + scrambleLevel + ' &rarr;</button>'
-          : '';
+        var nextBtn = scFinal
+          ? '<div style="display:flex;gap:0.5rem;justify-content:center;margin-top:0.8rem"><button class="cd-btn" onclick="closeGame()">claim victory</button><button class="cd-btn" style="max-width:140px" onclick="restartScramble()">restart &darr;</button></div>'
+          : (data.correct === data.total && data.total > 0
+            ? '<button class="cd-btn" style="max-width:150px;margin-top:0.8rem" onclick="loadScramble()">level ' + scrambleLevel + ' &rarr;</button>'
+            : '');
         resultDiv.innerHTML =
-          '<div class="qr-score">' + data.correct + '/' + data.total + '</div>' +
-          '<div class="qr-label">' + (data.correct === data.total ? 'flawless! level up!' : 'well played') + '</div>' +
+          '<div class="qr-score">' + (scFinal ? 'Word Master!' : data.correct + '/' + data.total) + '</div>' +
+          '<div class="qr-label">' + (scFinal ? 'All ' + SCRAMBLE_MAX + ' levels conquered!' : (data.correct === data.total ? 'flawless! level up!' : 'well played')) + '</div>' +
           '<div class="qr-points ' + (data.points >= 0 ? 'positive' : 'negative') + '">' + (data.points >= 0 ? '+' : '') + data.points + ' drachmae</div>' +
           (data.correct === data.total ? '<div class="qr-perfect">perfect score bonus!</div>' : '') +
           nextBtn;
@@ -4539,6 +4558,8 @@
         updatePointsBadge(data.total_points);
       });
   }
+
+  function restartScramble() { scrambleLevel = 1; saveGameLevels(); loadScramble(); }
 
   function loadMatching() {
     var count = Math.min(1 + Math.floor((matchingLevel - 1) / 2), 5);
@@ -4661,16 +4682,19 @@
         const arena = document.getElementById('game-arena');
         const resultDiv = document.createElement('div');
         resultDiv.className = 'quiz-result';
+        var mFinal = false;
         if (data.correct === data.total && data.total > 0) {
-          matchingLevel++;
+          if (matchingLevel >= MATCHING_MAX) { mFinal = true; } else { matchingLevel++; }
           saveGameLevels();
         }
-        var nextBtn = data.correct === data.total && data.total > 0
-          ? '<button class="cd-btn" style="max-width:150px;margin-top:0.8rem" onclick="loadMatching()">level ' + matchingLevel + ' &rarr;</button>'
-          : '';
+        var nextBtn = mFinal
+          ? '<div style="display:flex;gap:0.5rem;justify-content:center;margin-top:0.8rem"><button class="cd-btn" onclick="closeGame()">claim victory</button><button class="cd-btn" style="max-width:140px" onclick="restartMatching()">restart &darr;</button></div>'
+          : (data.correct === data.total && data.total > 0
+            ? '<button class="cd-btn" style="max-width:150px;margin-top:0.8rem" onclick="loadMatching()">level ' + matchingLevel + ' &rarr;</button>'
+            : '');
         resultDiv.innerHTML =
-          '<div class="qr-score">' + data.correct + '/' + data.total + '</div>' +
-          '<div class="qr-label">' + (data.correct === data.total ? 'flawless! level up!' : 'well played') + '</div>' +
+          '<div class="qr-score">' + (mFinal ? 'Matching Master!' : data.correct + '/' + data.total) + '</div>' +
+          '<div class="qr-label">' + (mFinal ? 'All ' + MATCHING_MAX + ' levels conquered!' : (data.correct === data.total ? 'flawless! level up!' : 'well played')) + '</div>' +
           '<div class="qr-points ' + (data.points >= 0 ? 'positive' : 'negative') + '">' + (data.points >= 0 ? '+' : '') + data.points + ' drachmae</div>' +
           (data.correct === data.total ? '<div class="qr-perfect">perfect score bonus!</div>' : '') +
           nextBtn;
@@ -4680,6 +4704,8 @@
         matchingPairs = {};
       });
   }
+
+  function restartMatching() { matchingLevel = 1; saveGameLevels(); loadMatching(); }
 
   // --- column drop (tetris-style block puzzle) ---
   let cdState = null;
@@ -4994,8 +5020,9 @@
     var points = cdState.score;
     var drachmae = Math.floor(points / 10);
     var linesCleared = cdState.lines;
+    var cdFinal = false;
     if (linesCleared >= columndropLevel * 3) {
-      columndropLevel++;
+      if (columndropLevel >= COLUMNDROP_MAX) { cdFinal = true; } else { columndropLevel++; }
       saveGameLevels();
     }
     // award bonus points
@@ -5009,15 +5036,19 @@
     var overEl = document.getElementById('cd-over');
     if (overEl) {
       overEl.innerHTML =
-        '<div class="cdo-score">' + points + '</div>' +
-        '<div class="cdo-label">final score</div>' +
+        '<div class="cdo-score">' + (cdFinal ? 'Column Drop Master!' : points) + '</div>' +
+        '<div class="cdo-label">' + (cdFinal ? 'All ' + COLUMNDROP_MAX + ' levels conquered!' : 'final score') + '</div>' +
         '<div class="cdo-points positive">+' + drachmae + ' drachmae earned</div>' +
         (linesCleared >= (columndropLevel - 1) * 3 ? '<div style="color:#ffca28;font-size:0.8rem;margin-bottom:0.4rem;">level ' + (columndropLevel - 1) + ' reached!</div>' : '') +
-        '<button class="cd-btn" style="max-width:120px" onclick="loadColumnDrop()">play again</button>';
+        (cdFinal
+          ? '<div style="display:flex;gap:0.5rem;justify-content:center;margin-top:0.5rem"><button class="cd-btn" onclick="closeGame()">claim victory</button><button class="cd-btn" style="max-width:140px" onclick="restartColumnDrop()">restart &darr;</button></div>'
+          : '<button class="cd-btn" style="max-width:120px" onclick="loadColumnDrop()">play again</button>');
       overEl.classList.add('visible');
     }
     cdUpdateStats();
   }
+
+  function restartColumnDrop() { columndropLevel = 1; saveGameLevels(); loadColumnDrop(); }
 
   function closeColumnDrop() {
     clearInterval(cdLoop);
@@ -5174,19 +5205,22 @@
       updatePointsBadge(d.total_points);
     }).catch(function() {});
 
+    var memFinal = false;
     if (flawless) {
-      memoryLevel++;
+      if (memoryLevel >= MEMORY_MAX) { memFinal = true; } else { memoryLevel++; }
       saveGameLevels();
     }
-    var nextBtn = flawless
-      ? '<button class="cd-btn" style="max-width:150px;margin-top:0.8rem" onclick="loadMemory()">level ' + memoryLevel + ' &rarr;</button>'
-      : '<button class="cd-btn" style="max-width:120px;margin-top:0.8rem" onclick="loadMemory()">try again</button>';
+    var nextBtn = memFinal
+      ? '<div style="display:flex;gap:0.5rem;justify-content:center;margin-top:0.8rem"><button class="cd-btn" onclick="closeGame()">claim victory</button><button class="cd-btn" style="max-width:140px" onclick="restartMemory()">restart &darr;</button></div>'
+      : (flawless
+        ? '<button class="cd-btn" style="max-width:150px;margin-top:0.8rem" onclick="loadMemory()">level ' + memoryLevel + ' &rarr;</button>'
+        : '<button class="cd-btn" style="max-width:120px;margin-top:0.8rem" onclick="loadMemory()">try again</button>');
     var arena = document.getElementById('game-arena');
     var result = document.createElement('div');
     result.className = 'quiz-result';
     result.innerHTML =
-      '<div class="qr-score">' + mmState.matches + '/8</div>' +
-      '<div class="qr-label">' + (flawless ? 'flawless victory! level up!' : 'well played') + '</div>' +
+      '<div class="qr-score">' + (memFinal ? 'Memory Master!' : mmState.matches + '/8') + '</div>' +
+      '<div class="qr-label">' + (memFinal ? 'All ' + MEMORY_MAX + ' levels conquered!' : (flawless ? 'flawless victory! level up!' : 'well played')) + '</div>' +
       '<div class="qr-points positive">+' + points + ' drachmae</div>' +
       (flawless ? '<div class="qr-perfect">no mistakes &mdash; perfect bonus!</div>' : '') +
       '<div style="font-size:0.8rem;color:#9a7a8a;margin-top:0.5rem">' + mmState.moves + ' moves &middot; ' + timeSec + 's</div>' +
@@ -5194,28 +5228,30 @@
     arena.appendChild(result);
   }
 
+  function restartMemory() { memoryLevel = 1; saveGameLevels(); loadMemory(); }
+
   // --- labours of hercules: monster combat ---
   const LABOUR_BOSSES = [
-    { name:'Nemean Lion',       type:'lion',     hp:90,  dmg:9,  speed:3.5, atkGap:2000, windUp:650, lungeRange:200,  color:'#f9a825', desc:'impenetrable golden fur' },
-    { name:'Lernaean Hydra',    type:'hydra',    hp:120, dmg:11, speed:2.5, atkGap:1800, windUp:600, lungeRange:0,    ranged:true, color:'#43a047', desc:'nine regenerating heads' },
-    { name:'Ceryneian Hind',    type:'hind',     hp:85,  dmg:8,  speed:5.5, atkGap:1400, windUp:450, lungeRange:220,  dodgy:true, color:'#ffb74d', desc:'golden-horned deer of Artemis' },
-    { name:'Erymanthian Boar',  type:'boar',     hp:140, dmg:14, speed:3.0, atkGap:1600, windUp:700, lungeRange:280,  knock:35, color:'#6d4c41', desc:'a monstrous tusked boar' },
-    { name:'Augean Stables',    type:'stables',  hp:130, dmg:10, speed:1.5, atkGap:1700, windUp:750, lungeRange:0,    ranged:true, tanky:true, color:'#8d6e63', desc:'the filth-choked stables of Augeas' },
-    { name:'Stymphalian Birds', type:'birds',    hp:100, dmg:12, speed:5.0, atkGap:1300, windUp:500, lungeRange:250,  flying:true, color:'#90a4ae', desc:'bronze-feathered man-eaters' },
-    { name:'Cretan Bull',       type:'bull',     hp:160, dmg:16, speed:4.0, atkGap:1500, windUp:600, lungeRange:300,  knock:30, color:'#c62828', desc:'a fire-breathing mad bull' },
-    { name:'Mares of Diomedes', type:'mare',     hp:145, dmg:15, speed:4.5, atkGap:1400, windUp:550, lungeRange:240,  ranged:true, color:'#546e7a', desc:'man-eating fire-breathing mares' },
-    { name:'Hippolyta',         type:'amazon',   hp:170, dmg:17, speed:4.0, atkGap:1200, windUp:450, lungeRange:180,  blocks:true, color:'#ab47bc', desc:'queen of the Amazons' },
-    { name:'Geryon',            type:'giant',    hp:200, dmg:19, speed:3.0, atkGap:1300, windUp:550, lungeRange:200,  color:'#e53935', desc:'a three-bodied giant' },
-    { name:'Ladon the Dragon',   type:'dragon',   hp:230, dmg:21, speed:3.5, atkGap:1100, windUp:500, lungeRange:0,    ranged:true, color:'#1e88e5', desc:'hundred-headed dragon of the Hesperides' },
-    { name:'Cerberus',          type:'cerberus', hp:280, dmg:24, speed:5.0, atkGap:1000, windUp:400, lungeRange:260,  ranged:true, color:'#37474f', desc:'three-headed hound of Hades' },
+    { name:'Nemean Lion',       type:'lion',     hp:130, dmg:12, speed:4.0, atkGap:1500, windUp:500, lungeRange:200,  color:'#f9a825', desc:'impenetrable golden fur', bg:['#2d1b0f','#1a1208'] },
+    { name:'Lernaean Hydra',    type:'hydra',    hp:170, dmg:14, speed:3.0, atkGap:1300, windUp:450, lungeRange:0,    ranged:true, color:'#43a047', desc:'nine regenerating heads', bg:['#0d2818','#061409'] },
+    { name:'Ceryneian Hind',    type:'hind',     hp:120, dmg:10, speed:6.0, atkGap:1000, windUp:350, lungeRange:220,  dodgy:true, color:'#ffb74d', desc:'golden-horned deer of Artemis', bg:['#2a2010','#15110a'] },
+    { name:'Erymanthian Boar',  type:'boar',     hp:190, dmg:17, speed:3.5, atkGap:1200, windUp:550, lungeRange:280,  knock:35, color:'#6d4c41', desc:'a monstrous tusked boar', bg:['#241a14','#120d0a'] },
+    { name:'Augean Stables',    type:'stables',  hp:180, dmg:13, speed:2.0, atkGap:1200, windUp:600, lungeRange:0,    ranged:true, tanky:true, color:'#8d6e63', desc:'the filth-choked stables of Augeas', bg:['#1f1a14','#0f0d0a'] },
+    { name:'Stymphalian Birds', type:'birds',    hp:140, dmg:15, speed:5.5, atkGap:900,  windUp:380, lungeRange:250,  flying:true, color:'#90a4ae', desc:'bronze-feathered man-eaters', bg:['#1a1a24','#0d0d12'] },
+    { name:'Cretan Bull',       type:'bull',     hp:210, dmg:19, speed:4.5, atkGap:1100, windUp:450, lungeRange:300,  knock:30, color:'#c62828', desc:'a fire-breathing mad bull', bg:['#2a1010','#150808'] },
+    { name:'Mares of Diomedes', type:'mare',     hp:195, dmg:18, speed:5.0, atkGap:1000, windUp:400, lungeRange:240,  ranged:true, color:'#546e7a', desc:'man-eating fire-breathing mares', bg:['#101820','#080c10'] },
+    { name:'Hippolyta',         type:'amazon',   hp:220, dmg:20, speed:4.5, atkGap:850,  windUp:350, lungeRange:180,  blocks:true, color:'#ab47bc', desc:'queen of the Amazons', bg:['#1a1024','#0d0812'] },
+    { name:'Geryon',            type:'giant',    hp:260, dmg:22, speed:3.5, atkGap:950,  windUp:400, lungeRange:200,  color:'#e53935', desc:'a three-bodied giant', bg:['#241010','#120808'] },
+    { name:'Ladon the Dragon',   type:'dragon',   hp:300, dmg:25, speed:4.0, atkGap:800,  windUp:380, lungeRange:0,    ranged:true, color:'#1e88e5', desc:'hundred-headed dragon of the Hesperides', bg:['#0a1828','#050c14'] },
+    { name:'Cerberus',          type:'cerberus', hp:360, dmg:28, speed:5.5, atkGap:700,  windUp:300, lungeRange:260,  ranged:true, color:'#37474f', desc:'three-headed hound of Hades', bg:['#14141a','#0a0a0d'] },
   ];
   const LABOURS_MAX_LEVEL = LABOUR_BOSSES.length;
 
-  // player move definitions
-  const F_SLASH = { dmg:8,  range:120, cd:200,  windup:0,   dur:140, stamina:0,  knock:6  };
-  const F_HEAVY = { dmg:20, range:105, cd:500,  windup:160, dur:220, stamina:25, knock:28 };
-  const F_DASH  = { speed:13, dur:130, iframes:130, stamina:16, cd:320 };
-  const F_THROW = { dmg:13, stamina:28, cd:650, projSpeed:9 };
+  // player move definitions — slash costs stamina so it can't be spammed
+  const F_SLASH = { dmg:6,  range:115, cd:380,  windup:0,   dur:160, stamina:12, knock:8  };
+  const F_HEAVY = { dmg:18, range:100, cd:600,  windup:200, dur:260, stamina:28, knock:30 };
+  const F_DASH  = { speed:13, dur:130, iframes:150, stamina:18, cd:360 };
+  const F_THROW = { dmg:11, stamina:30, cd:700, projSpeed:9 };
   const GRAVITY = 0.55;
   const JUMP_VY = -11;
 
@@ -5332,8 +5368,9 @@
 
   function playerSlash() {
     var s = fightState, p = s ? s.player : null;
-    if (!p || s.won || s.lost || p.slashCd > 0 || p.state === 'heavy') return;
-    p.slashCd = F_SLASH.cd; p.strikeAnim = F_SLASH.dur; p.lunge = 30; p.state = 'slash';
+    if (!p || s.won || s.lost || p.slashCd > 0 || p.state === 'heavy' || p.stamina < F_SLASH.stamina) return;
+    p.slashCd = F_SLASH.cd; p.stamina -= F_SLASH.stamina;
+    p.strikeAnim = F_SLASH.dur; p.lunge = 30; p.state = 'slash';
     resolveMelee(s, p, s.monster, F_SLASH, 'player');
   }
 
@@ -5577,6 +5614,13 @@
     ctx.save();
     if (s.shake > 0) ctx.translate((Math.random() - 0.5) * s.shake, (Math.random() - 0.5) * s.shake);
     ctx.clearRect(-20, -20, W + 40, H + 40);
+
+    // unique per-labour background (sky + ground)
+    var skyTop = b.bg ? b.bg[0] : '#1a1a2e';
+    var skyBot = b.bg ? b.bg[1] : '#16213e';
+    var skyGrad = ctx.createLinearGradient(0, 0, 0, gy);
+    skyGrad.addColorStop(0, skyTop); skyGrad.addColorStop(1, skyBot);
+    ctx.fillStyle = skyGrad; ctx.fillRect(0, 0, W, gy);
 
     var grad = ctx.createLinearGradient(0, gy, 0, H);
     grad.addColorStop(0, '#3a2a40'); grad.addColorStop(1, '#1a1220');
@@ -6139,7 +6183,7 @@
       (s.flawless ? '<div class="qr-perfect">flawless victory!</div>' : '') +
       '<div style="font-size:0.8rem;color:#9a7a8a;margin-top:0.5rem">' + elapsed + 's &middot; ' + Math.round(s.player.hp) + ' hp remaining' + (comboBonus > 0 ? ' &middot; ' + comboBonus + ' combo bonus' : '') + '</div>' +
       (isFinal
-        ? '<div style="margin-top:0.8rem"><button class="cd-btn" onclick="closeLabours()">claim immortality</button></div>'
+        ? '<div style="display:flex;gap:0.5rem;justify-content:center;margin-top:0.8rem"><button class="cd-btn" onclick="closeLabours()">claim immortality</button><button class="cd-btn" style="max-width:140px" onclick="restartLabours()">restart &darr;</button></div>'
         : '<div style="display:flex;gap:0.5rem;justify-content:center;margin-top:0.8rem"><button class="cd-btn" onclick="loadLabours()">next labour &rarr;</button></div>');
     arena.appendChild(result);
   }
@@ -6166,6 +6210,16 @@
     document.removeEventListener('keyup', fightKeyUpHandler);
     fightKeys = {}; fightState = null;
     closeGame();
+  }
+
+  function restartLabours() {
+    if (fightLoop) clearInterval(fightLoop);
+    document.removeEventListener('keydown', fightKeyHandler);
+    document.removeEventListener('keyup', fightKeyUpHandler);
+    fightKeys = {}; fightState = null;
+    laboursLevel = 1;
+    saveGameLevels();
+    loadLabours();
   }
   // --- labyrinth maze: Pac-Man style ---
   let mazeState = null;
@@ -6519,7 +6573,7 @@
         '<div class="qr-points positive">+' + pts + ' drachmae</div>' +
         '<div style="font-size:0.8rem;color:#9a7a8a;margin-top:0.5rem">' + mazeState.score + ' steps &middot; next: level ' + mazeLevel + '</div>' +
         (isFinal
-          ? '<div style="margin-top:0.8rem"><button class="cd-btn" onclick="closeMaze()">claim victory</button></div>'
+          ? '<div style="display:flex;gap:0.5rem;justify-content:center;margin-top:0.8rem"><button class="cd-btn" onclick="closeMaze()">claim victory</button><button class="cd-btn" style="max-width:140px" onclick="restartMaze()">restart &darr;</button></div>'
           : '<div style="display:flex;gap:0.5rem;justify-content:center;margin-top:0.8rem"><button class="cd-btn" onclick="loadMaze()">level ' + mazeLevel + ' &rarr;</button></div>');
       arena.appendChild(result);
       return;
@@ -6539,6 +6593,15 @@
     document.removeEventListener('keydown', mazeKeyHandler);
     mazeState = null;
     closeGame();
+  }
+
+  function restartMaze() {
+    if (mazeLoop) clearInterval(mazeLoop);
+    document.removeEventListener('keydown', mazeKeyHandler);
+    mazeState = null;
+    mazeLevel = 1;
+    saveGameLevels();
+    loadMaze();
   }
 
   function updatePointsBadge(total) {
