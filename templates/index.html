@@ -527,7 +527,7 @@
       touch-action: none;
     }
     .fight-instruction {
-      font-size: 0.82rem;
+      font-size: 0.78rem;
       color: #7a5a6a;
       margin: 0.6rem 0;
       line-height: 1.5;
@@ -535,20 +535,21 @@
     .fight-instruction strong { color: #ef5350; }
     .fight-controls {
       display: flex;
-      gap: 0.5rem;
+      gap: 0.8rem;
       flex-wrap: wrap;
       justify-content: center;
       align-items: center;
       margin-top: 0.6rem;
     }
+    .fc-cluster { display: flex; gap: 0.4rem; }
     .fight-btn {
-      min-width: 64px;
-      height: 50px;
-      padding: 0 0.9rem;
+      min-width: 56px;
+      height: 48px;
+      padding: 0 0.7rem;
       border: 2px solid rgba(239,83,80,0.25);
       border-radius: 12px;
       background: rgba(255,255,255,0.65);
-      font-size: 0.9rem;
+      font-size: 0.95rem;
       font-weight: 700;
       cursor: pointer;
       font-family: inherit;
@@ -557,18 +558,24 @@
       justify-content: center;
       gap: 0.3rem;
       color: #4a2c3a;
-      transition: all 0.15s ease;
+      transition: all 0.12s ease;
       user-select: none;
       -webkit-user-select: none;
     }
     .fight-btn:hover { border-color: #ef5350; background: rgba(255,255,255,0.9); }
-    .fight-btn:active { transform: scale(0.93); }
+    .fight-btn:active { transform: scale(0.92); }
     .fight-btn.move { font-size: 1.1rem; }
-    .fight-btn.strike { border-color: rgba(239,83,80,0.4); color: #c62828; }
-    .fight-btn.strike:active { background: rgba(239,83,80,0.15); }
+    .fight-btn.slash { border-color: rgba(239,83,80,0.4); color: #c62828; }
+    .fight-btn.slash:active { background: rgba(239,83,80,0.15); }
+    .fight-btn.heavy { border-color: rgba(255,152,0,0.4); color: #e65100; }
+    .fight-btn.heavy:active { background: rgba(255,152,0,0.15); }
+    .fight-btn.dash { border-color: rgba(76,175,80,0.4); color: #2e7d32; }
+    .fight-btn.dash:active { background: rgba(76,175,80,0.15); }
+    .fight-btn.throw { border-color: rgba(171,71,188,0.4); color: #7b1fa2; }
+    .fight-btn.throw:active { background: rgba(171,71,188,0.15); }
     .fight-btn.block { border-color: rgba(66,165,245,0.4); color: #1565c0; }
     .fight-btn.block.held { background: rgba(66,165,245,0.18); border-color: #42a5f5; }
-    .fight-btn:disabled { opacity: 0.45; cursor: default; }
+    .fight-btn:disabled { opacity: 0.4; cursor: default; }
 
     /* labyrinth maze game */
     .maze-wrap { text-align: center; }
@@ -3190,8 +3197,8 @@
         <div class="game-card" data-game="labours">
           <div class="gc-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 12v6M9 21l3-3 3 3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div>
           <div class="gc-name">Labours of Hercules</div>
-          <div class="gc-desc">Battle the twelve monsters of Hercules' labours in chronological order. Each level a fiercer foe.</div>
-          <div class="gc-points">+10 per labour &middot; +5 per level &middot; +40 flawless victory</div>
+          <div class="gc-desc">Fight the twelve monsters of the labours in order. Slash, heavy, dash, throw &mdash; each foe fiercer than the last.</div>
+          <div class="gc-points">+10 per labour &middot; +5 per level &middot; combo &amp; flawless bonuses</div>
           <div class="gc-play">enter &rarr;</div>
         </div>
         <div class="game-card" data-game="maze">
@@ -5188,23 +5195,29 @@
   }
 
   // --- labours of hercules: monster combat ---
-  // Twelve labours, chronological order. Each boss is tougher than the last:
-  // more HP, harder hits, faster and more aggressive attacks.
   const LABOUR_BOSSES = [
-    { name: 'Nemean Lion',     emoji: '\uD83E\uDD81', hp: 80,  dmg: 8,  atkGap: 2600, windUp: 900, approach: 0.55, color: '#f9a825', desc: 'impenetrable golden fur' },
-    { name: 'Lernaean Hydra',  emoji: '\uD83D\uDC0D', hp: 100, dmg: 10, atkGap: 2400, windUp: 850, approach: 0.60, color: '#43a047', desc: 'nine regenerating heads' },
-    { name: 'Ceryneian Hind',  emoji: '\uD83E\uDD8C', hp: 75,  dmg: 7,  atkGap: 2100, windUp: 750, approach: 0.95, color: '#ffb74d', desc: 'golden-horned deer of Artemis' },
-    { name: 'Erymanthian Boar',emoji: '\uD83D\uDC17', hp: 115, dmg: 12, atkGap: 2000, windUp: 800, approach: 0.85, color: '#6d4c41', desc: 'a monstrous tusked boar' },
-    { name: 'Augean Stables',  emoji: '\uD83D\uDED2', hp: 105, dmg: 9,  atkGap: 2300, windUp: 900, approach: 0.75, color: '#8d6e63', desc: 'the filth-choked stables of Augeas' },
-    { name: 'Stymphalian Birds',emoji:'\uD83E\uDDA6', hp: 90,  dmg: 11, atkGap: 1800, windUp: 700, approach: 0.90, color: '#90a4ae', desc: 'bronze-feathered man-eaters' },
-    { name: 'Cretan Bull',     emoji: '\uD83D\uDC02', hp: 130, dmg: 14, atkGap: 1900, windUp: 800, approach: 0.95, color: '#c62828', desc: 'a fire-breathing mad bull' },
-    { name: 'Mares of Diomedes',emoji:'\uD83D\uDC0E', hp: 120, dmg: 13, atkGap: 1700, windUp: 720, approach: 1.00, color: '#546e7a', desc: 'man-eating fire-breathing mares' },
-    { name: 'Hippolyta',       emoji: '\uD83D\uDEE1', hp: 145, dmg: 15, atkGap: 1600, windUp: 680, approach: 1.05, color: '#ab47bc', desc: 'queen of the Amazons' },
-    { name: 'Geryon',          emoji: '\uD83D\uDC79', hp: 175, dmg: 17, atkGap: 1500, windUp: 650, approach: 0.90, color: '#e53935', desc: 'a three-bodied giant' },
-    { name: 'Ladon the Dragon',emoji:'\uD83D\uDC09',hp: 205, dmg: 19, atkGap: 1400, windUp: 600, approach: 0.95, color: '#1e88e5', desc: 'hundred-headed dragon of the Hesperides' },
-    { name: 'Cerberus',        emoji: '\uD83D\uDC36', hp: 245, dmg: 22, atkGap: 1200, windUp: 520, approach: 1.10, color: '#37474f', desc: 'three-headed hound of Hades' },
+    { name:'Nemean Lion',       type:'lion',     hp:90,  dmg:9,  speed:3.5, atkGap:2000, windUp:650, lungeRange:200,  color:'#f9a825', desc:'impenetrable golden fur' },
+    { name:'Lernaean Hydra',    type:'hydra',    hp:120, dmg:11, speed:2.5, atkGap:1800, windUp:600, lungeRange:0,    ranged:true, color:'#43a047', desc:'nine regenerating heads' },
+    { name:'Ceryneian Hind',    type:'hind',     hp:85,  dmg:8,  speed:5.5, atkGap:1400, windUp:450, lungeRange:220,  dodgy:true, color:'#ffb74d', desc:'golden-horned deer of Artemis' },
+    { name:'Erymanthian Boar',  type:'boar',     hp:140, dmg:14, speed:3.0, atkGap:1600, windUp:700, lungeRange:280,  knock:35, color:'#6d4c41', desc:'a monstrous tusked boar' },
+    { name:'Augean Stables',    type:'stables',  hp:130, dmg:10, speed:1.5, atkGap:1700, windUp:750, lungeRange:0,    ranged:true, tanky:true, color:'#8d6e63', desc:'the filth-choked stables of Augeas' },
+    { name:'Stymphalian Birds', type:'birds',    hp:100, dmg:12, speed:5.0, atkGap:1300, windUp:500, lungeRange:250,  flying:true, color:'#90a4ae', desc:'bronze-feathered man-eaters' },
+    { name:'Cretan Bull',       type:'bull',     hp:160, dmg:16, speed:4.0, atkGap:1500, windUp:600, lungeRange:300,  knock:30, color:'#c62828', desc:'a fire-breathing mad bull' },
+    { name:'Mares of Diomedes', type:'mare',     hp:145, dmg:15, speed:4.5, atkGap:1400, windUp:550, lungeRange:240,  ranged:true, color:'#546e7a', desc:'man-eating fire-breathing mares' },
+    { name:'Hippolyta',         type:'amazon',   hp:170, dmg:17, speed:4.0, atkGap:1200, windUp:450, lungeRange:180,  blocks:true, color:'#ab47bc', desc:'queen of the Amazons' },
+    { name:'Geryon',            type:'giant',    hp:200, dmg:19, speed:3.0, atkGap:1300, windUp:550, lungeRange:200,  color:'#e53935', desc:'a three-bodied giant' },
+    { name:'Ladon the Dragon',   type:'dragon',   hp:230, dmg:21, speed:3.5, atkGap:1100, windUp:500, lungeRange:0,    ranged:true, color:'#1e88e5', desc:'hundred-headed dragon of the Hesperides' },
+    { name:'Cerberus',          type:'cerberus', hp:280, dmg:24, speed:5.0, atkGap:1000, windUp:400, lungeRange:260,  ranged:true, color:'#37474f', desc:'three-headed hound of Hades' },
   ];
   const LABOURS_MAX_LEVEL = LABOUR_BOSSES.length;
+
+  // player move definitions
+  const F_SLASH = { dmg:8,  range:120, cd:200,  windup:0,   dur:140, stamina:0,  knock:6  };
+  const F_HEAVY = { dmg:20, range:105, cd:500,  windup:160, dur:220, stamina:25, knock:28 };
+  const F_DASH  = { speed:13, dur:130, iframes:130, stamina:16, cd:320 };
+  const F_THROW = { dmg:13, stamina:28, cd:650, projSpeed:9 };
+  const GRAVITY = 0.55;
+  const JUMP_VY = -11;
 
   let fightState = null;
   let fightLoop = null;
@@ -5213,177 +5226,342 @@
   function loadLabours() {
     var idx = Math.min(laboursLevel - 1, LABOURS_MAX_LEVEL - 1);
     var boss = LABOUR_BOSSES[idx];
+    var groundY = 340;
     fightState = {
-      level: laboursLevel,
-      bossIdx: idx,
-      boss: boss,
-      player: { hp: 100, maxHp: 100, x: 150, vx: 0, stamina: 100, maxStamina: 100, blocking: false, atkCd: 0, lunge: 0, recoil: 0, hitFlash: 0, strikeAnim: 0, stagger: 0 },
-      monster: { hp: boss.hp, maxHp: boss.hp, x: 580, vx: 0, state: 'approach', timer: 0, atkCd: 1400, windTimer: 0, recoil: 0, hitFlash: 0, lunge: 0, struck: false },
-      won: false, lost: false, flashTimer: 0, shake: 0, hitFx: [], startTime: Date.now(), flawless: true,
+      level: laboursLevel, bossIdx: idx, boss: boss, groundY: groundY,
+      player: {
+        hp: 100, maxHp: 100, x: 160, y: groundY, vy: 0, facing: 1,
+        stamina: 100, maxStamina: 100,
+        state: 'idle', stateTimer: 0,
+        slashCd: 0, heavyCd: 0, dashCd: 0, throwCd: 0,
+        windup: 0, iframes: 0, hitFlash: 0, blocking: false, onGround: true,
+        combo: 0, comboTimer: 0, animPhase: 0, strikeAnim: 0, lunge: 0, recoil: 0,
+      },
+      monster: {
+        hp: boss.hp, maxHp: boss.hp,
+        x: 600, y: boss.flying ? groundY - 70 : groundY, vy: 0, facing: -1,
+        state: 'idle', stateTimer: 800,
+        atkCd: 1500, windTimer: 0, hitFlash: 0, stagger: 0,
+        animPhase: 0, onGround: !boss.flying, lunge: 0, recoil: 0, struck: false,
+        feintChance: Math.min(0.12 + idx * 0.025, 0.35),
+      },
+      projectiles: [], particles: [], hitFx: [],
+      won: false, lost: false, flashTimer: 0, shake: 0,
+      startTime: Date.now(), flawless: true,
     };
     var arena = document.getElementById('game-arena');
     arena.innerHTML =
       '<div class="ga-header"><span class="ga-title">Labour ' + (idx + 1) + ' &mdash; ' + boss.name + '</span><button class="ga-back" onclick="closeLabours()">&larr; back</button></div>' +
-      '<div class="maze-instruction">Defeat the <strong>' + boss.name + '</strong> &mdash; ' + boss.desc + '. Close in to strike (\u2320\u2337\u2321 / A,D to move, <strong>SPACE</strong> to strike, hold <strong>SHIFT</strong> to block).</div>' +
-      '<div style="display:flex;gap:0.8rem;justify-content:center;margin-bottom:0.6rem;flex-wrap:wrap;">' +
+      '<div class="fight-instruction"><strong>' + boss.name + '</strong> &mdash; ' + boss.desc + '. <strong>A/D</strong> move &middot; <strong>W</strong> jump &middot; <strong>J</strong> slash &middot; <strong>K</strong> heavy &middot; <strong>Shift</strong> dash &middot; <strong>L</strong> throw &middot; hold <strong>S</strong> block</div>' +
+      '<div style="display:flex;gap:0.6rem;justify-content:center;margin-bottom:0.6rem;flex-wrap:wrap;">' +
         '<div class="mm-stat"><div class="mms-val" id="ft-labour" style="color:#ef5350">' + (idx + 1) + '/' + LABOURS_MAX_LEVEL + '</div><div class="mms-label">labour</div></div>' +
-        '<div class="mm-stat"><div class="mms-val" style="color:#42a5f5" id="ft-hp">100</div><div class="mms-label">your hp</div></div>' +
+        '<div class="mm-stat"><div class="mms-val" style="color:#42a5f5" id="ft-hp">100</div><div class="mms-label">hp</div></div>' +
         '<div class="mm-stat"><div class="mms-val" style="color:#ffb74d" id="ft-stam">100</div><div class="mms-label">stamina</div></div>' +
+        '<div class="mm-stat"><div class="mms-val" style="color:#ef5350" id="ft-combo">0</div><div class="mms-label">combo</div></div>' +
       '</div>' +
-      '<div class="fight-wrap"><canvas id="fight-canvas" width="720" height="340"></canvas></div>' +
+      '<div class="fight-wrap"><canvas id="fight-canvas" width="760" height="400"></canvas></div>' +
       '<div class="fight-controls">' +
-        '<button class="fight-btn move" id="ft-left">\u25C0</button>' +
-        '<button class="fight-btn move" id="ft-right">\u25B6</button>' +
-        '<button class="fight-btn strike" id="ft-strike">\u2694 strike</button>' +
-        '<button class="fight-btn block" id="ft-block">\uD83D\uDEE1 block</button>' +
+        '<div class="fc-cluster">' +
+          '<button class="fight-btn move" id="ft-left">\u25C0</button>' +
+          '<button class="fight-btn move" id="ft-jump">\u25B2</button>' +
+          '<button class="fight-btn move" id="ft-right">\u25B6</button>' +
+        '</div>' +
+        '<div class="fc-cluster">' +
+          '<button class="fight-btn slash" id="ft-slash">\u2694</button>' +
+          '<button class="fight-btn heavy" id="ft-heavy">\u2692</button>' +
+          '<button class="fight-btn dash" id="ft-dash">\u00BB</button>' +
+          '<button class="fight-btn throw" id="ft-throw">\u2192</button>' +
+          '<button class="fight-btn block" id="ft-block">\u26E8</button>' +
+        '</div>' +
       '</div>';
     bindFightControls();
     drawFight();
     document.addEventListener('keydown', fightKeyHandler);
     document.addEventListener('keyup', fightKeyUpHandler);
-    fightLoop = setInterval(fightTick, 33);
+    fightLoop = setInterval(fightTick, 20);
   }
 
   function bindFightControls() {
-    var left = document.getElementById('ft-left');
-    var right = document.getElementById('ft-right');
-    var strike = document.getElementById('ft-strike');
-    var block = document.getElementById('ft-block');
     function hold(btn, key) {
       var down = function(e) { e.preventDefault(); fightKeys[key] = true; if (btn.classList) btn.classList.add('held'); };
       var up = function(e) { e.preventDefault(); fightKeys[key] = false; if (btn.classList) btn.classList.remove('held'); };
       btn.addEventListener('mousedown', down); btn.addEventListener('mouseup', up); btn.addEventListener('mouseleave', up);
       btn.addEventListener('touchstart', down, { passive: false }); btn.addEventListener('touchend', up); btn.addEventListener('touchcancel', up);
     }
-    hold(left, 'left'); hold(right, 'right'); hold(block, 'block');
-    strike.addEventListener('click', function(e) { e.preventDefault(); playerStrike(); });
-    strike.addEventListener('touchstart', function(e) { e.preventDefault(); playerStrike(); }, { passive: false });
+    hold(document.getElementById('ft-left'), 'left');
+    hold(document.getElementById('ft-right'), 'right');
+    hold(document.getElementById('ft-block'), 'block');
+    function tap(btn, fn) {
+      btn.addEventListener('click', function(e) { e.preventDefault(); fn(); });
+      btn.addEventListener('touchstart', function(e) { e.preventDefault(); fn(); }, { passive: false });
+    }
+    tap(document.getElementById('ft-slash'), playerSlash);
+    tap(document.getElementById('ft-heavy'), playerHeavy);
+    tap(document.getElementById('ft-dash'), playerDash);
+    tap(document.getElementById('ft-throw'), playerThrow);
+    tap(document.getElementById('ft-jump'), playerJump);
   }
 
   function fightKeyHandler(e) {
     if (['ArrowLeft','ArrowRight','ArrowUp','ArrowDown',' '].indexOf(e.key) >= 0) e.preventDefault();
-    if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') fightKeys.left = true;
-    else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') fightKeys.right = true;
-    else if (e.key === 'Shift') fightKeys.block = true;
-    else if (e.key === ' ' || e.key === 'j' || e.key === 'J') playerStrike();
+    var k = e.key;
+    if (k === 'ArrowLeft' || k === 'a' || k === 'A') fightKeys.left = true;
+    else if (k === 'ArrowRight' || k === 'd' || k === 'D') fightKeys.right = true;
+    else if (k === 'ArrowDown' || k === 's' || k === 'S') fightKeys.block = true;
+    if (!e.repeat) {
+      if (k === 'ArrowUp' || k === 'w' || k === 'W') playerJump();
+      else if (k === ' ' || k === 'j' || k === 'J') playerSlash();
+      else if (k === 'k' || k === 'K') playerHeavy();
+      else if (k === 'Shift') playerDash();
+      else if (k === 'l' || k === 'L' || k === 'i' || k === 'I') playerThrow();
+    }
   }
   function fightKeyUpHandler(e) {
-    if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') fightKeys.left = false;
-    else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') fightKeys.right = false;
-    else if (e.key === 'Shift') fightKeys.block = false;
+    var k = e.key;
+    if (k === 'ArrowLeft' || k === 'a' || k === 'A') fightKeys.left = false;
+    else if (k === 'ArrowRight' || k === 'd' || k === 'D') fightKeys.right = false;
+    else if (k === 'ArrowDown' || k === 's' || k === 'S') fightKeys.block = false;
   }
 
-  function playerStrike() {
-    var s = fightState, p = s.player;
-    if (!s || s.won || s.lost || p.stagger > 0 || p.atkCd > 0) return;
-    p.atkCd = 480;
-    p.strikeAnim = 220;
-    p.lunge = 36;
-    var m = s.monster;
-    var gap = Math.abs(m.x - p.x);
-    if (gap < 150) {
-      var dmg = 12 + s.bossIdx * 2;
-      m.hp -= dmg;
-      m.hitFlash = 260;
-      m.recoil = 30;
-      // a clean hit interrupts the monster's wind-up
-      if (m.state === 'windup' || m.state === 'strike') {
-        m.state = 'recover'; m.timer = Math.max(360, 600 - s.bossIdx * 18);
+  function playerJump() {
+    var s = fightState, p = s ? s.player : null;
+    if (!p || s.won || s.lost || !p.onGround || p.state === 'heavy') return;
+    p.vy = JUMP_VY; p.onGround = false;
+  }
+
+  function playerSlash() {
+    var s = fightState, p = s ? s.player : null;
+    if (!p || s.won || s.lost || p.slashCd > 0 || p.state === 'heavy') return;
+    p.slashCd = F_SLASH.cd; p.strikeAnim = F_SLASH.dur; p.lunge = 30; p.state = 'slash';
+    resolveMelee(s, p, s.monster, F_SLASH, 'player');
+  }
+
+  function playerHeavy() {
+    var s = fightState, p = s ? s.player : null;
+    if (!p || s.won || s.lost || p.heavyCd > 0 || p.stamina < F_HEAVY.stamina) return;
+    p.heavyCd = F_HEAVY.cd; p.stamina -= F_HEAVY.stamina;
+    p.state = 'heavy'; p.windup = F_HEAVY.windup; p.strikeAnim = 0;
+  }
+
+  function playerDash() {
+    var s = fightState, p = s ? s.player : null;
+    if (!p || s.won || s.lost || p.dashCd > 0 || p.stamina < F_DASH.stamina) return;
+    p.dashCd = F_DASH.cd; p.stamina -= F_DASH.stamina;
+    p.iframes = F_DASH.iframes; p.stateTimer = F_DASH.dur; p.state = 'dash';
+    p.vy = 0;
+    spawnParticles(s, p.x, p.y - 24, 6, '#81c784');
+  }
+
+  function playerThrow() {
+    var s = fightState, p = s ? s.player : null;
+    if (!p || s.won || s.lost || p.throwCd > 0 || p.stamina < F_THROW.stamina) return;
+    p.throwCd = F_THROW.cd; p.stamina -= F_THROW.stamina;
+    s.projectiles.push({ x: p.x + 30, y: p.y - 30, vx: F_THROW.projSpeed, vy: 0, dmg: F_THROW.dmg, from: 'player', life: 1500 });
+    spawnParticles(s, p.x + 20, p.y - 30, 4, '#ce93d8');
+  }
+
+  function spawnParticles(s, x, y, n, color) {
+    for (var i = 0; i < n; i++) {
+      s.particles.push({ x: x, y: y, vx: (Math.random() - 0.5) * 4, vy: (Math.random() - 0.5) * 4 - 1, life: 300 + Math.random() * 200, color: color });
+    }
+  }
+
+  function resolveMelee(s, attacker, defender, move, side) {
+    var gap = Math.abs(defender.x - attacker.x);
+    if (gap < move.range) {
+      var combo = side === 'player' ? s.player.combo : 0;
+      var dmg = Math.round(move.dmg * (1 + Math.min(combo, 5) * 0.1));
+      if (side === 'player') { s.player.combo++; s.player.comboTimer = 1500; }
+      var blocked = defender === s.player ? (s.player.blocking && s.player.stamina > 8 && s.player.iframes <= 0) : false;
+      var taken = blocked ? Math.round(dmg * 0.25) : dmg;
+      if (defender.iframes > 0) { taken = 0; }
+      defender.hp -= taken;
+      defender.hitFlash = 250;
+      defender.recoil = (defender === s.player ? 1 : -1) * (move.knock || 8);
+      s.shake = blocked ? 5 : (move.dmg >= 15 ? 14 : 8);
+      s.hitFx.push({ x: (attacker.x + defender.x) / 2, y: defender.y - 30, dmg: taken, t: 500, kind: blocked ? 'block' : side });
+      spawnParticles(s, (attacker.x + defender.x) / 2, defender.y - 30, blocked ? 4 : 8, side === 'player' ? '#fff176' : '#ef5350');
+      if (defender === s.monster && (defender.state === 'windup' || defender.state === 'lunge')) {
+        defender.state = 'stagger'; defender.stagger = 500 + s.bossIdx * 20; defender.struck = false;
       }
-      s.hitFx.push({ x: (m.x + p.x) / 2, y: 235, dmg: dmg, t: 600, kind: 'player' });
-      if (m.hp <= 0) { m.hp = 0; winLabour(s); }
+      if (defender === s.player && taken > 0) { s.flawless = false; s.player.combo = 0; }
+      if (defender.hp <= 0) {
+        defender.hp = 0;
+        if (defender === s.monster) winLabour(s); else loseLabour(s);
+      }
     } else {
-      s.hitFx.push({ x: p.x + 30, y: 235, dmg: 0, t: 260, kind: 'whiff' });
+      s.hitFx.push({ x: attacker.x + (side === 'player' ? 30 : -30), y: attacker.y - 30, dmg: 0, t: 200, kind: 'whiff' });
     }
   }
 
   function fightTick() {
     var s = fightState;
     if (!s || s.won || s.lost) return;
-    var dt = 33;
+    var dt = 20;
     var p = s.player, m = s.monster, b = s.boss;
+    var gy = s.groundY;
     s.flashTimer++;
-    if (s.shake > 0) s.shake = Math.max(0, s.shake - dt * 0.08);
+    if (s.shake > 0) s.shake = Math.max(0, s.shake - dt * 0.1);
 
-    // --- player ---
-    p.blocking = !!fightKeys.block && p.stamina > 5 && p.stagger <= 0;
-    var moveSpeed = 2.6;
-    if (p.stagger > 0) { p.stagger -= dt; moveSpeed = 0; }
-    if (p.atkCd > 0) p.atkCd -= dt;
-    if (p.strikeAnim > 0) p.strikeAnim -= dt;
-    if (p.lunge > 0) p.lunge = Math.max(0, p.lunge - dt * 0.18);
-    if (p.recoil > 0) p.recoil = Math.max(0, p.recoil - dt * 0.12);
+    // --- player physics & state ---
+    p.animPhase++;
+    p.blocking = !!fightKeys.block && p.stamina > 5 && p.state !== 'heavy' && p.state !== 'dash';
+    if (p.slashCd > 0) p.slashCd -= dt;
+    if (p.heavyCd > 0) p.heavyCd -= dt;
+    if (p.dashCd > 0) p.dashCd -= dt;
+    if (p.throwCd > 0) p.throwCd -= dt;
+    if (p.iframes > 0) p.iframes -= dt;
     if (p.hitFlash > 0) p.hitFlash -= dt;
-    if (p.blocking) { p.stamina = Math.max(0, p.stamina - dt * 0.035); }
-    else { p.stamina = Math.min(p.maxStamina, p.stamina + dt * 0.025); }
-    if (p.stamina <= 0 && p.stagger <= 0) { p.stagger = 900; } // guard broken
-    if (fightKeys.left && !fightKeys.right) { p.x -= moveSpeed; p.vx = -1; }
-    else if (fightKeys.right && !fightKeys.left) { p.x += moveSpeed; p.vx = 1; }
-    else { p.vx = 0; }
-    p.x = Math.max(45, Math.min(360, p.x));
+    if (p.strikeAnim > 0) p.strikeAnim -= dt;
+    if (p.lunge > 0) p.lunge = Math.max(0, p.lunge - dt * 0.2);
+    if (p.recoil > 0) p.recoil = Math.max(0, p.recoil - dt * 0.15);
+    if (p.comboTimer > 0) { p.comboTimer -= dt; if (p.comboTimer <= 0) p.combo = 0; }
+    if (p.blocking) p.stamina = Math.max(0, p.stamina - dt * 0.035);
+    else p.stamina = Math.min(p.maxStamina, p.stamina + dt * 0.03);
+
+    // heavy attack windup -> resolve
+    if (p.state === 'heavy') {
+      p.windup -= dt;
+      if (p.windup <= 0) {
+        p.strikeAnim = F_HEAVY.dur; p.lunge = 34;
+        resolveMelee(s, p, m, F_HEAVY, 'player');
+        p.state = 'idle';
+      }
+    }
+    // dash movement
+    if (p.state === 'dash') {
+      p.stateTimer -= dt;
+      var dir = fightKeys.left ? -1 : (fightKeys.right ? 1 : (p.facing >= 0 ? 1 : -1));
+      p.x += dir * F_DASH.speed;
+      if (p.stateTimer <= 0) p.state = 'idle';
+    } else {
+      var spd = 4.5;
+      if (fightKeys.left && !fightKeys.right) { p.x -= spd; p.facing = -1; }
+      else if (fightKeys.right && !fightKeys.left) { p.x += spd; p.facing = 1; }
+    }
+    // gravity / jump
+    if (!p.onGround) {
+      p.vy += GRAVITY;
+      if (p.vy > 14) p.vy = 14;
+      p.y += p.vy;
+      if (p.y >= gy) { p.y = gy; p.vy = 0; p.onGround = true; }
+    }
+    p.x = Math.max(35, Math.min(725, p.x));
 
     // --- monster AI ---
-    if (m.recoil > 0) m.recoil = Math.max(0, m.recoil - dt * 0.12);
+    m.animPhase++;
+    if (m.recoil > 0) m.recoil = Math.max(0, m.recoil - dt * 0.15);
     if (m.hitFlash > 0) m.hitFlash -= dt;
-    if (m.lunge > 0) m.lunge = Math.max(0, m.lunge - dt * 0.2);
+    if (m.lunge > 0) m.lunge = Math.max(0, m.lunge - dt * 0.22);
+    if (m.stagger > 0) { m.stagger -= dt; m.state = 'stagger'; }
+    if (m.stagger <= 0 && m.state === 'stagger') { m.state = 'recover'; m.stateTimer = Math.max(300, 600 - s.bossIdx * 20); }
+
     var gap = m.x - p.x;
-    var atkRange = 150;
-    if (m.state === 'approach') {
-      if (gap > atkRange) {
-        m.x -= b.approach * (dt * 0.06);
-        m.vx = -1;
-      } else {
-        m.vx = 0;
-        if (m.atkCd <= 0) { m.state = 'windup'; m.windTimer = b.windUp; }
+    var atkRange = b.lungeRange > 0 ? b.lungeRange : 200;
+    if (m.stagger <= 0) {
+      if (m.state === 'idle') {
+        m.stateTimer -= dt;
+        if (m.stateTimer <= 0) m.state = 'approach';
+      } else if (m.state === 'approach') {
+        var spd = b.speed;
+        if (gap > atkRange * 0.7) { m.x -= spd; m.vx = -1; }
+        else if (gap < -atkRange * 0.3) { m.x += spd; m.vx = 1; }
+        else {
+          m.vx = 0;
+          if (m.atkCd <= 0) {
+            if (Math.random() < m.feintChance) { m.state = 'feint'; m.stateTimer = 200; }
+            else if (b.ranged && Math.random() < 0.5) { m.state = 'windup'; m.windTimer = b.windUp; m.struck = false; m._ranged = true; }
+            else if (b.ranged) { m.state = 'windup'; m.windTimer = b.windUp; m.struck = false; m._ranged = false; }
+            else { m.state = 'windup'; m.windTimer = b.windUp; m.struck = false; m._ranged = false; }
+          }
+        }
+        if ((p.state === 'heavy' || p.strikeAnim > 0) && gap < 180 && Math.random() < 0.04 * b.speed) {
+          m.state = 'retreat'; m.stateTimer = 400;
+        }
+        m.atkCd = Math.max(0, m.atkCd - dt);
+      } else if (m.state === 'retreat') {
+        m.x += b.speed * 1.2; m.vx = 1;
+        m.stateTimer -= dt;
+        if (m.stateTimer <= 0) m.state = 'approach';
+      } else if (m.state === 'feint') {
+        m.vx = 0; m.stateTimer -= dt;
+        if (m.stateTimer <= 0) { m.state = 'approach'; m.atkCd = 300; }
+      } else if (m.state === 'windup') {
+        m.vx = 0; m.windTimer -= dt;
+        if (m.windTimer <= 0) {
+          if (m._ranged) {
+            s.projectiles.push({ x: m.x - 20, y: m.y - 30, vx: -6 - s.bossIdx * 0.3, vy: 0, dmg: Math.round(b.dmg * 0.6), from: 'monster', life: 2000 });
+            spawnParticles(s, m.x - 15, m.y - 30, 5, b.color);
+            m.state = 'recover'; m.stateTimer = Math.max(300, 600 - s.bossIdx * 20);
+          } else {
+            m.state = 'lunge'; m.lunge = 36; m.struck = false; m.stateTimer = 200;
+          }
+        }
+      } else if (m.state === 'lunge') {
+        m.x -= b.speed * 2.5; m.vx = -1;
+        if (!m.struck && Math.abs(gap) < atkRange + 40) {
+          m.struck = true;
+          var mv = { dmg: b.dmg, range: atkRange + 50, knock: b.knock || 10 };
+          resolveMelee(s, m, p, mv, 'monster');
+        }
+        m.stateTimer -= dt;
+        if (m.stateTimer <= 0) { m.state = 'recover'; m.stateTimer = Math.max(300, 600 - s.bossIdx * 22); }
+      } else if (m.state === 'recover') {
+        m.vx = 0; m.stateTimer -= dt;
+        if (m.stateTimer <= 0) { m.state = 'idle'; m.stateTimer = 400; m.atkCd = b.atkGap; }
       }
-      m.atkCd = Math.max(0, m.atkCd - dt);
-    } else if (m.state === 'windup') {
-      m.vx = 0;
-      m.windTimer -= dt;
-      if (m.windTimer <= 0) { m.state = 'strike'; m.lunge = 34; m.struck = false; }
-    } else if (m.state === 'strike') {
-      // resolve the hit exactly once, the instant the strike begins
-      if (!m.struck) {
-        m.struck = true;
-        m.timer = 170; // brief hold so the lunge/claw arc is visible
-        if (gap < 168) {
-          var blocked = p.blocking && p.stamina > 10;
-          var raw = b.dmg;
-          var taken = blocked ? Math.round(raw * 0.25) : raw;
-          p.hp -= taken;
-          p.hitFlash = 300;
-          p.recoil = 34;
-          s.shake = blocked ? 6 : 14;
-          if (blocked) p.stamina = Math.max(0, p.stamina - 22);
-          s.hitFx.push({ x: (m.x + p.x) / 2, y: 235, dmg: taken, t: 600, kind: blocked ? 'block' : 'monster' });
-          if (taken > 0) s.flawless = false;
+    }
+    if (b.flying && m.stagger <= 0) {
+      m.y = gy - 70 + Math.sin(m.animPhase * 0.05) * 12;
+    }
+    m.x = Math.max(60, Math.min(725, m.x));
+    if (m.x < p.x + 70) m.x = p.x + 70;
+    if (m.x > p.x + 500) m.x = p.x + 500;
+
+    // --- projectiles ---
+    for (var i = s.projectiles.length - 1; i >= 0; i--) {
+      var pr = s.projectiles[i];
+      pr.x += pr.vx; pr.y += pr.vy; pr.life -= dt;
+      if (pr.life <= 0 || pr.x < -20 || pr.x > 800) { s.projectiles.splice(i, 1); continue; }
+      if (pr.from === 'player') {
+        if (Math.abs(pr.x - m.x) < 40 && Math.abs(pr.y - m.y) < 50) {
+          var pdmg = pr.dmg + s.bossIdx * 2;
+          m.hp -= pdmg; m.hitFlash = 250; m.recoil = -20;
+          s.hitFx.push({ x: m.x, y: m.y - 30, dmg: pdmg, t: 500, kind: 'player' });
+          spawnParticles(s, m.x, m.y - 30, 8, '#fff176');
+          if (m.state === 'windup') { m.state = 'stagger'; m.stagger = 400; }
+          s.projectiles.splice(i, 1);
+          if (m.hp <= 0) { m.hp = 0; winLabour(s); }
+        }
+      } else {
+        if (p.iframes <= 0 && Math.abs(pr.x - p.x) < 35 && Math.abs(pr.y - p.y) < 45) {
+          var blocked = p.blocking && p.stamina > 8;
+          var taken = blocked ? Math.round(pr.dmg * 0.3) : pr.dmg;
+          p.hp -= taken; p.hitFlash = 250; p.recoil = 20; s.shake = 8;
+          if (blocked) p.stamina = Math.max(0, p.stamina - 15);
+          s.hitFx.push({ x: p.x, y: p.y - 30, dmg: taken, t: 500, kind: blocked ? 'block' : 'monster' });
+          if (taken > 0) { s.flawless = false; p.combo = 0; }
+          spawnParticles(s, p.x, p.y - 30, 6, '#ef5350');
+          s.projectiles.splice(i, 1);
           if (p.hp <= 0) { p.hp = 0; loseLabour(s); }
-        } else {
-          s.hitFx.push({ x: m.x - 24, y: 235, dmg: 0, t: 260, kind: 'whiff' });
         }
       }
-      m.timer -= dt;
-      if (m.timer <= 0) { m.state = 'recover'; m.timer = Math.max(360, 700 - s.bossIdx * 22); }
-    } else if (m.state === 'recover') {
-      m.vx = 0;
-      m.timer -= dt;
-      if (m.timer <= 0) { m.state = 'approach'; m.atkCd = b.atkGap; }
     }
-    // keep the monster on-screen and never overlapping the player
-    m.x = Math.max(80, Math.min(675, m.x));
-    if (m.x < p.x + 80) m.x = p.x + 80;
 
-    // expire hit effects
+    // --- particles ---
+    for (var i = s.particles.length - 1; i >= 0; i--) {
+      var pt = s.particles[i];
+      pt.x += pt.vx; pt.y += pt.vy; pt.vy += 0.15; pt.life -= dt;
+      if (pt.life <= 0) s.particles.splice(i, 1);
+    }
     for (var i = s.hitFx.length - 1; i >= 0; i--) {
       s.hitFx[i].t -= dt;
       if (s.hitFx[i].t <= 0) s.hitFx.splice(i, 1);
     }
 
-    // update HUD
-    var hpEl = document.getElementById('ft-hp');
-    if (hpEl) hpEl.textContent = Math.max(0, Math.round(p.hp));
-    var stEl = document.getElementById('ft-stam');
-    if (stEl) stEl.textContent = Math.max(0, Math.round(p.stamina));
+    var hpEl = document.getElementById('ft-hp'); if (hpEl) hpEl.textContent = Math.max(0, Math.round(p.hp));
+    var stEl = document.getElementById('ft-stam'); if (stEl) stEl.textContent = Math.max(0, Math.round(p.stamina));
+    var coEl = document.getElementById('ft-combo'); if (coEl) coEl.textContent = p.combo;
 
     drawFight();
   }
@@ -5394,119 +5572,366 @@
     var ctx = canvas.getContext('2d');
     var W = canvas.width, H = canvas.height;
     var s = fightState, p = s.player, m = s.monster, b = s.boss;
+    var gy = s.groundY;
     ctx.save();
     if (s.shake > 0) ctx.translate((Math.random() - 0.5) * s.shake, (Math.random() - 0.5) * s.shake);
     ctx.clearRect(-20, -20, W + 40, H + 40);
 
-    // ground
-    var groundY = 262;
-    var grad = ctx.createLinearGradient(0, groundY, 0, H);
+    var grad = ctx.createLinearGradient(0, gy, 0, H);
     grad.addColorStop(0, '#3a2a40'); grad.addColorStop(1, '#1a1220');
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, groundY, W, H - groundY);
+    ctx.fillStyle = grad; ctx.fillRect(0, gy, W, H - gy);
     ctx.strokeStyle = 'rgba(239,83,80,0.18)'; ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.moveTo(0, groundY); ctx.lineTo(W, groundY); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0, gy); ctx.lineTo(W, gy); ctx.stroke();
 
-    // --- HP bars ---
-    drawHpBar(ctx, 24, 18, 300, 'Hercules', p.hp, p.maxHp, '#42a5f5', '#1a1a2e');
-    drawHpBar(ctx, W - 324, 18, 300, b.name, m.hp, m.maxHp, b.color, '#1a1a2e', b.emoji);
-    // stamina bar under player HP
-    var stamW = 300 * (p.stamina / p.maxStamina);
-    ctx.fillStyle = 'rgba(255,255,255,0.12)'; ctx.fillRect(24, 44, 300, 7);
-    ctx.fillStyle = p.stamina < 25 ? '#ef5350' : '#ffb74d'; ctx.fillRect(24, 44, stamW, 7);
-
-    // telegraph shadow when monster is winding up
+    drawHpBar(ctx, 20, 16, 280, 'Hercules', p.hp, p.maxHp, '#42a5f5');
+    drawHpBar(ctx, W - 300, 16, 280, b.name, m.hp, m.maxHp, b.color);
+    var stamW = 280 * (p.stamina / p.maxStamina);
+    ctx.fillStyle = 'rgba(255,255,255,0.1)'; ctx.fillRect(20, 42, 280, 6);
+    ctx.fillStyle = p.stamina < 25 ? '#ef5350' : '#ffb74d'; ctx.fillRect(20, 42, stamW, 6);
+    if (p.combo > 1) {
+      ctx.fillStyle = '#fff176'; ctx.font = 'bold 18px Inter'; ctx.textAlign = 'left';
+      ctx.fillText(p.combo + 'x COMBO', 20, 66);
+    }
     if (m.state === 'windup') {
       var t = 1 - (m.windTimer / b.windUp);
-      ctx.fillStyle = 'rgba(255,23,68,' + (0.06 + t * 0.10) + ')';
+      ctx.fillStyle = 'rgba(255,23,68,' + (0.04 + t * 0.12) + ')';
       ctx.fillRect(0, 0, W, H);
     }
 
-    // --- Hercules ---
-    var px = p.x + (p.lunge * (p.vx >= 0 ? 1 : -1)) - p.recoil;
-    drawFighter(ctx, px, groundY, 26, '#42a5f5', '\uD83C\uDFFE', p.hitFlash, p.blocking, p.strikeAnim, p.vx, true);
-    // club swing arc when striking
-    if (p.strikeAnim > 0) {
-      var sa = 1 - (p.strikeAnim / 220);
-      ctx.strokeStyle = 'rgba(255,235,59,' + (1 - sa) + ')'; ctx.lineWidth = 5; ctx.lineCap = 'round';
-      ctx.beginPath();
-      ctx.arc(px + 18, groundY - 30, 40, -Math.PI * 0.6 + sa * Math.PI * 1.1, -Math.PI * 0.6 + sa * Math.PI * 1.1 + 1.1);
-      ctx.stroke();
+    for (var i = 0; i < s.projectiles.length; i++) {
+      var pr = s.projectiles[i];
+      if (pr.from === 'player') {
+        ctx.strokeStyle = '#ce93d8'; ctx.lineWidth = 3; ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.moveTo(pr.x - 12, pr.y); ctx.lineTo(pr.x + 8, pr.y); ctx.stroke();
+        ctx.fillStyle = '#ce93d8';
+        ctx.beginPath(); ctx.moveTo(pr.x + 8, pr.y - 4); ctx.lineTo(pr.x + 14, pr.y); ctx.lineTo(pr.x + 8, pr.y + 4); ctx.fill();
+      } else {
+        ctx.fillStyle = b.color; ctx.shadowColor = b.color; ctx.shadowBlur = 10;
+        ctx.beginPath(); ctx.arc(pr.x, pr.y, 7, 0, Math.PI * 2); ctx.fill(); ctx.shadowBlur = 0;
+      }
     }
 
-    // --- Monster ---
+    var px = p.x + (p.lunge * (p.facing >= 0 ? 1 : -1)) - p.recoil;
+    drawHercules(ctx, px, p.y, 24, { hitFlash: p.hitFlash, blocking: p.blocking, striking: p.strikeAnim > 0, phase: p.animPhase, iframes: p.iframes, dashing: p.state === 'dash' });
+
     var mx = m.x - m.lunge + m.recoil;
     var winding = m.state === 'windup';
-    drawFighter(ctx, mx, groundY, 34, b.color, b.emoji, m.hitFlash, false, m.lunge > 0 ? 1 : 0, m.vx, false, winding);
-    // monster attack telegraph arc
-    if (m.state === 'strike' && m.lunge > 10) {
-      ctx.strokeStyle = 'rgba(255,23,68,0.85)'; ctx.lineWidth = 6; ctx.lineCap = 'round';
-      ctx.beginPath();
-      ctx.arc(mx - 16, groundY - 36, 46, Math.PI * 0.5, Math.PI * 0.5 + 1.2);
-      ctx.stroke();
+    var mr = b.tanky ? 36 : (b.flying ? 28 : 32);
+    drawMonster(ctx, b, mx, m.y, mr, { hitFlash: m.hitFlash, winding: winding, phase: m.animPhase, stagger: m.stagger > 0 });
+
+    for (var i = 0; i < s.particles.length; i++) {
+      var pt = s.particles[i];
+      ctx.globalAlpha = Math.max(0, pt.life / 400);
+      ctx.fillStyle = pt.color;
+      ctx.beginPath(); ctx.arc(pt.x, pt.y, 2.5, 0, Math.PI * 2); ctx.fill();
+      ctx.globalAlpha = 1;
     }
 
-    // --- hit effects / damage numbers ---
     for (var i = 0; i < s.hitFx.length; i++) {
       var fx = s.hitFx[i];
       var alpha = Math.min(1, fx.t / 200);
-      var rise = (600 - fx.t) * 0.05;
+      var rise = (500 - fx.t) * 0.06;
       if (fx.kind === 'whiff') {
-        ctx.fillStyle = 'rgba(200,200,200,' + alpha + ')';
-        ctx.font = 'italic 600 14px Inter'; ctx.textAlign = 'center';
-        ctx.fillText('miss', fx.x, fx.y - 40 - rise);
+        ctx.fillStyle = 'rgba(200,200,200,' + alpha + ')'; ctx.font = 'italic 600 13px Inter'; ctx.textAlign = 'center';
+        ctx.fillText('miss', fx.x, fx.y - rise);
       } else {
         var col = fx.kind === 'block' ? '#42a5f5' : (fx.kind === 'player' ? '#fff176' : '#ef5350');
-        ctx.fillStyle = col; ctx.globalAlpha = alpha;
-        ctx.font = 'bold 22px Inter'; ctx.textAlign = 'center';
-        ctx.fillText((fx.kind === 'block' ? 'blocked ' : '') + (fx.dmg > 0 ? '-' + fx.dmg : ''), fx.x, fx.y - 44 - rise);
+        ctx.fillStyle = col; ctx.globalAlpha = alpha; ctx.font = 'bold 20px Inter'; ctx.textAlign = 'center';
+        ctx.fillText((fx.kind === 'block' ? 'blocked ' : '') + (fx.dmg > 0 ? '-' + fx.dmg : ''), fx.x, fx.y - rise);
         ctx.globalAlpha = 1;
       }
     }
     ctx.restore();
   }
 
-  function drawHpBar(ctx, x, y, w, label, hp, maxHp, color, bg, emoji) {
-    ctx.fillStyle = 'rgba(0,0,0,0.4)';
-    ctx.fillRect(x - 2, y - 2, w + 4, 26);
-    ctx.fillStyle = bg; ctx.fillRect(x, y, w, 22);
+  function drawHpBar(ctx, x, y, w, label, hp, maxHp, color) {
+    ctx.fillStyle = 'rgba(0,0,0,0.4)'; ctx.fillRect(x - 2, y - 2, w + 4, 24);
+    ctx.fillStyle = '#1a1a2e'; ctx.fillRect(x, y, w, 20);
     var frac = Math.max(0, hp / maxHp);
-    ctx.fillStyle = color; ctx.fillRect(x, y, w * frac, 22);
-    ctx.fillStyle = '#fff'; ctx.font = 'bold 13px Inter'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
-    ctx.fillText((emoji ? emoji + ' ' : '') + label, x + 8, y + 11);
+    ctx.fillStyle = color; ctx.fillRect(x, y, w * frac, 20);
+    ctx.fillStyle = '#fff'; ctx.font = 'bold 12px Inter'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+    ctx.fillText(label, x + 8, y + 10);
     ctx.textAlign = 'right';
-    ctx.fillText(Math.max(0, Math.ceil(hp)) + '/' + Math.ceil(maxHp), x + w - 8, y + 11);
+    ctx.fillText(Math.max(0, Math.ceil(hp)) + '/' + Math.ceil(maxHp), x + w - 8, y + 10);
     ctx.textBaseline = 'alphabetic';
   }
 
-  function drawFighter(ctx, x, groundY, r, color, face, hitFlash, blocking, strike, vx, isHero, winding) {
-    var cy = groundY - r - 4;
-    // shadow
-    ctx.fillStyle = 'rgba(0,0,0,0.35)';
-    ctx.beginPath(); ctx.ellipse(x, groundY + 2, r * 0.9, r * 0.3, 0, 0, Math.PI * 2); ctx.fill();
-    // body glow
-    ctx.shadowColor = winding ? '#ff1744' : color;
-    ctx.shadowBlur = winding ? 26 : 14;
-    ctx.fillStyle = hitFlash > 0 ? '#ffffff' : (winding ? '#d32f2f' : color);
-    ctx.beginPath(); ctx.arc(x, cy, r, 0, Math.PI * 2); ctx.fill();
-    ctx.shadowBlur = 0;
-    // shield when blocking
-    if (blocking) {
-      ctx.fillStyle = 'rgba(66,165,245,0.5)';
-      ctx.beginPath(); ctx.arc(x + r * 0.8, cy, r * 0.7, 0, Math.PI * 2); ctx.fill();
+  function drawHercules(ctx, x, y, r, anim) {
+    var cy = y - r - 2;
+    if (anim.iframes > 0 && Math.floor(anim.phase / 2) % 2 === 0) { ctx.globalAlpha = 0.4; }
+    ctx.fillStyle = 'rgba(0,0,0,0.3)';
+    ctx.beginPath(); ctx.ellipse(x, y + 2, r * 0.9, r * 0.25, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#c62828';
+    ctx.beginPath();
+    ctx.moveTo(x - r * 0.4, cy - r * 0.2);
+    ctx.lineTo(x - r * 1.1, cy + r * 0.7 + Math.sin(anim.phase * 0.1) * 2);
+    ctx.lineTo(x - r * 0.2, cy + r * 0.4); ctx.closePath(); ctx.fill();
+    ctx.shadowColor = anim.hitFlash > 0 ? '#fff' : '#42a5f5'; ctx.shadowBlur = anim.hitFlash > 0 ? 20 : 10;
+    ctx.fillStyle = anim.hitFlash > 0 ? '#fff' : '#42a5f5';
+    ctx.beginPath(); ctx.arc(x, cy, r, 0, Math.PI * 2); ctx.fill(); ctx.shadowBlur = 0;
+    ctx.fillStyle = '#ffd54f';
+    ctx.beginPath(); ctx.arc(x, cy - r * 0.5, r * 0.55, Math.PI, 0); ctx.fill();
+    ctx.fillRect(x - r * 0.55, cy - r * 0.55, r * 1.1, 3);
+    ctx.fillStyle = '#c62828';
+    ctx.beginPath();
+    ctx.moveTo(x - r * 0.12, cy - r * 0.85); ctx.lineTo(x + r * 0.12, cy - r * 0.85);
+    ctx.lineTo(x, cy - r * 1.25); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#fff';
+    ctx.beginPath(); ctx.arc(x - r * 0.2, cy - r * 0.1, r * 0.1, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(x + r * 0.2, cy - r * 0.1, r * 0.1, 0, Math.PI * 2); ctx.fill();
+    if (anim.blocking) {
+      ctx.fillStyle = 'rgba(66,165,245,0.35)';
+      ctx.beginPath(); ctx.arc(x + r * 0.9, cy, r * 0.8, 0, Math.PI * 2); ctx.fill();
       ctx.strokeStyle = '#42a5f5'; ctx.lineWidth = 3;
-      ctx.beginPath(); ctx.arc(x + r * 0.8, cy, r * 0.7, 0, Math.PI * 2); ctx.stroke();
+      ctx.beginPath(); ctx.arc(x + r * 0.9, cy, r * 0.8, 0, Math.PI * 2); ctx.stroke();
     }
-    // face emoji
-    ctx.font = (r * 1.2) + 'px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.fillText(face, x, cy + 1);
-    ctx.textBaseline = 'alphabetic';
-    // wind-up tremor
-    if (winding) {
-      var sh = Math.sin(fightState.flashTimer * 0.8) * 2;
-      ctx.fillStyle = 'rgba(255,23,68,0.25)';
-      ctx.beginPath(); ctx.arc(x + sh, cy, r * 1.25, 0, Math.PI * 2); ctx.fill();
+    if (anim.striking) {
+      ctx.strokeStyle = '#8d6e63'; ctx.lineWidth = 5; ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.moveTo(x + r * 0.3, cy + r * 0.2); ctx.lineTo(x + r * 1.7, cy - r * 0.4); ctx.stroke();
+      ctx.fillStyle = '#6d4c41';
+      ctx.beginPath(); ctx.arc(x + r * 1.7, cy - r * 0.4, 5, 0, Math.PI * 2); ctx.fill();
     }
+    if (anim.dashing) {
+      ctx.fillStyle = 'rgba(76,175,80,0.3)';
+      for (var i = 1; i <= 3; i++) { ctx.beginPath(); ctx.arc(x - i * 8, cy, r - i * 2, 0, Math.PI * 2); ctx.fill(); }
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  function drawMonster(ctx, boss, x, y, r, anim) {
+    ctx.save();
+    if (anim.hitFlash > 0) { ctx.shadowColor = '#fff'; ctx.shadowBlur = 20; }
+    else if (anim.winding) { ctx.shadowColor = '#ff1744'; ctx.shadowBlur = 22 + Math.sin(anim.phase * 0.3) * 6; }
+    else if (anim.stagger) { ctx.shadowColor = '#ffeb3b'; ctx.shadowBlur = 14; }
+    else { ctx.shadowColor = boss.color; ctx.shadowBlur = 10; }
+    ctx.fillStyle = 'rgba(0,0,0,0.3)';
+    ctx.beginPath(); ctx.ellipse(x, y + 2, r * 0.9, r * 0.25, 0, 0, Math.PI * 2); ctx.fill();
+    var flash = anim.hitFlash > 0;
+    var sh = anim.stagger ? Math.sin(anim.phase * 0.8) * 3 : 0;
+    var dx = x + sh;
+    switch (boss.type) {
+      case 'lion': drawLion(ctx, dx, y, r, flash, anim); break;
+      case 'hydra': drawHydra(ctx, dx, y, r, flash, anim); break;
+      case 'hind': drawHind(ctx, dx, y, r, flash, anim); break;
+      case 'boar': drawBoar(ctx, dx, y, r, flash, anim); break;
+      case 'stables': drawStables(ctx, dx, y, r, flash, anim); break;
+      case 'birds': drawBirds(ctx, dx, y, r, flash, anim); break;
+      case 'bull': drawBull(ctx, dx, y, r, flash, anim); break;
+      case 'mare': drawMare(ctx, dx, y, r, flash, anim); break;
+      case 'amazon': drawAmazon(ctx, dx, y, r, flash, anim); break;
+      case 'giant': drawGiant(ctx, dx, y, r, flash, anim); break;
+      case 'dragon': drawDragon(ctx, dx, y, r, flash, anim); break;
+      case 'cerberus': drawCerberus(ctx, dx, y, r, flash, anim); break;
+    }
+    ctx.restore();
+  }
+
+  function drawLion(ctx, x, y, r, flash, anim) {
+    var cy = y - r - 2;
+    var mane = flash ? '#fff' : '#f57f17';
+    for (var i = 0; i < 14; i++) {
+      var a = (i / 14) * Math.PI * 2;
+      ctx.fillStyle = mane;
+      ctx.beginPath();
+      ctx.moveTo(x + Math.cos(a) * r * 1.35, cy + Math.sin(a) * r * 1.35);
+      ctx.lineTo(x + Math.cos(a - 0.18) * r * 0.95, cy + Math.sin(a - 0.18) * r * 0.95);
+      ctx.lineTo(x + Math.cos(a + 0.18) * r * 0.95, cy + Math.sin(a + 0.18) * r * 0.95);
+      ctx.closePath(); ctx.fill();
+    }
+    ctx.fillStyle = flash ? '#fff' : '#f9a825';
+    ctx.beginPath(); ctx.arc(x, cy, r, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#d32f2f';
+    ctx.beginPath(); ctx.arc(x - r * 0.3, cy - r * 0.15, r * 0.1, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(x + r * 0.1, cy - r * 0.15, r * 0.1, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#fff';
+    ctx.beginPath(); ctx.moveTo(x - r * 0.3, cy + r * 0.25); ctx.lineTo(x - r * 0.2, cy + r * 0.55); ctx.lineTo(x - r * 0.1, cy + r * 0.25); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(x + r * 0.1, cy + r * 0.25); ctx.lineTo(x + r * 0.2, cy + r * 0.55); ctx.lineTo(x + r * 0.3, cy + r * 0.25); ctx.fill();
+  }
+
+  function drawHydra(ctx, x, y, r, flash, anim) {
+    var cy = y - r - 2;
+    ctx.strokeStyle = flash ? '#fff' : '#2e7d32'; ctx.lineWidth = r * 0.4; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(x + r * 0.5, y); ctx.quadraticCurveTo(x, cy, x - r * 0.3, cy + r * 0.2); ctx.stroke();
+    var col = flash ? '#fff' : '#43a047';
+    for (var i = -1; i <= 1; i++) {
+      var hx = x + i * r * 0.4, hy = cy - r * 0.5;
+      ctx.strokeStyle = flash ? '#fff' : '#2e7d32'; ctx.lineWidth = r * 0.18;
+      ctx.beginPath(); ctx.moveTo(x + i * r * 0.2, cy); ctx.quadraticCurveTo(hx, cy - r * 0.3, hx, hy); ctx.stroke();
+      ctx.fillStyle = col; ctx.beginPath(); ctx.arc(hx, hy, r * 0.22, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#ff1744'; ctx.beginPath(); ctx.arc(hx - 3, hy - 2, 2, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.fillStyle = col; ctx.beginPath(); ctx.ellipse(x, cy + r * 0.1, r * 0.6, r * 0.5, 0, 0, Math.PI * 2); ctx.fill();
+  }
+
+  function drawHind(ctx, x, y, r, flash, anim) {
+    var cy = y - r;
+    var col = flash ? '#fff' : '#ffb74d';
+    ctx.strokeStyle = flash ? '#fff' : '#f57c00'; ctx.lineWidth = 3; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(x - r * 0.3, y); ctx.lineTo(x - r * 0.5, y - r * 0.2); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x + r * 0.3, y); ctx.lineTo(x + r * 0.5, y - r * 0.2); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x - r * 0.1, y); ctx.lineTo(x - r * 0.15, y - r * 0.15); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x + r * 0.15, y); ctx.lineTo(x + r * 0.2, y - r * 0.15); ctx.stroke();
+    ctx.fillStyle = col;
+    ctx.beginPath(); ctx.ellipse(x, cy, r * 0.55, r * 0.4, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = flash ? '#fff' : '#bf360c'; ctx.lineWidth = r * 0.15;
+    ctx.beginPath(); ctx.moveTo(x, cy - r * 0.3); ctx.lineTo(x, cy - r * 0.7); ctx.stroke();
+    ctx.fillStyle = col; ctx.beginPath(); ctx.arc(x, cy - r * 0.8, r * 0.2, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = '#ffd54f'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(x - 2, cy - r * 0.95); ctx.lineTo(x - 6, cy - r * 1.2); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x + 2, cy - r * 0.95); ctx.lineTo(x + 6, cy - r * 1.2); ctx.stroke();
+    ctx.fillStyle = '#fff176'; ctx.beginPath(); ctx.arc(x + r * 0.12, cy - r * 0.08, 1.5, 0, Math.PI * 2); ctx.fill();
+  }
+
+  function drawBoar(ctx, x, y, r, flash, anim) {
+    var cy = y - r - 2;
+    var col = flash ? '#fff' : '#6d4c41';
+    ctx.fillStyle = col; ctx.beginPath(); ctx.ellipse(x, cy, r * 0.9, r * 0.7, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = flash ? '#fff' : '#5d4037';
+    for (var i = -2; i <= 2; i++) { ctx.beginPath(); ctx.moveTo(x + i * 5, cy - r * 0.6); ctx.lineTo(x + i * 5 - 2, cy - r * 0.85); ctx.lineTo(x + i * 5 + 2, cy - r * 0.85); ctx.fill(); }
+    ctx.fillStyle = col; ctx.beginPath(); ctx.arc(x - r * 0.7, cy, r * 0.45, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#fff';
+    ctx.beginPath(); ctx.moveTo(x - r * 0.9, cy + r * 0.1); ctx.quadraticCurveTo(x - r * 1.15, cy - r * 0.2, x - r * 0.85, cy - r * 0.35); ctx.lineTo(x - r * 0.75, cy + r * 0.1); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(x - r * 0.7, cy + r * 0.1); ctx.quadraticCurveTo(x - r * 0.85, cy - r * 0.1, x - r * 0.65, cy - r * 0.3); ctx.lineTo(x - r * 0.55, cy + r * 0.1); ctx.fill();
+    ctx.fillStyle = '#d32f2f'; ctx.beginPath(); ctx.arc(x - r * 0.9, cy - r * 0.1, 2.5, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(x - r * 0.55, cy - r * 0.1, 2.5, 0, Math.PI * 2); ctx.fill();
+  }
+
+  function drawStables(ctx, x, y, r, flash, anim) {
+    var cy = y - r * 0.5;
+    ctx.fillStyle = flash ? '#fff' : '#6d4c41';
+    ctx.beginPath(); ctx.moveTo(x - r, y); ctx.lineTo(x - r * 0.7, cy); ctx.lineTo(x + r * 0.7, cy); ctx.lineTo(x + r, y); ctx.closePath(); ctx.fill();
+    ctx.strokeStyle = flash ? '#fff' : '#3e2723'; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.moveTo(x, cy); ctx.lineTo(x, y); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x - r * 0.7, cy + r * 0.3); ctx.lineTo(x + r * 0.7, cy + r * 0.3); ctx.stroke();
+    ctx.fillStyle = flash ? '#fff' : '#827717';
+    for (var i = 0; i < 4; i++) { ctx.beginPath(); ctx.arc(x - r * 0.6 + i * r * 0.4, y - 2, 4 + Math.random() * 3, 0, Math.PI * 2); ctx.fill(); }
+    ctx.fillStyle = '#fafafa'; ctx.beginPath(); ctx.arc(x, cy - r * 0.1, r * 0.3, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#37474f'; ctx.beginPath(); ctx.arc(x - 5, cy - r * 0.15, 2.5, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(x + 5, cy - r * 0.15, 2.5, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#37474f'; ctx.fillRect(x - 4, cy + r * 0.05, 8, 2);
+  }
+
+  function drawBirds(ctx, x, y, r, flash, anim) {
+    var cy = y - r - 2;
+    var flap = Math.sin(anim.phase * 0.15) * r * 0.4;
+    var col = flash ? '#fff' : '#90a4ae';
+    ctx.strokeStyle = col; ctx.lineWidth = 3; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(x, cy); ctx.lineTo(x - r * 1.2, cy - flap); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x, cy); ctx.lineTo(x + r * 1.2, cy - flap); ctx.stroke();
+    for (var i = 1; i <= 3; i++) {
+      ctx.strokeStyle = flash ? '#fff' : '#78909c';
+      ctx.beginPath(); ctx.moveTo(x - r * 0.4 * i, cy - flap * 0.5); ctx.lineTo(x - r * 1.1, cy - flap * (0.8 - i * 0.1)); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(x + r * 0.4 * i, cy - flap * 0.5); ctx.lineTo(x + r * 1.1, cy - flap * (0.8 - i * 0.1)); ctx.stroke();
+    }
+    ctx.fillStyle = col; ctx.beginPath(); ctx.ellipse(x, cy, r * 0.5, r * 0.4, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = flash ? '#fff' : '#b0bec5'; ctx.beginPath(); ctx.arc(x - r * 0.4, cy, r * 0.3, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#ff5722'; ctx.beginPath(); ctx.moveTo(x - r * 0.7, cy); ctx.lineTo(x - r * 0.95, cy - 3); ctx.lineTo(x - r * 0.7, cy + 3); ctx.fill();
+    ctx.fillStyle = '#d32f2f'; ctx.beginPath(); ctx.arc(x - r * 0.35, cy - 2, 2.5, 0, Math.PI * 2); ctx.fill();
+  }
+
+  function drawBull(ctx, x, y, r, flash, anim) {
+    var cy = y - r - 2;
+    var col = flash ? '#fff' : '#c62828';
+    ctx.fillStyle = col; ctx.beginPath(); ctx.ellipse(x, cy, r * 0.9, r * 0.7, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = flash ? '#fff' : '#b71c1c'; ctx.beginPath(); ctx.arc(x - r * 0.7, cy, r * 0.5, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = '#fffafa'; ctx.lineWidth = 4; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(x - r * 0.9, cy - r * 0.3); ctx.quadraticCurveTo(x - r * 1.3, cy - r * 0.6, x - r * 1.1, cy - r * 0.9); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x - r * 0.5, cy - r * 0.3); ctx.quadraticCurveTo(x - r * 0.9, cy - r * 0.6, x - r * 0.7, cy - r * 0.9); ctx.stroke();
+    ctx.fillStyle = '#d32f2f'; ctx.beginPath(); ctx.arc(x - r * 0.85, cy - r * 0.1, 3, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(x - r * 0.55, cy - r * 0.1, 3, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = flash ? '#fff' : '#4e342e'; ctx.lineWidth = 4;
+    ctx.beginPath(); ctx.moveTo(x - r * 0.3, y); ctx.lineTo(x - r * 0.4, y - r * 0.3); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x + r * 0.3, y); ctx.lineTo(x + r * 0.4, y - r * 0.3); ctx.stroke();
+    ctx.fillStyle = '#37474f'; ctx.beginPath(); ctx.arc(x - r * 0.75, cy + r * 0.2, 2, 0, Math.PI * 2); ctx.fill();
+  }
+
+  function drawMare(ctx, x, y, r, flash, anim) {
+    var cy = y - r;
+    var col = flash ? '#fff' : '#546e7a';
+    ctx.strokeStyle = flash ? '#fff' : '#37474f'; ctx.lineWidth = 3; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(x - r * 0.2, y); ctx.lineTo(x - r * 0.3, y - r * 0.3); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x + r * 0.2, y); ctx.lineTo(x + r * 0.3, y - r * 0.3); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x - r * 0.5, y); ctx.lineTo(x - r * 0.55, y - r * 0.25); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x + r * 0.5, y); ctx.lineTo(x + r * 0.55, y - r * 0.25); ctx.stroke();
+    ctx.fillStyle = col; ctx.beginPath(); ctx.ellipse(x, cy, r * 0.6, r * 0.45, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = flash ? '#fff' : '#455a64'; ctx.lineWidth = r * 0.15;
+    ctx.beginPath(); ctx.moveTo(x + r * 0.3, cy - r * 0.3); ctx.lineTo(x + r * 0.6, cy - r * 0.1); ctx.stroke();
+    ctx.fillStyle = col; ctx.beginPath(); ctx.arc(x + r * 0.7, cy - r * 0.2, r * 0.28, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#ff6f00';
+    for (var i = -2; i <= 2; i++) { ctx.beginPath(); ctx.moveTo(x + i * 4, cy - r * 0.4); ctx.lineTo(x + i * 4 - 2, cy - r * 0.75); ctx.lineTo(x + i * 4 + 2, cy - r * 0.75); ctx.fill(); }
+    ctx.fillStyle = '#d32f2f'; ctx.beginPath(); ctx.arc(x + r * 0.62, cy - r * 0.22, 2.5, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(x + r * 0.78, cy - r * 0.22, 2.5, 0, Math.PI * 2); ctx.fill();
+  }
+
+  function drawAmazon(ctx, x, y, r, flash, anim) {
+    var cy = y - r - 2;
+    var col = flash ? '#fff' : '#ab47bc';
+    ctx.fillStyle = '#8e24aa';
+    ctx.beginPath(); ctx.moveTo(x - r * 0.3, cy + r * 0.2); ctx.lineTo(x - r * 0.7, cy + r * 0.6); ctx.lineTo(x - r * 0.2, cy + r * 0.5); ctx.fill();
+    ctx.fillStyle = col; ctx.beginPath(); ctx.arc(x, cy, r * 0.8, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = flash ? '#fff' : '#9c27b0'; ctx.beginPath(); ctx.arc(x, cy - r * 0.55, r * 0.5, Math.PI, 0); ctx.fill();
+    ctx.fillStyle = '#c62828';
+    ctx.beginPath(); ctx.moveTo(x - r * 0.1, cy - r * 0.85); ctx.lineTo(x + r * 0.1, cy - r * 0.85); ctx.lineTo(x, cy - r * 1.2); ctx.fill();
+    ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(x - r * 0.15, cy - r * 0.1, r * 0.08, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(x + r * 0.15, cy - r * 0.1, r * 0.08, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = '#e0e0e0'; ctx.lineWidth = 3; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(x + r * 0.3, cy + r * 0.2); ctx.lineTo(x + r * 1.4, cy - r * 0.5); ctx.stroke();
+    ctx.fillStyle = '#bdbdbd'; ctx.beginPath(); ctx.moveTo(x + r * 1.4, cy - r * 0.55); ctx.lineTo(x + r * 1.7, cy - r * 0.5); ctx.lineTo(x + r * 1.4, cy - r * 0.4); ctx.fill();
+    ctx.fillStyle = 'rgba(171,71,188,0.4)'; ctx.beginPath(); ctx.arc(x - r * 0.7, cy, r * 0.6, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = '#ab47bc'; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.arc(x - r * 0.7, cy, r * 0.6, 0, Math.PI * 2); ctx.stroke();
+  }
+
+  function drawGiant(ctx, x, y, r, flash, anim) {
+    var cy = y - r - 2;
+    var col = flash ? '#fff' : '#e53935';
+    for (var i = -1; i <= 1; i++) {
+      var bx = x + i * r * 0.55, by = cy + Math.abs(i) * r * 0.15;
+      ctx.fillStyle = col; ctx.beginPath(); ctx.arc(bx, by, r * 0.45, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#b71c1c'; ctx.beginPath(); ctx.arc(bx - r * 0.15, by - r * 0.5, r * 0.25, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(bx - r * 0.18, by - r * 0.55, 2.5, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.strokeStyle = col; ctx.lineWidth = 5; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(x - r * 0.7, cy + r * 0.2); ctx.lineTo(x - r * 1.3, cy + r * 0.6); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x + r * 0.7, cy + r * 0.2); ctx.lineTo(x + r * 1.3, cy + r * 0.6); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x, cy + r * 0.3); ctx.lineTo(x - r * 0.8, cy + r * 0.8); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x, cy + r * 0.3); ctx.lineTo(x + r * 0.8, cy + r * 0.8); ctx.stroke();
+  }
+
+  function drawDragon(ctx, x, y, r, flash, anim) {
+    var cy = y - r - 2;
+    var col = flash ? '#fff' : '#1e88e5';
+    ctx.strokeStyle = flash ? '#fff' : '#1565c0'; ctx.lineWidth = r * 0.5; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(x + r * 0.6, y - 2); ctx.quadraticCurveTo(x + r * 0.2, cy + r * 0.2, x - r * 0.2, cy); ctx.quadraticCurveTo(x - r * 0.5, cy - r * 0.2, x - r * 0.1, cy - r * 0.5); ctx.stroke();
+    for (var i = -1; i <= 1; i++) {
+      var hx = x + i * r * 0.35, hy = cy - r * 0.6;
+      ctx.strokeStyle = flash ? '#fff' : '#1976d2'; ctx.lineWidth = r * 0.15;
+      ctx.beginPath(); ctx.moveTo(x + i * r * 0.15, cy - r * 0.3); ctx.quadraticCurveTo(hx, cy - r * 0.45, hx, hy); ctx.stroke();
+      ctx.fillStyle = col; ctx.beginPath(); ctx.arc(hx, hy, r * 0.18, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#ffeb3b'; ctx.beginPath(); ctx.arc(hx - 2, hy - 1, 2, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.fillStyle = flash ? '#fff' : '#42a5f5';
+    ctx.beginPath(); ctx.moveTo(x, cy - r * 0.4); ctx.lineTo(x - r * 0.5, cy - r * 1.1); ctx.lineTo(x + r * 0.5, cy - r * 1.1); ctx.fill();
+    ctx.fillStyle = '#fff';
+    for (var s = 0; s < 4; s++) { ctx.beginPath(); ctx.arc(x - r * 0.3 + s * r * 0.2, cy + r * 0.05, 1.5, 0, Math.PI * 2); ctx.fill(); }
+  }
+
+  function drawCerberus(ctx, x, y, r, flash, anim) {
+    var cy = y - r - 2;
+    var col = flash ? '#fff' : '#37474f';
+    ctx.fillStyle = col; ctx.beginPath(); ctx.ellipse(x, cy, r * 0.85, r * 0.65, 0, 0, Math.PI * 2); ctx.fill();
+    for (var i = -1; i <= 1; i++) {
+      var hx = x + i * r * 0.5, hy = cy - r * 0.5;
+      ctx.strokeStyle = flash ? '#fff' : '#263238'; ctx.lineWidth = r * 0.18;
+      ctx.beginPath(); ctx.moveTo(x + i * r * 0.3, cy - r * 0.2); ctx.lineTo(hx, hy); ctx.stroke();
+      ctx.fillStyle = col; ctx.beginPath(); ctx.arc(hx, hy, r * 0.28, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#ff1744'; ctx.beginPath(); ctx.arc(hx - 4, hy - 3, 2.5, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(hx + 4, hy - 3, 2.5, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.moveTo(hx - 4, hy + 3); ctx.lineTo(hx - 2, hy + 8); ctx.lineTo(hx, hy + 3); ctx.fill();
+    }
+    ctx.strokeStyle = '#b0bec5'; ctx.lineWidth = 2;
+    for (var c = 0; c < 5; c++) { ctx.beginPath(); ctx.arc(x - r * 0.5 + c * r * 0.25, cy + r * 0.5, 2.5, 0, Math.PI * 2); ctx.stroke(); }
+    ctx.fillStyle = flash ? '#fff' : '#455a64';
+    for (var sp = -2; sp <= 2; sp++) { ctx.beginPath(); ctx.moveTo(x + sp * 6, cy - r * 0.55); ctx.lineTo(x + sp * 6 - 3, cy - r * 0.8); ctx.lineTo(x + sp * 6 + 3, cy - r * 0.8); ctx.fill(); }
   }
 
   function winLabour(s) {
@@ -5515,7 +5940,8 @@
     document.removeEventListener('keydown', fightKeyHandler);
     document.removeEventListener('keyup', fightKeyUpHandler);
     var elapsed = Math.floor((Date.now() - s.startTime) / 1000);
-    var pts = 10 + s.level * 5 + (s.flawless ? 40 : 0);
+    var comboBonus = s.player.combo * 3;
+    var pts = 10 + s.level * 5 + (s.flawless ? 40 : 0) + comboBonus;
     fetch('/api/award', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -5532,7 +5958,7 @@
       '<div class="qr-label">' + s.boss.name + ' is slain. ' + (s.flawless ? 'Not a scratch on Hercules.' : 'Hercules survives the ' + s.boss.name + '.') + '</div>' +
       '<div class="qr-points positive">+' + pts + ' drachmae</div>' +
       (s.flawless ? '<div class="qr-perfect">flawless victory!</div>' : '') +
-      '<div style="font-size:0.8rem;color:#9a7a8a;margin-top:0.5rem">' + elapsed + 's &middot; ' + Math.round(s.player.hp) + ' hp remaining</div>' +
+      '<div style="font-size:0.8rem;color:#9a7a8a;margin-top:0.5rem">' + elapsed + 's &middot; ' + Math.round(s.player.hp) + ' hp remaining' + (comboBonus > 0 ? ' &middot; ' + comboBonus + ' combo bonus' : '') + '</div>' +
       (isFinal
         ? '<div style="margin-top:0.8rem"><button class="cd-btn" onclick="closeLabours()">claim immortality</button></div>'
         : '<div style="display:flex;gap:0.5rem;justify-content:center;margin-top:0.8rem"><button class="cd-btn" onclick="loadLabours()">next labour &rarr;</button></div>');
@@ -5562,7 +5988,6 @@
     fightKeys = {}; fightState = null;
     closeGame();
   }
-
   // --- labyrinth maze: Pac-Man style ---
   let mazeState = null;
   let mazeLoop = null;
