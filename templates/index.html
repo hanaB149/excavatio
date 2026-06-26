@@ -2887,7 +2887,7 @@
     <div class="user-box">
       <span class="points-badge" id="points-badge" title="your drachmae">0</span>
       <div class="user-avatar" id="header-avatar" onclick="goToProfile()"
-           title="click for your profile">{% set av = session.get('avatar', '') %}{% if av and (av.startswith('/static/') or av.startswith('http') or av.startswith('<img')) %}{% if av.startswith('<img') %}{{ av|safe }}{% else %}<img src="{{ av }}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">{% endif %}{% else %}{{ av or '&#x1F3DB;' }}{% endif %}</div>
+           title="click for your profile">{% set av = avatar or '' %}{% if av and (av.startswith('/static/') or av.startswith('http') or av.startswith('data:') or av.startswith('<img')) %}{% if av.startswith('<img') %}{{ av|safe }}{% else %}<img src="{{ av }}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">{% endif %}{% else %}{{ av or '&#x1F3DB;' }}{% endif %}</div>
       <span class="user-name" onclick="goToProfile()" style="cursor:pointer" title="click for your profile">{{ session.get('username', '') }}</span>
       <a href="/logout" class="logout-btn">sign out</a>
     </div>
@@ -2908,7 +2908,7 @@
     <h2 class="profile-title">Edit Profile</h2>
 
     <div class="profile-avatar-section">
-      <div class="profile-avatar-preview" id="profile-avatar-preview">{% set av = session.get('avatar', '') %}{% if av and (av.startswith('/static/') or av.startswith('http') or av.startswith('<img')) %}{% if av.startswith('<img') %}{{ av|safe }}{% else %}<img src="{{ av }}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">{% endif %}{% else %}{{ av or '&#x1F3DB;' }}{% endif %}</div>
+      <div class="profile-avatar-preview" id="profile-avatar-preview">{% set av = avatar or '' %}{% if av and (av.startswith('/static/') or av.startswith('http') or av.startswith('data:') or av.startswith('<img')) %}{% if av.startswith('<img') %}{{ av|safe }}{% else %}<img src="{{ av }}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">{% endif %}{% else %}{{ av or '&#x1F3DB;' }}{% endif %}</div>
       <div class="profile-upload-row">
         <label class="profile-upload-btn" for="avatar-upload">upload image</label>
         <input type="file" id="avatar-upload" accept="image/*" style="display:none">
@@ -3267,7 +3267,7 @@
   <div class="container">
     <div class="profile-page">
       <div class="profile-page-header">
-        <div class="profile-avatar-large" id="profile-page-avatar">{% set av = session.get('avatar', '') %}{% if av and (av.startswith('/static/') or av.startswith('http') or av.startswith('<img')) %}{% if av.startswith('<img') %}{{ av|safe }}{% else %}<img src="{{ av }}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">{% endif %}{% else %}{{ av or '&#x1F3DB;' }}{% endif %}</div>
+        <div class="profile-avatar-large" id="profile-page-avatar">{% set av = avatar or '' %}{% if av and (av.startswith('/static/') or av.startswith('http') or av.startswith('data:') or av.startswith('<img')) %}{% if av.startswith('<img') %}{{ av|safe }}{% else %}<img src="{{ av }}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">{% endif %}{% else %}{{ av or '&#x1F3DB;' }}{% endif %}</div>
         <div class="profile-page-info">
           <h2 class="profile-page-username">{{ session.get('username', '') }}</h2>
           <p class="profile-page-bio" id="profile-page-bio">{{ session.get('bio', '') or 'No bio yet.' }}</p>
@@ -5946,30 +5946,33 @@
   function applyCrop() {
     var img = document.getElementById('crop-image');
     var canvas = document.createElement('canvas');
-    canvas.width = 300;
-    canvas.height = 300;
+    // avatars are stored inline as base64 data URIs in the user store so they
+    // survive build.io app restarts — keep them small to fit a config var
+    canvas.width = 128;
+    canvas.height = 128;
     var ctx = canvas.getContext('2d');
     var scale = img.naturalWidth / img.offsetWidth;
-    ctx.drawImage(img, cropX * scale, cropY * scale, cropSize * scale, cropSize * scale, 0, 0, 300, 300);
-    canvas.toBlob(function(blob) {
-      var fd = new FormData();
-      fd.append('file', blob, 'avatar.png');
-      fetch('/api/upload-avatar', { method: 'POST', body: fd })
-        .then(function(r) { return r.json(); })
-        .then(function(data) {
-          if (data.url) {
-            var html = '<img src="' + data.url + '" style="width:100%;height:100%;border-radius:50%;object-fit:cover">';
-            document.getElementById('profile-avatar-preview').innerHTML = html;
-            document.getElementById('header-avatar').innerHTML = html;
-            document.getElementById('profile-page-avatar').innerHTML = html;
-            document.getElementById('crop-msg').style.display = 'inline';
-            setTimeout(function() {
-              document.getElementById('crop-msg').style.display = 'none';
-              closeCropModal();
-            }, 1000);
-          }
-        }).catch(function() {});
-    }, 'image/png');
+    ctx.drawImage(img, cropX * scale, cropY * scale, cropSize * scale, cropSize * scale, 0, 0, 128, 128);
+    var dataUri = canvas.toDataURL('image/jpeg', 0.85);
+    fetch('/api/profile', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ avatar: dataUri })
+    })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (data.saved) {
+          var html = '<img src="' + dataUri + '" style="width:100%;height:100%;border-radius:50%;object-fit:cover">';
+          document.getElementById('profile-avatar-preview').innerHTML = html;
+          document.getElementById('header-avatar').innerHTML = html;
+          document.getElementById('profile-page-avatar').innerHTML = html;
+          document.getElementById('crop-msg').style.display = 'inline';
+          setTimeout(function() {
+            document.getElementById('crop-msg').style.display = 'none';
+            closeCropModal();
+          }, 1000);
+        }
+      }).catch(function() {});
   }
   function saveProfile() {
     var bio = document.getElementById('profile-bio').value.slice(0, 500);
@@ -5989,8 +5992,12 @@
     }).then(function(r) { return r.json(); }).then(function(data) {
       if (data.saved) {
         document.getElementById('profile-saved-msg').style.display = 'inline';
-        document.getElementById('header-avatar').innerHTML = avatar;
-        document.getElementById('profile-page-avatar').innerHTML = avatar;
+        // render image avatars (data URI / path / url) as <img>, emojis as text
+        var avatarHtml = (avatar.startsWith('/static/') || avatar.startsWith('http') || avatar.startsWith('data:'))
+          ? '<img src="' + avatar + '" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">'
+          : avatar;
+        document.getElementById('header-avatar').innerHTML = avatarHtml;
+        document.getElementById('profile-page-avatar').innerHTML = avatarHtml;
         document.getElementById('profile-page-bio').textContent = bio || 'No bio yet.';
         document.getElementById('profile-page-interests').textContent = interests || 'No interests listed.';
         setTimeout(function() { document.getElementById('profile-saved-msg').style.display = 'none'; }, 2000);
@@ -6128,7 +6135,7 @@
       var card = document.createElement('div');
       card.className = 'explore-card';
       card.style.animationDelay = (i * 0.04) + 's';
-      var avatarHtml = u.avatar && (u.avatar.startsWith('/static/') || u.avatar.startsWith('http') || u.avatar.startsWith('<img'))
+      var avatarHtml = u.avatar && (u.avatar.startsWith('/static/') || u.avatar.startsWith('http') || u.avatar.startsWith('data:') || u.avatar.startsWith('<img'))
         ? '<img src="' + (u.avatar.startsWith('<img') ? u.avatar.replace(/.*src="([^"]+)".*/, '$1') : u.avatar) + '" alt="avatar">'
         : (u.avatar || '\uD83C\uDFFA');
       var bio = u.bio || 'No bio yet.';
@@ -6181,7 +6188,7 @@
     fetch('/api/users/' + userId)
       .then(function(r) { return r.json(); })
       .then(function(u) {
-        var avatarHtml = u.avatar && (u.avatar.startsWith('/static/') || u.avatar.startsWith('http') || u.avatar.startsWith('<img'))
+        var avatarHtml = u.avatar && (u.avatar.startsWith('/static/') || u.avatar.startsWith('http') || u.avatar.startsWith('data:') || u.avatar.startsWith('<img'))
           ? '<img src="' + (u.avatar.startsWith('<img') ? u.avatar.replace(/.*src="([^"]+)".*/, '$1') : u.avatar) + '" style="width:64px;height:64px;border-radius:50%;object-fit:cover;">'
           : '<div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#f8bbd0,#ce93d8);display:flex;align-items:center;justify-content:center;font-size:2rem;">' + (u.avatar || '\uD83C\uDFFA') + '</div>';
         var savedHtml = '';
@@ -6284,7 +6291,7 @@
           var item = document.createElement('div');
           item.className = 'follow-item';
           item.onclick = function() { showUserDetail(u.id); };
-          var avHtml = u.avatar && (u.avatar.startsWith('/static/') || u.avatar.startsWith('http') || u.avatar.startsWith('<img'))
+          var avHtml = u.avatar && (u.avatar.startsWith('/static/') || u.avatar.startsWith('http') || u.avatar.startsWith('data:') || u.avatar.startsWith('<img'))
             ? '<img src="' + (u.avatar.startsWith('<img') ? u.avatar.replace(/.*src="([^"]+)".*/, '$1') : u.avatar) + '">'
             : (u.avatar || '');
           item.innerHTML = '<div class="fi-avatar">' + avHtml + '</div><div class="fi-name">' + escapeHtml(u.username) + '</div>';

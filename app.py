@@ -53,10 +53,14 @@ def _load_users():
             _users_cache = []
     else:
         _users_cache = []
-    # clean up truncated avatars from old bug
+    # clean up garbage avatars left by an old truncation bug, while preserving
+    # legitimate emoji avatars and base64 data-URI avatars (uploaded images,
+    # which are stored inline so they survive app restarts)
     for u in _users_cache:
         av = u.get("avatar", "")
-        if av and not av.startswith("/static/") and not av.startswith("http") and not av.startswith("<img") and len(av) < 30:
+        if (av and not av.startswith("/static/") and not av.startswith("http")
+                and not av.startswith("data:") and not av.startswith("<img")
+                and len(av) > 30):
             u["avatar"] = ""
     return _users_cache
 
@@ -98,7 +102,10 @@ def _clean_avatar(av):
     """Return a clean avatar value or a random default Greek emoji."""
     if not av:
         import random
-        return random.choice(["\u26EA", "\U0001F3FA"])
+        return random.choice(["\U0001F3DB", "\U0001F3FA"])
+    # data URI (uploaded image stored inline so it survives restarts)
+    if av.startswith("data:"):
+        return av[:100000]
     # already a clean image path
     if av.startswith("/static/") or av.startswith("http"):
         return av[:200]
@@ -110,7 +117,7 @@ def _clean_avatar(av):
     # short string that's not an emoji entity — probably trash
     if len(av) < 30 and not av.startswith("&#x"):
         import random
-        return random.choice(["\u26EA", "\U0001F3FA"])
+        return random.choice(["\U0001F3DB", "\U0001F3FA"])
     return av[:200]
 
 
@@ -124,7 +131,7 @@ def find_user_by_email(email):
 def create_user(username, email, password):
     users = _load_users()
     import random
-    default_avatars = ["\u26EA", "\U0001F3FA"]
+    default_avatars = ["\U0001F3DB", "\U0001F3FA"]
     user = {
         "id": len(users) + 1,
         "username": username,
@@ -156,7 +163,9 @@ def save_user_progress(user_id):
             u["action_counts"] = session.get("action_counts", {})
             u["bio"] = session.get("bio", "")
             u["interests"] = session.get("interests", "")
-            u["avatar"] = session.get("avatar", "")
+            # avatar is managed solely by /api/profile (it can be a base64
+            # data URI that is too large for the session cookie), so do not
+            # overwrite the stored value from the session here
             u["saved_items"] = session.get("saved_items", [])
             u["game_levels"] = session.get("game_levels", {})
             u["followers"] = session.get("followers", [])
@@ -1504,7 +1513,6 @@ def signup():
     session["action_counts"] = {}
     session["bio"] = ""
     session["interests"] = ""
-    session["avatar"] = user.get("avatar", "")
     session["saved_items"] = []
     session["game_levels"] = {}
     session["followers"] = []
@@ -1530,7 +1538,6 @@ def login():
     session["action_counts"] = user.get("action_counts", {})
     session["bio"] = user.get("bio", "")
     session["interests"] = user.get("interests", "")
-    session["avatar"] = user.get("avatar", "")
     session["saved_items"] = user.get("saved_items", [])
     session["game_levels"] = user.get("game_levels", {})
     session["followers"] = user.get("followers", [])
@@ -1553,19 +1560,18 @@ def logout():
 @app.route("/")
 @login_required
 def index():
-    # ensure session avatar is populated from user store if missing
-    if "user_id" in session and not session.get("avatar"):
-        users = _load_users()
-        for u in users:
-            if u.get("id") == session["user_id"]:
-                av = u.get("avatar", "")
-                if av:
-                    session["avatar"] = av
-                    session["followers"] = u.get("followers", [])
-                    session["following"] = u.get("following", [])
-                    session.modified = True
-                break
-    return render_template("index.html")
+    # Avatars live in the user store (a build.io config var) so they survive
+    # app restarts. They are NOT kept in the session cookie: uploaded avatars
+    # are base64 data URIs that would overflow the 4KB cookie limit, and every
+    # avatar save triggers a config-var update that restarts the dyno (which
+    # wipes the ephemeral filesystem, so disk uploads don't persist either).
+    avatar = ""
+    uid = session.get("user_id")
+    for u in _load_users():
+        if u.get("id") == uid:
+            avatar = u.get("avatar", "")
+            break
+    return render_template("index.html", avatar=avatar)
 
 def query_ai(passage, api_key):
     prompt = (
@@ -1883,8 +1889,12 @@ def api_profile_update():
                     parsed = urlparse(av)
                     if parsed.path:
                         av = parsed.path
-                u["avatar"] = av[:200]
-                session["avatar"] = u["avatar"]
+                # data URIs (uploaded images) are stored inline so they
+                # persist across app restarts; regular values stay small
+                if av.startswith("data:"):
+                    u["avatar"] = av[:100000]
+                else:
+                    u["avatar"] = av[:200]
             with _persist_lock:
                 _persist_users()
             return jsonify({"saved": True})
@@ -1909,7 +1919,6 @@ def api_upload_avatar():
     for u in users:
         if u.get("id") == session.get("user_id"):
             u["avatar"] = url
-            session["avatar"] = url
             with _persist_lock:
                 _persist_users()
             return jsonify({"url": url})
